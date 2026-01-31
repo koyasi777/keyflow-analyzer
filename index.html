@@ -472,6 +472,136 @@
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
         .btn-copy { background: var(--bg-key); border: 1px solid var(--border); color: var(--text-main); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ▼▼▼ MOBILE RESPONSIVE OVERRIDES ▼▼▼ */
+        @media (max-width: 900px) {
+            /* --- 1. 全体レイアウト --- */
+            /* 縦スクロールを許可し、高さをコンテンツに合わせる */
+            body { height: auto; overflow: auto; }
+            .app-container { height: auto; overflow: visible; }
+
+            /* メインエリアとサイドバーを縦積みに変更 */
+            main { flex-direction: column; overflow: visible; }
+
+            .workspace {
+                min-height: auto;
+                padding: 1rem 0.5rem;
+                overflow: visible;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                overflow: visible;
+                padding-bottom: 4rem; /* スマホ操作用の下部余白 */
+            }
+
+            /* 不要なUIの非表示 */
+            .resizer { display: none; }
+
+            /* --- 2. キーボードUI (Physical) --- */
+            /* 左右の手を「縦」に積む */
+            .keyboard-container {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+                align-items: center;
+                margin-bottom: 1rem;
+                padding-bottom: 0;
+            }
+
+            /* キーサイズを少し小さくして画面幅に収める */
+            .key { width: 38px; height: 38px; }
+            .key-grid { grid-template-rows: repeat(4, 38px); gap: 4px; }
+            #grid-left { grid-template-columns: repeat(6, 38px); }
+            #grid-right { grid-template-columns: repeat(7, 38px); }
+
+            /* スペースキー（親指エリア）の配置修正 */
+            #thumb-area {
+                position: relative;
+                padding-right: 0;
+                margin-top: 4px;
+                height: auto;
+            }
+            .key.space-key { width: 200px; height: 38px; }
+
+            /* 文字サイズの微調整 */
+            .key-char { font-size: 0.9rem; }
+            .key-sub { font-size: 0.55rem; }
+
+            /* --- 3. ツールバー & ヘッダー (Controls) --- */
+            .toolbar-container {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            /* モード切替ボタン群：横幅いっぱいに均等配置 */
+            .mode-group {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            .mode-btn {
+                flex: 1;             /* 均等幅 */
+                text-align: center;
+                padding: 8px 2px;
+                white-space: nowrap;
+                font-size: 0.75rem;
+            }
+
+            /* インポート/エクスポートボタン：中央揃え */
+            .context-actions { justify-content: center; }
+
+            /* --- 4. プリセット入力欄 (Layout Meta) --- */
+            /* 入力グループを縦積みに強制変更 */
+            .layout-meta .input-group {
+                flex-direction: column !important;
+                height: auto !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+                padding: 12px !important;
+            }
+
+            /* 不要な仕切り線を消す */
+            .layout-meta .input-group > div[style*="width:1px"] {
+                display: none !important;
+            }
+
+            /* ラベル調整 */
+            .layout-meta label {
+                text-align: left;
+                font-size: 0.75rem;
+                color: var(--accent);
+                margin-bottom: -4px;
+            }
+
+            /* 入力フォームを幅いっぱいに */
+            .layout-meta select,
+            .layout-meta input {
+                width: 100% !important;
+                margin: 0 !important;
+                background: var(--bg-input) !important;
+                border: 1px solid var(--border) !important;
+                padding: 8px !important;
+                text-align: center;
+            }
+
+            /* --- 5. 設定画面 & 解析結果 (Panels) --- */
+            /* グリッドを1列にして縦に並べる */
+            .gap-container,
+            .stability-grid,
+            .stats-split,
+            .settings-view {
+                grid-template-columns: 1fr;
+                width: 100%;
+            }
+
+            .logic-card, .score-box { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
