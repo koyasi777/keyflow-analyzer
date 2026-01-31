@@ -1,5 +1,7 @@
 # KEYFLOW ANALYZER
 
+<img width="3454" height="2019" alt="image" src="https://github.com/user-attachments/assets/3c790305-bd06-4943-a37a-fcb2aaf21749" />
+
 A keyboard layout analyzer with editable cost models (transition/static), fatigue recovery, and statistical efficiency metrics.
 
 ---
