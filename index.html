@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KEYFLOW ANALYZER</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-main: #0d1117; --bg-panel: #161b22; --bg-key: #21262d; --bg-input: #010409;
+            --accent: #2f81f7; --accent-dim: #1f6feb; --accent-sub: #1f2428;
+            --text-main: #e6edf3; --text-dim: #8b949e; --border: #30363d;
+
+            --f-pinky: #ff7b72; --f-ring: #d29922; --f-middle: #3fb950; --f-index: #58a6ff; --f-thumb: #a371f7;
+            --c-best: #58a6ff; --c-good: #3fb950; --c-warn: #d29922; --c-dang: #f85149;
+            --h-1: #0e4429; --h-2: #006d32; --h-3: #26a641; --h-4: #39d353;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        body {
+            background-color: var(--bg-main); color: var(--text-main);
+            font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden;
+            font-size: 14px;
+        }
+        .app-container { display: flex; flex-direction: column; height: 100%; }
+
+        header {
+            height: 60px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; background: var(--bg-panel); flex-shrink: 0; z-index: 10;
+        }
+        .logo { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: var(--accent); }
+
+        /* Domain Switcher (Moved to Workspace) */
+        .domain-switch {
+            display: flex; background: var(--bg-panel); border-radius: 8px; padding: 4px; border: 1px solid var(--border);
+            margin-bottom: 1rem; /* ワークスペース内での余白 */
+        }
+        .domain-btn {
+            padding: 6px 16px; border: none; background: transparent; color: var(--text-dim);
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 6px; transition: 0.2s;
+        }
+        .domain-btn.active { background: var(--accent-sub); color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .domain-btn:hover:not(.active) { color: var(--text-main); }
+
+        .controls { display: flex; gap: 12px; align-items: center; }
+
+        main { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        .workspace {
+            flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center;
+            /* overflow-y: auto -> overflow: auto に変更し、横スクロールも許可 */
+            overflow: auto; position: relative; min-width: 0; /* Flexboxの縮小制限を解除 */
+            background: radial-gradient(circle at center, #13171e 0%, var(--bg-main) 100%);
+        }
+
+        /* SUB-TOOLBAR (Context Specific) */
+        .toolbar-container {
+            margin-bottom: 2rem; width: 100%; max-width: 900px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .mode-group {
+            display: flex; gap: 4px; background: var(--bg-panel); padding: 4px;
+            border-radius: 8px; border: 1px solid var(--border);
+        }
+
+        /* Context Actions (Import/Export) */
+        .context-actions { display: flex; gap: 8px; }
+        .action-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-dim);
+            padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .action-btn:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.02); }
+        .action-btn svg { width: 14px; height: 14px; }
+
+        .resizer {
+            width: 6px; background: var(--bg-main); border-left: 1px solid var(--border);
+            cursor: col-resize; flex-shrink: 0; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; z-index: 5;
+        }
+        .resizer:hover, .resizer.active { background: var(--accent); }
+
+        .mode-bar {
+            margin-bottom: 2rem; background: var(--bg-panel); padding: 4px;
+            border-radius: 8px; border: 1px solid var(--border);
+            display: flex; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .mode-btn {
+            background: transparent; border: none; color: var(--text-dim);
+            padding: 6px 16px; cursor: pointer; font-weight: 600; border-radius: 6px;
+            transition: all 0.2s; font-size: 0.85rem;
+        }
+        .mode-btn.active { background: var(--accent-dim); color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+        /* HEADER & TITLE */
+        .kb-header {
+            display: flex; align-items: center; justify-content: center; gap: 1rem;
+            margin-bottom: 1.5rem; width: 100%; position: relative; height: 40px;
+
+            /* スペースキーと同じ補正ロジックを追加 */
+            /* Right(7列) - Left(6列) = 1列分(46px) + gap(6px) = 52px */
+            /* 右側に52pxの余白を入れることで、コンテンツの中心を「左右のグリッドの隙間」に合わせます */
+            padding-right: 52px;
+        }
+
+        .kb-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700; /* Extra Bold */
+            color: var(--text-main);
+            letter-spacing: -0.04em; /* 文字間を少し詰めて引き締める */
+            text-transform: uppercase;
+
+            text-shadow: none;
+            line-height: 1;
+        }
+
+        .kb-select {
+            background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border);
+            padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
+            font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .kb-select:hover { border-color: var(--accent); }
+        .kb-select:focus { border-color: var(--accent); }
+
+        /* プルダウンの中身（選択肢）の背景色を強制的に指定 */
+        .kb-select option {
+            background-color: var(--bg-panel); /* 暗い色を指定 */
+            color: var(--text-main);           /* 白い文字 */
+        }
+
+        /* KEYBOARD GRID SYSTEM */
+        .keyboard-container { display: flex; gap: 40px; margin-bottom: 2rem; transition: opacity 0.2s; align-items: flex-start; position: relative; padding-bottom: 60px; }
+        .hand-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .hand-label {
+            text-align: center; margin-bottom: 1rem; font-size: 0.75rem;
+            color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+        }
+
+        /* 4 Rows Grid (Left:6, Right:7) */
+        .key-grid {
+            display: grid;
+            grid-template-rows: repeat(4, 46px);
+            gap: 6px;
+        }
+        #grid-left { grid-template-columns: repeat(6, 46px); }
+        #grid-right { grid-template-columns: repeat(7, 46px); }
+
+        /* Thumb Area (Space Key) */
+        #thumb-area {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            display: flex; justify-content: center; align-items: center;
+            height: 50px;
+
+            /* 右手(7列)は左手(6列)より 1列分(46px) + gap(6px) = 52px だけ広いです。
+               右側に同量のパディングを入れることで、justify-content: center の基準点を
+               「左右の隙間の中心」に強制的に合わせます。 */
+            padding-right: 52px;
+        }
+
+        .key {
+            width: 46px; height: 46px; background: var(--bg-key);
+            border: 1px solid var(--border); border-radius: 6px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none; position: relative; transition: all 0.1s ease;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        /* Space Key Specific Style */
+        .key.space-key {
+            width: 250px; height: 46px; border-radius: 8px;
+        }
+
+        .key:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .key:active { transform: translateY(1px); box-shadow: none; }
+
+        /* Disabled Key State (Masking) */
+        .key.is-disabled {
+            background: transparent; border: 1px dashed rgba(48, 54, 61, 0.3);
+            box-shadow: none; cursor: default;
+        }
+        .key.is-disabled .key-char, .key.is-disabled .key-sub, .key.is-disabled .finger-bar, .key.is-disabled .key-count { display: none; }
+        .key.is-disabled:hover { border-color: rgba(48, 54, 61, 0.3); transform: none; }
+
+        .key.dragging { opacity: 0.4; border-color: var(--accent); transform: scale(0.95); }
+        .key.drag-over { border-style: dashed; background: rgba(88, 166, 255, 0.15); border-color: var(--accent); }
+
+        .key-char {
+            font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700;
+            z-index: 2; pointer-events: none; color: var(--text-main);
+            text-transform: uppercase;
+        }
+        .key-sub {
+            font-size: 0.65rem; color: var(--text-dim); margin-top: 2px;
+            z-index: 2; font-weight: bold; pointer-events: none;
+        }
+        .key-count {
+            position: absolute; bottom: 3px; right: 4px; font-size: 0.6rem;
+            color: rgba(255,255,255,0.6); pointer-events: none;
+        }
+        .finger-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+            opacity: 0.8; pointer-events: none;
+        }
+
+        .key.active-source { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); z-index: 10; }
+        .key-char.small { font-size: 0.8rem; }
+
+        /* Cost Colors */
+        .key.cost-best { border-color: var(--c-best); color: var(--c-best); background: rgba(88, 166, 255, 0.08); }
+        .key.cost-good { border-color: var(--c-good); color: var(--c-good); background: rgba(63, 185, 80, 0.08); }
+        .key.cost-warn { border-color: var(--c-warn); color: var(--c-warn); background: rgba(210, 153, 34, 0.08); }
+        .key.cost-dang { border-color: var(--c-dang); color: var(--c-dang); background: rgba(248, 81, 73, 0.08); }
+
+        .key.finger-edit:hover { opacity: 0.8; }
+
+        .control-area {
+            background: var(--bg-panel); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border);
+            text-align: center; max-width: 650px; width: 100%; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .instruction { margin-bottom: 0; line-height: 1.5; color: var(--text-dim); }
+        .highlight { color: var(--accent); font-weight: bold; }
+
+        .finger-palette { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+        .p-btn {
+            width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #000; font-weight: bold;
+            transition: transform 0.1s;
+        }
+        .p-btn:hover { transform: scale(1.1); }
+        .p-btn.active { border-color: white; transform: scale(1.15); box-shadow: 0 0 15px rgba(0,0,0,0.3); }
+
+        .layout-meta {
+            display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 1rem;
+        }
+        .layout-meta input, .layout-meta select {
+            background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+            padding: 8px 12px; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
+        }
+        .layout-meta input:focus, .layout-meta select:focus { border-color: var(--accent); }
+
+        .sidebar {
+            width: 380px; background: var(--bg-panel); border-left: 1px solid var(--border);
+            padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; flex-shrink: 0;
+            max-width: 80vw;
+        }
+        .panel h3 {
+            font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;
+            color: var(--text-dim); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; letter-spacing: 0.5px;
+        }
+        textarea {
+            width: 100%; height: 120px; background: var(--bg-input); border: 1px solid var(--border);
+            color: var(--text-main); padding: 12px; border-radius: 6px; resize: vertical;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.4;
+        }
+        textarea:focus { border-color: var(--accent); }
+
+        button { cursor: pointer; border-radius: 6px; font-weight: 600; transition: 0.2s; font-family: 'Inter'; }
+        .primary {
+            width: 100%; background: var(--accent); color: white; border: none; padding: 12px; font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+        .primary:hover { background: var(--accent-dim); transform: translateY(-1px); }
+        .primary:active { transform: translateY(0); }
+
+        .secondary { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; font-size: 0.85rem; }
+        .secondary:hover { border-color: var(--text-dim); background: rgba(255,255,255,0.03); }
+
+        /* RESULTS STYLING */
+        .score-box {
+            background: var(--bg-main); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border);
+            text-align: center; margin-bottom: 1.5rem;
+        }
+        .score-box .label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px; }
+        .score-box .value { display: block; font-size: 2.5rem; font-weight: 800; color: var(--accent); letter-spacing: -1px; }
+
+        .stat-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        .stat-item:last-child { border-bottom: none; }
+
+        .stats-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.9rem; }
+        .stats-col h4 { font-size: 0.7rem; color: var(--text-dim); text-align: center; margin-bottom: 0.5rem; text-transform: uppercase; }
+
+        .bar-chart-container { margin-bottom: 0.5rem; }
+        .bar-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.75rem; }
+        .bar-label { width: 50px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; margin-right: 8px; }
+        .bar-track { flex: 1; background: var(--bg-main); height: 6px; border-radius: 3px; overflow: hidden; margin-right: 8px; }
+        .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .bar-val { width: 30px; text-align: right; font-family: 'JetBrains Mono'; font-weight: bold; }
+
+        /* SETTINGS VIEW */
+        .settings-view { width: 100%; max-width: 900px; display: none; flex-direction: column; gap: 2rem; }
+        .logic-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+        .logic-header { margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .logic-title { font-size: 1.25rem; font-weight: bold; color: var(--accent); margin-bottom: 0.5rem; }
+        .logic-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; }
+
+        .gap-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+        .gap-card {
+            background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px;
+            padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;
+            transition: transform 0.2s;
+        }
+        .gap-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+        /* Visualizer Dots */
+        .gap-viz { display: flex; gap: 8px; margin-bottom: 1rem; align-items: center; height: 30px; }
+        .viz-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); }
+        .viz-dot.hit { background: var(--accent); box-shadow: 0 0 5px var(--accent); width: 14px; height: 14px; }
+        .viz-dot.rest { background: var(--text-dim); opacity: 0.3; width: 8px; height: 8px; }
+
+        .gap-name { font-weight: bold; font-size: 1rem; margin-bottom: 0.2rem; }
+        .gap-sub { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem; height: 2.4em; }
+        .input-group { 
+            display: flex; align-items: center; gap: 12px; 
+        }
+        .input-group span { font-size: 0.8rem; color: var(--text-dim); font-weight: bold; }
+        
+        /* --- Stepper System --- */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        .stepper-box {
+            display: flex; align-items: center;
+            background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 6px; overflow: hidden; height: 32px;
+            transition: border-color 0.2s;
+        }
+        .stepper-box:hover, .stepper-box:focus-within { border-color: var(--text-dim); }
+        .stepper-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+        .gap-input { 
+            width: 50px !important; background: transparent !important; border: none !important; 
+            color: var(--text-main) !important; text-align: center !important;
+            font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.9rem; padding: 0; height: 100%;
+        }
+        
+        .step-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 24px; height: 100%; background: transparent; border: none;
+            color: var(--text-dim); cursor: pointer; transition: all 0.1s;
+        }
+        .step-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .step-btn:active { background: rgba(255,255,255,0.05); transform: scale(0.95); }
+        .step-btn svg { width: 14px; height: 14px; stroke-width: 3; }
+
+        /* --- Distribution & Stability Styles --- */
+        .hist-area { margin: 1rem 0; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .hist-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
+
+        /* ヒストグラムのバー領域 */
+        .hist-bars {
+            display: flex; align-items: flex-end; gap: 2px; height: 60px;
+            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); padding-top: 4px;
+        }
+        .h-bar {
+            flex: 1; background: var(--accent-dim); opacity: 0.6;
+            border-top-left-radius: 2px; border-top-right-radius: 2px;
+            transition: height 0.3s; position: relative;
+        }
+        .h-bar:hover { opacity: 1; background: var(--accent); }
+        /* ツールチップ的な簡易表示 */
+        .h-bar:hover::after {
+            content: attr(data-val); position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            font-size: 0.6rem; color: white; background: var(--bg-key); padding: 2px 4px; border-radius: 4px;
+            pointer-events: none; white-space: nowrap; z-index: 10;
+        }
+
+        /* 安定性指標のグリッド */
+        .stability-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+        .s-item { background: var(--bg-key); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border); }
+        .s-label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 2px; text-transform: uppercase; }
+        .s-val { display: block; font-size: 0.9rem; font-weight: bold; font-family: 'JetBrains Mono'; color: var(--text-main); }
+        .s-unit { font-size: 0.6rem; color: var(--text-dim); margin-left: 2px; }
+
+        /* --- Tooltip Styles (Fixed v2: Correct Selectors) --- */
+        .tooltip { position: relative; cursor: help; }
+        .tooltip:hover { border-color: var(--accent); background: rgba(88, 166, 255, 0.1); }
+
+        /* ツールチップ本体 (共通設定) */
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute; bottom: 100%;
+            width: 180px;
+            padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; line-height: 1.4;
+            background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--accent);
+            pointer-events: none; opacity: 0; z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            font-weight: normal; font-family: 'Inter', sans-serif;
+            transition: opacity 0.2s, transform 0.2s;
+            margin-bottom: 8px;
+            white-space: normal;
+        }
+
+        /* 矢印 (共通設定) */
+        .tooltip::before {
+            content: ''; position: absolute; bottom: 100%;
+            border: 6px solid transparent; border-top-color: var(--accent);
+            opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 1000;
+            margin-bottom: -4px;
+        }
+
+        .tooltip:hover::after, .tooltip:hover::before { opacity: 1; }
+
+        /* --- 位置の個別最適化 --- */
+
+        /* 1つ目 (Median): 左揃え */
+        .stability-grid .s-item:nth-child(1)::after {
+            left: 0; text-align: left;
+        }
+        .stability-grid .s-item:nth-child(1)::before {
+            left: 20px;
+        }
+
+        /* 2つ目 (SD): 中央揃え */
+        .stability-grid .s-item:nth-child(2)::after {
+            left: 50%; transform: translateX(-50%); text-align: center;
+        }
+        .stability-grid .s-item:nth-child(2)::before {
+            left: 50%; transform: translateX(-50%);
+        }
+
+        /* 3つ目 (95%): 右揃え */
+        .stability-grid .s-item:nth-child(3)::after {
+            right: 0; left: auto; text-align: left;
+        }
+        .stability-grid .s-item:nth-child(3)::before {
+            right: 20px; left: auto;
+        }
+
+        /* --- Modal Window Styles (Compact) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px);
+            display: none; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-content {
+            background: var(--bg-panel); border: 1px solid var(--border);
+            width: 500px; max-width: 90%;
+            border-radius: 10px; padding: 1.5rem;
+            display: flex; flex-direction: column; gap: 0.8rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1rem; font-weight: bold; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-close { background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.2rem; line-height: 1; }
+        .modal-close:hover { color: var(--c-dang); }
+
+        .modal-textarea {
+            flex: 1; min-height: 180px;
+            background: var(--bg-input); border: 1px solid var(--border);
+            color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            padding: 10px; border-radius: 6px; resize: vertical; line-height: 1.4;
+        }
+        .modal-textarea:focus { border-color: var(--accent); }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+        .btn-copy { background: var(--bg-key); border: 1px solid var(--border); color: var(--text-main); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                KEYFLOW <span>ANALYZER</span>
+            </div>
+
+            <div class="controls">
+                <button id="btn-lang" class="secondary">JP</button>
+            </div>
+        </header>
+
+        <main id="main-area">
+            <section class="workspace" id="workspace">
+                <div class="domain-switch">
+                    <button class="domain-btn active" id="dom-logic" data-domain="logic">Logical (配列設計)</button>
+                    <button class="domain-btn" id="dom-phys" data-domain="physical">Physical (物理設定)</button>
+                </div>
+
+                <div class="toolbar-container">
+                    <div class="mode-group" id="toolbar-logic">
+                        <button class="mode-btn active" data-mode="layout" data-i18n="mode_layout">Layout</button>
+                        <button class="mode-btn" data-mode="finger" data-i18n="mode_finger">Fingering</button>
+                    </div>
+                    <div class="mode-group" id="toolbar-phys" style="display:none;">
+                        <button class="mode-btn" data-mode="base" data-i18n="mode_base">Static Cost</button>
+                        <button class="mode-btn" data-mode="cost" data-i18n="mode_cost">Transition</button>
+                        <button class="mode-btn" data-mode="settings" data-i18n="mode_settings">Logic</button>
+                    </div>
+
+                    <div class="context-actions">
+                        <button id="btn-import" class="action-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span id="lbl-import" data-i18n="header_import">Import</span>
+                        </button>
+                        <button id="btn-export" class="action-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <span id="lbl-export" data-i18n="header_export">Export</span>
+                        </button>
+                        <input type="file" id="file-input" hidden>
+                    </div>
+                </div>
+
+                <div class="kb-header">
+                    <h2 class="kb-title" id="kb-title">CUSTOM</h2>
+                </div>
+
+                <div class="keyboard-container" id="kb-container">
+                    <div class="hand-wrapper">
+                        <div class="key-grid" id="grid-left"></div>
+                    </div>
+                    <div class="hand-wrapper">
+                        <div class="key-grid" id="grid-right"></div>
+                    </div>
+                    <div id="thumb-area"></div>
+                </div>
+
+                <div class="control-area" id="control-area">
+                    </div>
+
+                <div class="settings-view" id="settings-view">
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_weight_title">Scoring Weights</div>
+                            <p class="logic-desc" data-i18n="set_weight_desc">Customize the balance between Position Cost (Static) and Transition Cost (Dynamic).</p>
+                        </div>
+                        
+                        <div style="padding: 1rem 0;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:0.9rem;">
+                                <span style="color:var(--text-dim)">
+                                    <span data-i18n="lbl_static_w">Position</span>: <span id="disp-static" style="color:var(--text-main)">35</span>%
+                                </span>
+                                <span style="color:var(--accent)">
+                                    <span data-i18n="lbl_trans_w">Transition</span>: <span id="disp-trans" style="color:white">65</span>%
+                                </span>
+                            </div>
+
+                            <input type="range" id="weight-slider" min="0" max="100" value="35" step="5" style="width:100%; cursor:pointer;">
+
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-top:6px;">
+                                <span data-i18n="desc_static_w">Long-term Fatigue</span>
+                                <span data-i18n="desc_trans_w">Short-term Flow</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_gap_title">Finger Fatigue & Recovery Simulation</div>
+                            <p class="logic-desc" data-i18n="set_gap_desc">This setting simulates how finger fatigue "recovers" when you use the OTHER hand.</p>
+                        </div>
+
+                        <div class="gap-container">
+                            <div class="gap-card">
+                                <div class="gap-viz">
+                                    <div class="viz-dot hit"></div><div class="viz-dot hit"></div>
+                                </div>
+                                <div class="gap-name" style="color:var(--c-dang)" data-i18n="gap0_name">Consecutive (SFB)</div>
+                                <div class="gap-sub" data-i18n="gap0_sub">Same finger used twice. No rest. Maximum fatigue.</div>
+                                <div class="input-group">
+                                    <span>Cost x</span>
+                                    <div class="stepper-box">
+                                        <button class="step-btn" onclick="stepVal('gap-0', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                        <input type="number" id="gap-0" value="1.0" step="0.1" class="gap-input">
+                                        <button class="step-btn" onclick="stepVal('gap-0', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="gap-card">
+                                <div class="gap-viz">
+                                    <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
+                                </div>
+                                <div class="gap-name" style="color:var(--c-warn)" data-i18n="gap1_name">Short Rest</div>
+                                <div class="gap-sub" data-i18n="gap1_sub">1 keystroke by other hand between uses. Slight recovery.</div>
+                                <div class="input-group">
+                                    <span>Cost x</span>
+                                    <div class="stepper-box">
+                                        <button class="step-btn" onclick="stepVal('gap-1', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                        <input type="number" id="gap-1" value="0.8" step="0.1" class="gap-input">
+                                        <button class="step-btn" onclick="stepVal('gap-1', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="gap-card">
+                                <div class="gap-viz">
+                                    <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
+                                </div>
+                                <div class="gap-name" style="color:var(--c-best)" data-i18n="gap2_name">Long Rest</div>
+                                <div class="gap-sub" data-i18n="gap2_sub">2+ keystrokes by other hand. Fully recovered.</div>
+                                <div class="input-group">
+                                    <span>Cost x</span>
+                                    <div class="stepper-box">
+                                        <button class="step-btn" onclick="stepVal('gap-2', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                        <input type="number" id="gap-2" value="0.5" step="0.1" class="gap-input">
+                                        <button class="step-btn" onclick="stepVal('gap-2', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_repeat_title">Repeat Penalty (Same Key)</div>
+                            <p class="logic-desc" data-i18n="set_repeat_desc">Cost penalty for pressing the same key consecutively. Adjust based on finger agility.</p>
+                        </div>
+                        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:1rem;">
+                            <div style="text-align:center;">
+                                <div style="color:var(--f-pinky); font-weight:bold; font-size:0.8rem; margin-bottom:6px;" data-i18n="lbl_pinky">Pinky</div>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('rep-0', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="rep-0" value="2.5" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('rep-0', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:var(--f-ring); font-weight:bold; font-size:0.8rem; margin-bottom:6px;" data-i18n="lbl_ring">Ring</div>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('rep-1', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="rep-1" value="2.0" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('rep-1', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:var(--f-middle); font-weight:bold; font-size:0.8rem; margin-bottom:6px;" data-i18n="lbl_mid">Middle</div>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('rep-2', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="rep-2" value="1.2" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('rep-2', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:var(--f-index); font-weight:bold; font-size:0.8rem; margin-bottom:6px;" data-i18n="lbl_idx">Index</div>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('rep-3', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="rep-3" value="1.0" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('rep-3', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:var(--f-thumb); font-weight:bold; font-size:0.8rem; margin-bottom:6px;" data-i18n="lbl_thb">Thumb</div>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('rep-4', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="rep-4" value="1.5" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('rep-4', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="resizer" id="drag-handle"></div>
+
+            <section class="sidebar" id="sidebar">
+                <div class="panel">
+                    <h3 data-i18n="panel_corpus">Corpus Text</h3>
+                    <textarea id="corpus-input" spellcheck="false"></textarea>
+                    <button id="btn-analyze" class="primary" style="margin-top:1rem;" data-i18n="btn_analyze">ANALYZE</button>
+                </div>
+
+                <div class="panel" id="results-panel" style="display:none;">
+                    <h3 data-i18n="panel_results">Metrics</h3>
+                    <div class="score-box">
+                        <span class="label"><span data-i18n="res_total">Efficiency Score</span> (Cost/Key)</span>
+                        <span class="value" id="res-total">0.00</span>
+                    </div>
+
+                    <div class="stat-item">
+                        <span data-i18n="res_work">Total Load</span>
+                        <span id="res-total-load">0</span>
+                    </div>
+                    <div class="stat-item"><span data-i18n="res_trans">Dynamic Flow</span><span id="res-trans-val">0.00</span></div>
+                    <div class="stat-item"><span data-i18n="res_static">Static Load</span><span id="res-static-val">0.00</span></div>
+
+                    <div class="hist-area">
+                        <div class="hist-header">
+                            <span data-i18n="lbl_dist">Cost Distribution</span>
+                            <span style="font-size:0.6rem; opacity:0.7;">Low ← Cost → High</span>
+                        </div>
+                        <div class="hist-bars" id="cost-hist"></div>
+                    </div>
+
+                    <h4 style="font-size:0.7rem; color:var(--text-dim); margin-bottom:0.5rem; text-transform:uppercase;" data-i18n="lbl_stability">Stability Metrics</h4>
+                    <div class="stability-grid">
+                        <div class="s-item tooltip" data-i18n-tooltip="desc_median">
+                            <span class="s-label" data-i18n="lbl_median">Median</span>
+                            <span class="s-val" id="val-median">0.0</span>
+                        </div>
+                        <div class="s-item tooltip" data-i18n-tooltip="desc_sd">
+                            <span class="s-label" data-i18n="lbl_sd">SD (Mura)</span>
+                            <span class="s-val" id="val-sd">0.0</span>
+                        </div>
+                        <div class="s-item tooltip" data-i18n-tooltip="desc_95">
+                            <span class="s-label" data-i18n="lbl_95">95% Tile</span>
+                            <span class="s-val" id="val-95">0.0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-item"><span data-i18n="stat_keystrokes">Keystrokes</span><span id="stat-keystrokes" class="highlight">0</span></div>
+                    <div class="stat-item"><span data-i18n="stat_repeat">Repeats</span><span id="stat-repeat">0</span></div>
+
+                    <div id="repeat-detail-area" style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; margin-bottom:10px; display:none;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:6px; color:var(--text-dim);">
+                            <span data-i18n="lbl_rep_cost">Repeat Cost</span>
+                            <span id="val-rep-cost" style="color:var(--c-warn); font-weight:bold;">0.0</span>
+                        </div>
+                        <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:4px;" data-i18n="lbl_rep_finger">By Finger</div>
+                        <div id="chart-repeat-finger"></div>
+                    </div>
+
+                    <div class="stat-item"><span data-i18n="stat_sfb">SFB Rate</span><span id="stat-sfb" style="color:var(--f-pinky)">0%</span></div>
+                    <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
+
+                    <h3 style="margin-top:2rem;" data-i18n="res_worst">Top Inefficiencies</h3>
+                    <div id="worst-list"></div>
+
+                    <h3 style="margin-top:2rem;" data-i18n="graph_finger">Finger Balance</h3>
+                    <div class="stats-split">
+                        <div class="stats-col">
+                            <h4>L</h4>
+                            <div id="chart-finger-L"></div>
+                        </div>
+                        <div class="stats-col">
+                            <h4>R</h4>
+                            <div id="chart-finger-R"></div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top:1rem;" data-i18n="graph_row">Row Usage</h3>
+                    <div class="stats-split">
+                        <div class="stats-col">
+                            <h4>L</h4>
+                            <div id="chart-row-L"></div>
+                        </div>
+                        <div class="stats-col">
+                            <h4>R</h4>
+                            <div id="chart-row-R"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="io-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Config JSON</div>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:8px;" id="modal-desc">
+                Copy/Paste the JSON text below.
+            </p>
+            <textarea id="modal-text" class="modal-textarea" spellcheck="false"></textarea>
+
+            <div class="modal-actions">
+                <button id="btn-modal-copy" class="btn-copy">Copy to Clipboard</button>
+                <button id="btn-modal-import" class="primary" style="width: auto; padding: 8px 24px;">Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /** * KEYFLOW ANALYZER
+         * - 4 Rows Grid
+         * - Left: 6 cols / Right: 7 cols + Space
+         * - Fixed TOTAL_KEYS error
+         * - Fixed Infinite Space Key bug
+         */
+
+        const ROWS = 4;
+        const COLS_L = 6;
+        const COLS_R = 7;
+        const TOTAL_KEYS_L = ROWS * COLS_L;
+        const TOTAL_KEYS_R = (ROWS * COLS_R) + 1; // +1 for Space Key
+
+        const FINGER_COLORS = {
+            0: 'var(--f-pinky)', 1: 'var(--f-ring)', 2: 'var(--f-middle)',
+            3: 'var(--f-index)', 4: 'var(--f-thumb)'
+        };
+
+        const PRESETS = {
+            qwerty: {
+                name: "QWERTY",
+                L: [
+                    // Row 0 (Num)
+                    '`','1','2','3','4','5',
+                    // Row 1 (Top)
+                    null,'Q','W','E','R','T',
+                    // Row 2 (Home)
+                    null,'A','S','D','F','G',
+                    // Row 3 (Bot)
+                    null,'Z','X','C','V','B'
+                ],
+                R: [
+                    // Row 0
+                    '6','7','8','9','0','-','=',
+                    // Row 1
+                    'Y','U','I','O','P','[',']',
+                    // Row 2
+                    'H','J','K','L',';','\'',null,
+                    // Row 3
+                    'N','M',',','.','/',null,null,
+                    // Space (Thumb)
+                    'Space'
+                ],
+                fingers: {
+                    L: [
+                        0,0,1,2,3,3,
+                        null,0,1,2,3,3,
+                        null,0,1,2,3,3,
+                        null,0,1,2,3,3
+                    ],
+                    R: [
+                        3,3,2,1,0,0,0,
+                        3,3,2,1,0,0,0,
+                        3,3,2,1,0,0,null,
+                        3,3,2,1,0,null,null,
+                        4 // Space
+                    ]
+                }
+            },
+            dvorak: {
+                name: "DVORAK",
+                L: [
+                    // Num
+                    '`','1','2','3','4','5',
+                    // Top (Punctuation)
+                    null,'\'',',','.','P','Y',
+                    // Home (Vowels)
+                    null,'A','O','E','U','I',
+                    // Bot
+                    null,';','Q','J','K','X'
+                ],
+                R: [
+                    // Num
+                    '6','7','8','9','0','[',']',
+                    // Top
+                    'F','G','C','R','L','/','=',
+                    // Home
+                    'D','H','T','N','S','-',null,
+                    // Bot
+                    'B','M','W','V','Z',null,null,
+                    // Space
+                    'Space'
+                ],
+                fingers: {
+                    L: [
+                        0,0,1,2,3,3,
+                        null,0,1,2,3,3,
+                        null,0,1,2,3,3,
+                        null,0,1,2,3,3
+                    ],
+                    R: [
+                        3,3,2,1,0,0,0,
+                        3,3,2,1,0,0,0,
+                        3,3,2,1,0,0,null,
+                        3,3,2,1,0,null,null,
+                        4
+                    ]
+                }
+            },
+            onishi: {
+                name: "大西配列",
+                L: [null,"1","2","3","4","5",null,"q","l","u",",",".",null,"e","i","a","o","-",null,"z","x","c","v",";"],
+                R: ["6","7","8","9","0",null,null,"f","w","r","y","p",null,null,"k","t","n","s","h",null,null,"g","d","m","j","b",null,null,"Space"],
+                fingers: {
+                    L: [0,0,1,2,3,3,null,0,1,2,3,3,null,0,1,2,3,3,null,0,1,2,3,3],
+                    R: [3,3,2,1,0,0,0,3,3,2,1,0,0,0,3,3,2,1,0,0,null,3,3,2,1,0,null,null,4]
+                }
+            },
+            seoto: {
+                name: "瀬音配列（せおと配列）",
+                L: [
+                    null,"1","2","3","4","5",
+                    null,"D","G","K","H","F",
+                    null,"R","S","T","N","P",
+                    null,"Z","J","B","M","X"
+                ],
+                R: [
+                    "6","7","8","9","0",null,null,
+                    "V","Y","O","W","-",null,null,
+                    "`","A","I","U","E",null,null,
+                    "C",",",".","L","Q",null,null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [0,0,1,2,3,3, null,0,1,2,3,3, null,0,1,2,3,3, null,0,1,2,3,3],
+                    R: [3,3,2,1,0,0,0, 3,3,2,1,0,0,0, 3,3,2,1,0,0,null, 3,3,2,1,0,null,null, 4]
+                }
+            }
+        };
+
+        /**
+         * 物理設定のデフォルト値 (DEFAULT PHYSICAL CONFIG)
+         * 今後設定を変更したい場合は、アプリ上で「Export (Physical)」を行い、
+         * 出力されたJSONファイルの中身を、この下の { ... } と丸ごと差し替えてください。
+         */
+        const DEFAULT_PHYSICAL_DATA = {
+            "type": "physical",
+            "costs": {
+                "L": [
+                    [0,9,10,10,10,10,2,10,10,10,10,10,4,10,10,10,10,10,6,10,10,10,10,10],
+                    [9,0,9,10,10,10,3,10,10,10,10,10,4,10,10,10,10,10,6,10,10,10,10,10],
+                    [10,9,0,9,10,10,4,10,10,10,10,10,6,8,10,10,10,10,7,10,10,10,10,10],
+                    [10,10,9,0,9,10,6,10,10,10,10,10,7,10,10,10,10,10,8,10,10,10,10,10],
+                    [10,10,10,9,0,9,8,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,9],
+                    [10,10,10,10,9,0,10,8,10,10,10,9,10,9,10,10,8,8,10,10,10,10,10,9],
+                    [2,3,4,6,8,10,0,2,4,6,8,10,2,3,4,6,8,10,4,4,6,7,9,10],
+                    [10,9,10,10,10,10,2,0,1,2,2,5,3,2,3,4,2,5,4,8,9,5,5,5],
+                    [10,10,9,10,10,10,4,3,0,0,2,5,4,1,2,1,1,6,6,8,7,6,3,7],
+                    [10,10,10,9,10,10,6,3,1,0,1,5,6,2,0,0,0,6,7,5,8,7,4,9],
+                    [10,10,10,10,9,10,8,3,2,0,0,2,8,0,1,2,3,5,9,5,7,8,6,9],
+                    [10,10,10,10,10,9,10,6,6,2,1,0,10,2,3,3,4,2,10,7,8,4,9,8],
+                    [4,4,6,7,9,10,2,3,4,6,8,10,0,2,4,6,8,10,2,3,4,6,8,10],
+                    [10,10,10,10,10,10,3,3,4,1,1,6,2,0,2,1,1,5,3,4,6,3,3,7],
+                    [10,10,10,10,9,10,4,3,2,1,3,7,4,1,0,0,0,7,4,5,4,3,4,8],
+                    [10,10,10,10,10,10,6,2,4,1,2,6,6,2,0,0,0,5,6,3,2,1,1,7],
+                    [9,10,10,10,10,10,8,5,3,2,4,7,8,2,1,0,0,5,8,4,3,3,3,6],
+                    [10,10,10,10,10,10,10,3,4,2,4,2,10,0,0,0,1,0,10,4,5,5,6,2],
+                    [6,6,7,8,10,10,4,4,6,7,9,10,2,3,4,6,8,10,0,2,4,6,8,10],
+                    [10,10,10,10,10,10,4,7,6,3,4,6,3,1,3,1,1,5,2,0,2,2,1,4],
+                    [10,10,10,10,10,10,6,6,6,4,6,8,4,1,2,1,1,7,4,2,0,1,1,6],
+                    [10,10,10,10,10,10,7,6,7,6,5,8,6,1,2,2,2,5,6,2,1,0,0,3],
+                    [10,10,10,10,10,10,9,4,4,3,6,8,8,1,1,0,1,5,8,3,1,1,0,2],
+                    [10,10,10,10,10,10,10,6,7,5,7,6,10,1,1,1,3,1,10,7,8,2,2,0]
+                ],
+                "R": [
+                    [0,9,10,10,8,10,10,2,3,4,6,8,10,10,4,4,6,7,9,10,10,6,6,7,8,10,10,10,0],
+                    [9,0,9,10,10,10,10,8,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,8,10,10,0],
+                    [10,9,0,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,7,8,10,0],
+                    [10,10,9,0,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,7,8,10,10,10,10,7,8,0],
+                    [10,10,10,9,0,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,6,10,10,10,10,9,6,7,0],
+                    [10,10,10,10,9,0,9,10,10,10,10,10,10,9,10,10,9,10,10,8,4,10,10,10,10,9,6,6,0],
+                    [10,10,10,10,10,10,0,10,10,10,10,10,10,10,10,10,10,10,9,10,4,10,10,10,10,10,6,6,0],
+                    [10,10,10,10,10,10,10,0,1,2,6,6,10,10,2,4,3,3,2,10,10,8,9,4,8,7,10,10,0],
+                    [10,9,8,10,10,10,10,2,0,0,2,3,10,10,5,3,2,1,0,10,10,9,6,8,7,5,9,10,0],
+                    [10,10,9,10,10,10,10,5,1,0,1,3,10,10,6,0,0,0,2,10,8,9,4,7,8,5,7,9,0],
+                    [10,10,10,9,10,10,10,5,2,0,0,3,10,10,6,1,1,2,1,10,6,7,3,6,7,8,6,7,0],
+                    [10,10,10,10,9,10,10,5,2,2,1,0,9,10,5,2,4,3,2,10,4,5,5,5,9,8,4,6,0],
+                    [10,10,10,10,10,10,10,10,10,10,10,10,0,9,10,8,10,10,10,9,3,10,10,10,10,10,4,4,0],
+                    [10,10,10,10,9,10,10,10,10,10,10,10,10,0,10,10,10,10,7,6,2,10,10,10,10,10,4,4,0],
+                    [10,10,10,10,10,10,10,2,4,2,4,3,10,10,0,1,0,0,0,10,10,2,6,5,5,4,10,10,0],
+                    [10,10,10,9,10,10,10,7,4,2,3,5,10,10,5,0,0,1,2,10,10,6,3,3,3,4,8,10,0],
+                    [10,10,10,10,10,10,10,6,2,1,4,2,10,10,5,0,0,0,2,10,8,7,1,1,2,3,6,8,0],
+                    [10,10,10,10,10,10,7,7,3,1,2,3,10,10,7,0,0,0,1,10,6,8,4,3,4,5,4,6,0],
+                    [10,10,10,10,10,10,10,6,1,1,4,3,10,10,5,1,1,2,0,8,4,7,3,3,6,4,3,4,0],
+                    [10,10,10,10,10,10,9,10,10,10,10,9,9,10,10,10,10,10,9,0,2,10,10,10,10,9,2,3,0],
+                    [10,10,9,7,6,4,4,10,10,8,6,4,3,2,10,10,8,6,4,2,0,10,10,8,6,4,3,2,8],
+                    [10,10,10,10,10,10,10,6,7,5,7,6,10,10,1,3,1,1,1,10,10,0,2,2,8,7,10,10,0],
+                    [10,10,10,10,10,10,10,8,6,3,4,4,10,10,5,1,0,1,1,10,10,2,0,1,1,3,8,10,0],
+                    [10,10,10,10,10,10,10,8,5,6,7,6,10,10,5,2,2,2,1,10,8,3,0,0,1,2,6,8,0],
+                    [10,10,10,10,10,10,10,8,6,4,6,6,10,7,7,1,1,2,1,10,6,6,1,1,0,2,4,6,0],
+                    [10,10,10,10,10,10,10,6,4,3,6,7,10,10,5,1,1,3,1,10,4,4,1,2,2,0,2,4,0],
+                    [10,10,8,7,6,6,6,10,9,7,6,4,4,4,10,8,6,4,3,2,3,10,8,6,4,2,0,2,5],
+                    [10,10,10,8,7,6,6,10,10,9,7,6,4,4,10,10,8,6,4,3,2,10,10,8,6,4,2,0,7],
+                    [9,8,8,8,8,9,10,8,6,6,6,6,8,9,6,5,4,4,5,6,8,5,3,2,2,3,5,7,0]
+                ]
+            },
+            "baseCosts": {
+                "L": [10,10,10,10,10,10,1,8,5,3,4,9,0,2,1,0,0,8,1,9,7,4,3,10],
+                "R": [10,10,10,10,10,10,10,9,4,3,5,8,10,10,8,0,0,1,2,10,0,10,3,4,7,9,1,1,0]
+            },
+            "repeatCosts": { "0": 2.5, "1": 2.0, "2": 1.2, "3": 1.0, "4": 1.5 },
+            "gapConfig": {"0":1,"1":0.8,"2":0.5},
+            "weights": { "trans": 65 }
+        };
+
+        const I18N = {
+            en: {
+                fingers: ["Pinky", "Ring", "Mid", "Idx", "Thb"],
+
+                // Terminology: Logic vs Physical / Position / Transition
+                mode_layout: "Layout Editor", mode_finger: "Finger Assignment",
+                mode_cost: "Transition Cost", mode_base: "Position Cost", mode_settings: "Logic",
+
+                hand_left: "LEFT HAND", hand_right: "RIGHT HAND",
+                panel_corpus: "Corpus Text (Romaji / Alphanumeric)", btn_analyze: "RUN ANALYSIS",
+
+                panel_results: "Analysis Results", res_total: "Efficiency Score", res_work: "Total Work (Load)",
+                res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
+
+                stat_keystrokes: "Keystrokes", stat_sfb: "SFB %", stat_repeat: "Repeats", stat_max_key: "Top Key",
+                res_worst: "Worst Transitions",
+
+                graph_finger: "Finger Load", graph_row: "Row Load",
+                header_import: "Import", header_export: "Export",
+
+                instr_layout: "Left-Click: Rename. Right-Click: Toggle Mask (Enable/Disable). Drag: Swap.",
+                instr_finger: "Select tool, click keys to assign finger.",
+
+                // Definitions updated to imply "Ergonomics" inside "Physical" context
+                instr_cost: "Select start key, then wheel on target key to adjust. Define based on distance, scissors, and rolls.",
+                instr_base: "Define base effort (Finger strength, Reach). Wheel on key to adjust.",
+
+                instr_result: "Heatmap View. Darker green = More usage.",
+                set_gap_title: "Hand Fatigue & Recovery Simulation",
+                set_gap_desc: "Simulates how hand fatigue recovers while using the *other* hand (creating a margin for the next transition). The coefficient set here is multiplied by the Transition Cost.",
+                gap0_name: "Same Hand (Consecutive)",
+                gap0_sub: "Continuous use of the same hand. No rest.",
+                gap1_name: "Short Rest (Alternation)",
+                gap1_sub: "1 keystroke by other hand.",
+                gap2_name: "Long Rest",
+                gap2_sub: "2+ keystrokes by other hand.",
+                lbl_preset: "Load Preset:", lbl_name: "Layout Name:",
+
+                imp_layout: "Import", exp_layout: "Export",
+                imp_phys: "Import", exp_phys: "Export",
+                alert_load_layout: "Layout data loaded.", alert_load_phys: "Physical config loaded.",
+
+                lbl_dist: "Cost Distribution",
+                lbl_stability: "Stability Metrics",
+
+                // 指標ラベル
+                lbl_median: "Median",
+                lbl_sd: "SD (Consistency)",
+                lbl_95: "95th Percentile",
+
+                // ツールチップ説明文
+                desc_median: "The typical cost unaffected by outliers. Represents the layout's true baseline performance.",
+                desc_sd: "Standard Deviation. Represents inconsistency (Mura). Lower means a steadier typing rhythm.",
+                desc_95: "95% of keystrokes fall below this cost. Lower means fewer sudden, difficult reaches.",
+
+                set_weight_title: "Score Weighting Strategy",
+                set_weight_desc: "Customize the calculation balance for the 'Efficiency Score'. Define your priority between Position (Stamina) and Transition (Flow). *Note: This does not affect physical metrics like SD or Distribution.",
+                lbl_static_w: "Position (Static)",
+                lbl_trans_w: "Flow (Dynamic)",
+                desc_static_w: "Prioritize Reach/Strength",
+                desc_trans_w: "Prioritize Alternation/Rolls",
+
+                set_repeat_title: "Repeat Penalty (Same Key)",
+                set_repeat_desc: "Cost penalty for pressing the same key consecutively. Adjust based on finger agility.",
+                lbl_pinky: "Pinky", lbl_ring: "Ring", lbl_mid: "Mid", lbl_idx: "Index", lbl_thb: "Thumb",
+
+                lbl_rep_cost: "Avg. Repeat Cost",
+                lbl_rep_finger: "Repeats by Finger",
+
+                modal_title_imp_layout: "Import Layout (Logical)",
+                modal_title_exp_layout: "Export Layout (Logical)",
+                modal_title_imp_phys: "Import Config (Physical)",
+                modal_title_exp_phys: "Export Config (Physical)",
+                modal_desc_imp: "Paste the JSON text below.",
+                modal_desc_exp: "Copy and save the JSON text below.",
+                btn_copy: "Copy to Clipboard",
+                btn_imp_exec: "Import",
+                msg_copied: "Copied!",
+                err_invalid_json: "Invalid JSON format.",
+            },
+            ja: {
+                fingers: ["小指", "薬指", "中指", "人差", "親指"],
+
+                // 用語: 硬派なシステム用語を採用
+                mode_layout: "レイアウト編集", mode_finger: "運指割当",
+                mode_cost: "遷移コスト", mode_base: "位置コスト", mode_settings: "解析ロジック",
+
+                hand_left: "左手 (Left)", hand_right: "右手 (Right)",
+                panel_corpus: "評価用テキスト (※日本語はローマ字で入力)", btn_analyze: "解析実行 (RUN)",
+
+                // 結果パネル:
+                panel_results: "解析結果", res_total: "総合スコア (平均)", res_work: "総運動量 (Total)",
+                res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
+
+                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率 (同指)", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
+                res_worst: "ワースト遷移 (負担大)",
+                graph_finger: "指の負荷", graph_row: "段の負荷",
+                header_import: "インポート", header_export: "エクスポート",
+
+                instr_layout: "左クリック:文字変更 / 右クリック:有効無効切替(マスク) / ドラッグ:入替",
+                instr_finger: "指ツールを選んでキーをクリックしてください。",
+
+                instr_cost: "始点キーをクリック選択後、終点キー上でホイールして設定。距離・ロール・シザーズ等の運指相性を加味して定義します。",
+                instr_base: "「キーの位置コスト」を定義。ホームポジションからの距離や、指ごとの強さを加味して設定。",
+
+                instr_result: "ヒートマップ。緑が濃いほど高頻度。",
+                set_gap_title: "手の疲労と回復シミュレーション",
+                set_gap_desc: "「反対の手」を使っている間に、もう片方の手の疲労がどれくらい回復するか（次の遷移にどれくらい余裕が生まれるか）を設定します。ここで設定した係数が「遷移コスト」に掛け算されます。",
+                gap0_name: "同手連打 (Consecutive)",
+                gap0_sub: "反対の手を挟まず、同じ手で連続打鍵。疲労蓄積大。",
+                gap1_name: "1打鍵の休憩 (交互打鍵)",
+                gap1_sub: "反対の手を1回挟む。少し回復します。",
+                gap2_name: "2打鍵以上の休憩",
+                gap2_sub: "反対の手を2回以上挟む。さらに回復。",
+                lbl_preset: "プリセット読込:", lbl_name: "配列名:",
+                imp_layout: "インポート", exp_layout: "エクスポート",
+                imp_phys: "インポート", exp_phys: "エクスポート",
+                alert_load_layout: "配列データを読み込みました", alert_load_phys: "物理設定データを読み込みました",
+
+                lbl_dist: "コスト分布 (負荷の山)",
+                lbl_stability: "安定性指標 (詳細)",
+
+                // 指標ラベル
+                lbl_median: "中央値",
+                lbl_sd: "標準偏差",
+                lbl_95: "95%タイル値",
+
+                // ツールチップ説明文
+                desc_median: "極端な値に影響されにくい、その配列の「実力値」。典型的な打鍵負荷を示します。",
+                desc_sd: "打鍵心地の「ムラ」。数値が小さいほど、常に一定のリズムで快適に打てます。",
+                desc_95: "「95%の打鍵はこのコスト以下に収まる」ライン。低いほど、突発的な高負荷(無理な運指)が少ないことを意味します。",
+
+                set_weight_title: "総合スコアの重み付け",
+                set_weight_desc: "「総合スコア」の算出比重を設定します。位置（スタミナ）と遷移（フロー）、どちらを重視して評価するか定義してください。※SDや分布などの物理指標には影響しません。",
+                lbl_static_w: "位置コスト (スタミナ)",
+                lbl_trans_w: "遷移コスト (フロー)",
+                desc_static_w: "距離や指の強さを重視",
+                desc_trans_w: "運指の流れ・リズムを重視",
+
+                set_repeat_title: "同キー連打ペナルティ",
+                set_repeat_desc: "同じキーを連続して打つ際の追加コストです。指の動きにくさに応じて調整してください。",
+                lbl_pinky: "小指", lbl_ring: "薬指", lbl_mid: "中指", lbl_idx: "人差", lbl_thb: "親指",
+
+                lbl_rep_cost: "平均連打コスト",
+                lbl_rep_finger: "指ごとの連打回数",
+
+                modal_title_imp_layout: "インポート（配列データ）",
+                modal_title_exp_layout: "エクスポート（配列データ）",
+                modal_title_imp_phys: "インポート（物理設定）",
+                modal_title_exp_phys: "エクスポート（物理設定）",
+                modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
+                modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
+                btn_copy: "クリップボードにコピー",
+                btn_imp_exec: "インポート実行",
+                msg_copied: "コピーしました!",
+                err_invalid_json: "JSON形式が正しくありません。",
+            }
+        };
+
+        class AppState {
+            constructor() {
+                this.layout = { L: [], R: [] };
+                this.fingers = { L: [], R: [] };
+
+                // デフォルト設定定数(DEFAULT_PHYSICAL_DATA)の値をディープコピーして初期化します
+                const defaults = JSON.parse(JSON.stringify(DEFAULT_PHYSICAL_DATA));
+
+                this.costs = defaults.costs;
+                this.baseCosts = defaults.baseCosts;
+                this.gapConfig = defaults.gapConfig;
+                this.repeatCosts = defaults.repeatCosts || { "0": 2.5, "1": 2.0, "2": 1.5, "3": 1.0, "4": 1.2 };
+                this.weights = defaults.weights || { trans: 65 };
+
+                this.layoutName = "Custom";
+                this.lang = "ja";
+
+                // ドメイン管理
+                this.domain = 'logic'; // 'logic' or 'physical'
+                this.mode = 'layout';
+
+                this.initLayoutData();
+                this.loadPreset('qwerty');
+            }
+
+            initLayoutData() {
+                ['L','R'].forEach(h => {
+                    const count = h === 'L' ? TOTAL_KEYS_L : TOTAL_KEYS_R;
+
+                    // 配列と指の初期化のみ行う (コスト計算は削除)
+                    this.layout[h] = Array(count).fill(null);
+                    this.fingers[h] = Array(count).fill(0);
+                });
+            }
+
+            loadPreset(name) {
+                const p = PRESETS[name];
+                if (!p) return;
+                this.layout.L = [...p.L]; this.layout.R = [...p.R];
+                if (p.fingers) {
+                    this.fingers.L = [...p.fingers.L]; this.fingers.R = [...p.fingers.R];
+                }
+                // データ側にname定義があればそれを使い、なければキーを大文字化
+                this.layoutName = p.name || name.toUpperCase();
+            }
+
+            toggleKey(hand, idx) {
+                if (this.layout[hand][idx] === null) this.layout[hand][idx] = "";
+                else this.layout[hand][idx] = null;
+            }
+
+            // 論理データ（配列）のみエクスポート
+            exportLogical() {
+                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName });
+            }
+
+            // 物理データ（設定）のみエクスポート
+            exportPhysical() {
+                // repeatCosts をエクスポート対象に含める
+                return JSON.stringify({
+                    type: 'physical',
+                    costs: this.costs,
+                    baseCosts: this.baseCosts,
+                    gapConfig: this.gapConfig,
+                    repeatCosts: this.repeatCosts,
+                    weights: this.weights
+                });
+            }
+        }
+
+        class Analyzer {
+            constructor(state) { this.state = state; }
+
+            normalizeChar(char) {
+                const c = char.toLowerCase();
+                if (c === ' ' || c === '　') return 'space';
+                if (c === '\n' || c === '\r') return 'ent';
+                return c;
+            }
+
+            getLayoutMap() {
+                const map = {};
+                ['L','R'].forEach(hand => {
+                    this.state.layout[hand].forEach((keyVal, idx) => {
+                        if (keyVal === null) return;
+                        const v = keyVal.toLowerCase();
+                        let target = v;
+                        if (v === 'space' || v === 'spc') target = 'space';
+                        else if (v === 'ent' || v === 'enter' || v === 'return') target = 'ent';
+
+                        if (!map[target]) map[target] = [];
+                        map[target].push({hand, idx});
+                    });
+                });
+                return map;
+            }
+
+            run(text) {
+                const keyMap = this.getLayoutMap();
+                const stats = {
+                    totalCost: 0, transCost: 0, staticCost: 0,
+                    keystrokes: 0, sfbCount: 0, repeatCount: 0,
+
+                    // 連打詳細データ
+                    repeatCostSum: 0,            // 連打によるコストの総和
+                    fingerRepeats: [0,0,0,0,0],  // 指ごとの連打回数 (左右合算: 小,薬,中,人,親)
+
+                    keyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
+                    fingerCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
+                    rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
+                    transitions: {},
+                    costSamples: [] // 分布計算用
+                };
+
+                let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
+
+                // コスト計算ヘルパー関数 (このメソッド内、またはクラスメソッドとして定義)
+                // 直前の状態(history)から、候補キー(cand)を打った場合の推定コストを返す
+                const calcStepCost = (cand, history) => {
+                    const activeH = cand.hand;
+                    const last = history[activeH].idx;
+                    const gap = history[activeH].gap; // gapは「他方の手を何回使ったか」
+
+                    let sCost = this.state.baseCosts[activeH][cand.idx]; // 位置コスト
+                    let tCost = 0; // 遷移コスト
+
+                    if (last !== null) {
+                        const f = this.state.fingers[activeH][cand.idx];
+
+                        if (last === cand.idx) {
+                            // 連打
+                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
+                                        ? this.state.repeatCosts[f] : 1.5;
+                            tCost = rCost;
+                        } else {
+                            // 通常遷移
+                            let rawCost = this.state.costs[activeH][last][cand.idx];
+                            let fatigue = 1.0;
+                            if (gap >= 2) fatigue = this.state.gapConfig[2];
+                            else if (gap === 1) fatigue = this.state.gapConfig[1];
+                            else fatigue = this.state.gapConfig[0];
+
+                            tCost = rawCost * fatigue;
+                        }
+                    }
+                    // 単純合計コストを返す (選択基準用)
+                    return sCost + tCost;
+                };
+
+                for (let char of text) {
+                    const normalized = this.normalizeChar(char);
+                    const candidates = keyMap[normalized]; // 配列が返ってくる
+
+                    if (!candidates || candidates.length === 0) continue;
+
+                    let k = null;
+
+                    // ロジック: 候補が1つなら即決、複数ならベストを探す
+                    if (candidates.length === 1) {
+                        k = candidates[0];
+                    } else {
+                        // Greedy探索: 現在のhistory状態で最もコストが低くなる候補を選ぶ
+                        let bestCand = null;
+                        let minScore = Infinity;
+
+                        candidates.forEach(cand => {
+                            // 仮のコストを計算 (historyは変更しない)
+                            const score = calcStepCost(cand, history);
+                            if (score < minScore) {
+                                minScore = score;
+                                bestCand = cand;
+                            }
+                        });
+                        k = bestCand;
+                    }
+
+                    stats.keystrokes++;
+                    stats.keyCounts[k.hand][k.idx]++;
+
+                    const cols = k.hand === 'L' ? COLS_L : COLS_R;
+                    let row = Math.floor(k.idx / cols);
+                    // 5行目(Index 4)は親指行として許容する。それ以上は丸める。
+                    if (row > 4) row = 4;
+                    stats.rowCounts[k.hand][row]++;
+
+                    const f = this.state.fingers[k.hand][k.idx];
+                    if (f !== null && f !== undefined) stats.fingerCounts[k.hand][f]++;
+
+                    const activeH = k.hand;
+                    const otherH = activeH === 'L' ? 'R' : 'L';
+                    history[otherH].gap++;
+
+                    // 1打鍵のコスト計算
+                    const sCost = this.state.baseCosts[activeH][k.idx];
+                    let tCost = 0; // 今回の遷移コスト
+
+                    const last = history[activeH].idx;
+                    if (last !== null) {
+                        if (last === k.idx) {
+                            stats.repeatCount++;
+                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
+                                          ? this.state.repeatCosts[f]
+                                          : 1.5;
+                            tCost = rCost;
+
+                            // 詳細集計
+                            stats.repeatCostSum += rCost;
+                            if (f !== null && f !== undefined) {
+                                stats.fingerRepeats[f]++;
+                            }
+                        } else {
+                            const lastF = this.state.fingers[activeH][last];
+                            if (lastF === f && f !== null) stats.sfbCount++;
+
+                            let rawCost = this.state.costs[activeH][last][k.idx];
+                            const gap = history[activeH].gap;
+                            let fatigue = 1.0;
+                            if (gap >= 2) fatigue = this.state.gapConfig[2];
+                            else if (gap === 1) fatigue = this.state.gapConfig[1];
+                            else fatigue = this.state.gapConfig[0];
+
+                            tCost = rawCost * fatigue;
+
+                            const k1 = this.state.layout[activeH][last];
+                            const k2 = this.state.layout[activeH][k.idx];
+                            const keyName = `${k1}→${k2}`;
+                            stats.transitions[keyName] = (stats.transitions[keyName] || 0) + tCost;
+                        }
+                    }
+
+                    // 記録
+                    stats.staticCost += sCost;
+                    stats.transCost += tCost;
+                    stats.totalCost += (sCost + tCost);
+
+                    // 1打鍵の合計負荷をサンプルとして保存
+                    stats.costSamples.push(sCost + tCost);
+
+                    history[activeH].idx = k.idx;
+                    history[activeH].gap = 0;
+                }
+
+                stats.worstTransitions = Object.entries(stats.transitions)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 8);
+
+                const k = stats.keystrokes > 0 ? stats.keystrokes : 1;
+
+                stats.avgTrans = stats.transCost / k;
+                stats.avgStatic = stats.staticCost / k;
+
+                // 遷移コスト比率(0~100)を取得
+                const transRatio = (this.state.weights && this.state.weights.trans !== undefined)
+                                   ? this.state.weights.trans
+                                   : 65;
+
+                const wTrans = transRatio / 100.0;
+                const wStatic = 1.0 - wTrans;
+
+                // 加重平均スコア
+                stats.efficiencyScore = (stats.avgStatic * wStatic) + (stats.avgTrans * wTrans);
+
+                stats.avgTotal = stats.efficiencyScore;
+
+                // 連打に関する詳細指標
+                // 連打率 (Repeat Rate)
+                stats.repeatRate = stats.keystrokes > 0
+                    ? (stats.repeatCount / stats.keystrokes * 100)
+                    : 0;
+
+                // 平均連打コスト (Avg. Repeat Cost)
+                stats.avgRepeatCost = stats.repeatCount > 0
+                    ? (stats.repeatCostSum / stats.repeatCount)
+                    : 0;
+
+                return stats;
+            }
+        }
+
+        class UI {
+            constructor() {
+                this.state = new AppState();
+                this.analyzer = new Analyzer(this.state);
+                this.isDragging = false;
+                this.dragSource = null;
+                this.activeTool = 3;
+
+                this.dom = {
+                    gridL: document.getElementById('grid-left'),
+                    gridR: document.getElementById('grid-right'),
+                    ctrlArea: document.getElementById('control-area'),
+                    resPanel: document.getElementById('results-panel'),
+                    sidebar: document.getElementById('sidebar'),
+                    resizer: document.getElementById('drag-handle'),
+                    // ツールバー要素
+                    toolbarLogic: document.getElementById('toolbar-logic'),
+                    toolbarPhys: document.getElementById('toolbar-phys'),
+                    btnImp: document.getElementById('btn-import'),
+                    btnExp: document.getElementById('btn-export')
+                };
+
+                this.init();
+            }
+
+            init() {
+                // ドメイン切替
+                document.getElementById('dom-logic').onclick = () => this.setDomain('logic');
+                document.getElementById('dom-phys').onclick = () => this.setDomain('physical');
+
+                // モード切替
+                document.querySelectorAll('.mode-btn').forEach(b =>
+                    b.onclick = () => {
+                        this.state.mode = b.dataset.mode;
+                        this.updateUI();
+                    });
+
+                // 解析ボタン
+                document.getElementById('btn-analyze').onclick = () => this.runAnalysis();
+
+                // 言語切替
+                document.getElementById('btn-lang').onclick = () => {
+                    this.state.lang = this.state.lang === 'ja' ? 'en' : 'ja';
+                    this.updateText();
+                    this.updateUI();
+                    this.renderGrid('L'); this.renderGrid('R');
+                    if(this.state.mode === 'result') this.renderStats(this.state.lastResult);
+                };
+
+                // Gap設定のイベント
+                [0,1,2].forEach(i => {
+                    document.getElementById(`gap-${i}`).onchange = (e) =>
+                        this.state.gapConfig[i] = parseFloat(e.target.value);
+                });
+
+                // 連打コスト設定のイベントと初期値反映
+                [0,1,2,3,4].forEach(i => {
+                    const el = document.getElementById(`rep-${i}`);
+                    if(el) {
+                        el.value = this.state.repeatCosts[i]; // 初期値セット
+                        el.onchange = (e) => this.state.repeatCosts[i] = parseFloat(e.target.value);
+                    }
+                });
+
+                // ウェイト設定スライダーのイベント
+                const wSlider = document.getElementById('weight-slider');
+                const dStatic = document.getElementById('disp-static');
+                const dTrans = document.getElementById('disp-trans');
+
+                // 初期表示更新関数（引数 val は「位置コスト(Static)」の値になる）
+                const updateDisp = (val) => {
+                    dStatic.textContent = val;           // 左側 (Position)
+                    dTrans.textContent = 100 - val;      // 右側 (Transition)
+                };
+
+                // 初期値セット: 全体(100)から遷移コスト(trans)を引いて、位置コスト(static)を算出
+                wSlider.value = 100 - this.state.weights.trans;
+                updateDisp(wSlider.value);
+
+                wSlider.oninput = (e) => {
+                    const val = parseInt(e.target.value, 10); // これが「位置コスト」になる
+                    this.state.weights.trans = 100 - val;     // 内部データ(trans)は逆算して保存
+                    updateDisp(val);
+                };
+
+                // --- Modal Logic Start ---
+                this.modal = document.getElementById('io-modal');
+                this.modalTitle = document.getElementById('modal-title');
+                this.modalText = document.getElementById('modal-text');
+                this.modalDesc = document.getElementById('modal-desc');
+                this.btnModalCopy = document.getElementById('btn-modal-copy');
+                this.btnModalImport = document.getElementById('btn-modal-import');
+
+                // Close Modal
+                const closeModal = () => this.modal.classList.remove('open');
+                document.getElementById('modal-close').onclick = closeModal;
+                this.modal.onclick = (e) => { if (e.target === this.modal) closeModal(); };
+
+                // Export Button
+                document.getElementById('btn-export').onclick = () => {
+                    const isLogic = this.state.domain === 'logic';
+                    const dataStr = isLogic ? this.state.exportLogical() : this.state.exportPhysical();
+                    const prettyJson = JSON.stringify(JSON.parse(dataStr), null, 2);
+                    this.openModal('export', prettyJson);
+                };
+
+                // Import Button
+                document.getElementById('btn-import').onclick = () => {
+                    this.openModal('import');
+                };
+
+                // Modal: Copy Action
+                this.btnModalCopy.onclick = () => {
+                    const dict = I18N[this.state.lang];
+                    this.modalText.select();
+                    document.execCommand('copy');
+
+                    const originalText = this.btnModalCopy.textContent;
+                    this.btnModalCopy.textContent = dict.msg_copied;
+                    setTimeout(() => this.btnModalCopy.textContent = originalText, 1500);
+                };
+
+                // Modal: Import Action
+                this.btnModalImport.onclick = () => {
+                    const dict = I18N[this.state.lang];
+                    const jsonText = this.modalText.value.trim();
+                    if (!jsonText) return;
+
+                    try {
+                        const d = JSON.parse(jsonText);
+
+                        if (d.type === 'logical') {
+                            this.state.layout = d.layout;
+                            this.state.fingers = d.fingers;
+                            if(d.name) this.state.layoutName = d.name;
+                            this.triggerCustomMode();
+                            alert(dict.alert_load_layout);
+                            this.setDomain('logic');
+                        } else if (d.type === 'physical') {
+                            this.state.costs = d.costs;
+                            this.state.baseCosts = d.baseCosts;
+                            if(d.gapConfig) this.state.gapConfig = d.gapConfig;
+                            if(d.repeatCosts) this.state.repeatCosts = d.repeatCosts;
+                            if(d.weights) this.state.weights = d.weights;
+
+                            // Update Sliders UI
+                            const wSlider = document.getElementById('weight-slider');
+                            if(wSlider && this.state.weights) {
+                                wSlider.value = 100 - this.state.weights.trans;
+                                document.getElementById('disp-static').textContent = 100 - this.state.weights.trans;
+                                document.getElementById('disp-trans').textContent = this.state.weights.trans;
+                            }
+                            // Update Repeat Inputs
+                            [0,1,2,3,4].forEach(i => {
+                                const el = document.getElementById(`rep-${i}`);
+                                if(el) el.value = this.state.repeatCosts[i];
+                            });
+
+                            alert(dict.alert_load_phys);
+                            this.setDomain('physical');
+                        } else {
+                            Object.assign(this.state, d);
+                            alert("Imported legacy data.");
+                            this.setDomain('logic');
+                        }
+
+                        this.renderGrid('L'); this.renderGrid('R');
+                        this.updateUI();
+                        closeModal();
+
+                    } catch (e) {
+                        alert(dict.err_invalid_json + "\n" + e.message);
+                    }
+                };
+                // --- Modal Logic End ---
+
+                // リサイズ等のイベント
+                let isResizing = false;
+                this.dom.resizer.onmousedown = () => { isResizing = true; this.dom.resizer.classList.add('active'); };
+                document.onmousemove = (e) => {
+                    if (!isResizing) return;
+                    const w = document.body.clientWidth - e.clientX;
+                    if (w > 300 && w < 800) this.dom.sidebar.style.width = w + 'px';
+                };
+                document.onmouseup = () => { isResizing = false; this.dom.resizer.classList.remove('active'); };
+
+                // 初期化
+                this.updateText();
+
+                // Header Elements Init
+                this.dom.kbHeader = document.querySelector('.kb-header');
+                this.dom.kbTitle = document.getElementById('kb-title');
+
+                this.setDomain('logic');
+                document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\n(Note: Please input Romanized text for Japanese analysis.)\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
+            }
+
+            updateText() {
+                const dict = I18N[this.state.lang];
+
+                // 1. 通常のテキスト書き換え
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    if (dict[el.dataset.i18n]) {
+                        el.textContent = dict[el.dataset.i18n];
+                    }
+                });
+
+                // 2. ツールチップ属性の書き換え
+                document.querySelectorAll('[data-i18n-tooltip]').forEach(el => {
+                    if (dict[el.dataset.i18nTooltip]) {
+                        el.setAttribute('data-tooltip', dict[el.dataset.i18nTooltip]);
+                    }
+                });
+
+                document.getElementById('btn-lang').textContent = this.state.lang === 'ja' ? 'EN' : 'JP';
+            }
+
+            setDomain(d) {
+                this.state.domain = d;
+                document.querySelectorAll('.domain-btn').forEach(b => b.classList.toggle('active', b.dataset.domain === d));
+                this.dom.toolbarLogic.style.display = d === 'logic' ? 'flex' : 'none';
+                this.dom.toolbarPhys.style.display = d === 'physical' ? 'flex' : 'none';
+
+                if (d === 'logic') {
+                    if (this.state.mode !== 'layout' && this.state.mode !== 'finger') this.state.mode = 'layout';
+                } else {
+                    if (this.state.mode !== 'base' && this.state.mode !== 'cost' && this.state.mode !== 'settings') this.state.mode = 'base';
+                }
+                this.updateUI();
+            }
+
+            // カスタムモードへ強制切り替えするヘルパー
+            triggerCustomMode() {
+                const presetSelect = document.getElementById('kb-preset-in');
+                const nameInput = document.getElementById('layout-name-in');
+
+                if (presetSelect && presetSelect.value !== 'custom') {
+                    presetSelect.value = 'custom';
+                }
+
+                if (nameInput) {
+                    // 読み取り専用を解除して CUSTOM に書き換え
+                    if (nameInput.hasAttribute('readonly')) {
+                        nameInput.removeAttribute('readonly');
+                        nameInput.value = "CUSTOM";
+                        this.state.layoutName = "CUSTOM";
+                        if (this.dom.kbTitle) this.dom.kbTitle.textContent = "CUSTOM";
+                    }
+                }
+            }
+
+            updateUI() {
+                const mode = this.state.mode;
+                const dict = I18N[this.state.lang];
+                this.state.selectedSource = null;
+
+                // 解析ロジック(settings)画面では、ヘッダー(配列名)を非表示にする
+                if (this.dom.kbHeader) {
+                    this.dom.kbHeader.style.display = (mode === 'settings') ? 'none' : 'flex';
+                }
+
+                // ボタンラベル更新
+                const isLogic = this.state.domain === 'logic';
+                this.dom.btnImp.querySelector('span').textContent = isLogic ? dict.imp_layout : dict.imp_phys;
+                this.dom.btnExp.querySelector('span').textContent = isLogic ? dict.exp_layout : dict.exp_phys;
+
+                // モードボタン更新
+                document.querySelectorAll('.mode-btn').forEach(b =>
+                    b.classList.toggle('active', b.dataset.mode === mode));
+
+                const settings = document.getElementById('settings-view');
+                const kb = document.getElementById('kb-container');
+                const ctrl = document.getElementById('control-area');
+
+                if (mode === 'settings') {
+                    settings.style.display = 'flex'; kb.style.display = 'none'; ctrl.style.display = 'none';
+                } else {
+                    settings.style.display = 'none'; kb.style.display = 'flex'; ctrl.style.display = 'flex';
+                    this.renderGrid('L');
+                    this.renderGrid('R');
+
+                    let html = `<div class="instruction">${dict['instr_' + mode]}</div>`;
+
+                    // 1. タイトル更新
+                    if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
+
+                    // 2. Layoutモードの場合、プルダウンと入力ボックスを表示
+                    if (mode === 'layout') {
+                        // 現在のプリセット状態を簡易判定（名前がPRESETSにあるか）
+                        const isPreset = PRESETS[this.state.layoutName.toLowerCase()] !== undefined;
+                        const readOnlyAttr = isPreset ? 'readonly' : '';
+                        const presetValue = isPreset ? this.state.layoutName.toLowerCase() : 'custom';
+
+                        html += `
+                            <div class="layout-meta">
+                                <div class="input-group" style="background:var(--bg-main); padding: 4px 8px;">
+                                    <label style="font-size:0.8rem; color:var(--text-dim); margin-right:8px;">${dict.lbl_preset}</label>
+
+                                    <select id="kb-preset-in" class="kb-select" style="border:none; background:transparent; margin-right:12px;">
+                                        <option value="custom">Custom</option>
+                                        <option value="qwerty">QWERTY</option>
+                                        <option value="dvorak">Dvorak</option>
+                                        <option value="onishi">大西配列</option>
+                                        <option value="seoto">瀬音配列</option>
+                                    </select>
+
+                                    <div style="width:1px; height:20px; background:var(--border); margin-right:12px;"></div>
+
+                                    <label style="font-size:0.8rem; color:var(--text-dim); margin-right:8px;">${dict.lbl_name}</label>
+                                    <input type="text" id="layout-name-in" value="${this.state.layoutName}" ${readOnlyAttr}
+                                           style="background:transparent; border:none; color:white; width:150px; font-weight:bold;">
+                                </div>
+                            </div>`;
+                    } else if (mode === 'finger') {
+                        html += `<div class="finger-palette">`;
+                        [0,1,2,3,4].forEach(f => {
+                            const act = this.activeTool === f ? 'active' : '';
+                            html += `<div class="p-btn ${act}" style="background:${FINGER_COLORS[f]}" onclick="app.setTool(${f})">${dict.fingers[f][0]}</div>`;
+                        });
+                        html += `</div>`;
+                    }
+                    ctrl.innerHTML = html;
+
+                    // イベントリスナーの登録 (innerHTML書き換え後に実行)
+                    if (mode === 'layout') {
+                        const presetIn = document.getElementById('kb-preset-in');
+                        const nameIn = document.getElementById('layout-name-in');
+
+                        // 初期選択状態のセット
+                        if (presetIn) {
+                            const currentKey = this.state.layoutName.toLowerCase();
+                            if (PRESETS[currentKey]) {
+                                presetIn.value = currentKey;
+                            } else {
+                                presetIn.value = 'custom';
+                            }
+
+                            // プルダウン変更時の処理
+                            presetIn.onchange = (e) => {
+                                const val = e.target.value;
+                                if (val === 'custom') {
+                                    // Custom選択時: 入力を空にして編集可能に
+                                    nameIn.removeAttribute('readonly');
+                                    nameIn.value = "CUSTOM";
+                                    this.state.layoutName = "CUSTOM";
+                                    this.dom.kbTitle.textContent = "CUSTOM";
+                                } else {
+                                    // プリセット選択時: プリセットをロードし、入力ボックスをReadOnlyに
+                                    this.state.loadPreset(val);
+                                    this.renderGrid('L'); this.renderGrid('R');
+
+                                    nameIn.value = this.state.layoutName; // loadPresetでUpper化されている
+                                    nameIn.setAttribute('readonly', true);
+                                    this.dom.kbTitle.textContent = this.state.layoutName;
+                                }
+                            };
+                        }
+
+                        // 名前変更時の処理
+                        if (nameIn) {
+                            nameIn.oninput = (e) => {
+                                this.state.layoutName = e.target.value;
+                                this.dom.kbTitle.textContent = e.target.value;
+                            };
+                        }
+                    }
+                }
+
+                if (mode !== 'result') this.dom.resPanel.style.display = 'none';
+            }
+
+            openModal(type, content = "") {
+                const dict = I18N[this.state.lang];
+                // --- 現在のドメイン判定 ---
+                const isLogic = this.state.domain === 'logic';
+                // -----------------------------
+
+                this.modal.classList.add('open');
+                this.modalText.value = content;
+
+                this.btnModalCopy.textContent = dict.btn_copy;
+                this.btnModalImport.textContent = dict.btn_imp_exec;
+
+                if (type === 'export') {
+                    // --- ドメインに応じたタイトルを選択 ---
+                    this.modalTitle.textContent = isLogic ? dict.modal_title_exp_layout : dict.modal_title_exp_phys;
+                    // -----------------------------------------
+                    this.modalDesc.textContent = dict.modal_desc_exp;
+
+                    this.btnModalCopy.style.display = 'inline-block';
+                    this.btnModalImport.style.display = 'none';
+                    this.modalText.readOnly = true;
+                    setTimeout(() => this.modalText.select(), 50);
+                } else {
+                    // --- ドメインに応じたタイトルを選択 ---
+                    this.modalTitle.textContent = isLogic ? dict.modal_title_imp_layout : dict.modal_title_imp_phys;
+                    // -----------------------------------------
+                    this.modalDesc.textContent = dict.modal_desc_imp;
+
+                    this.btnModalCopy.style.display = 'none';
+                    this.btnModalImport.style.display = 'inline-block';
+                    this.modalText.readOnly = false;
+                    this.modalText.value = "";
+                    this.modalText.focus();
+                }
+            }
+
+            setTool(f) { this.activeTool = f; this.updateUI(); }
+
+            // ヒートマップ表示ロジックを含む renderGrid
+            renderGrid(hand) {
+                const el = this.dom[hand === 'L' ? 'gridL' : 'gridR'];
+                const thumbEl = document.getElementById('thumb-area');
+                el.innerHTML = '';
+                if (hand === 'R') thumbEl.innerHTML = '';
+
+                const isRight = hand === 'R';
+                const totalKeys = isRight ? TOTAL_KEYS_R : TOTAL_KEYS_L;
+
+                this.state.layout[hand].forEach((char, idx) => {
+                    const isSpace = isRight && (idx === totalKeys - 1);
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    if (isSpace) keyDiv.classList.add('space-key');
+
+                    if (char === null) {
+                        keyDiv.classList.add('is-disabled');
+                        keyDiv.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            if (this.state.mode === 'layout') {
+                                this.state.toggleKey(hand, idx);
+                                // 無効キーを復活させたのでCustom扱いに変更
+                                this.triggerCustomMode();
+                                this.renderGrid(hand);
+                            }
+                        };
+                        if (isSpace) thumbEl.appendChild(keyDiv);
+                        else el.appendChild(keyDiv);
+                        return;
+                    }
+
+                    const cSpan = document.createElement('div');
+                    cSpan.className = 'key-char';
+                    cSpan.textContent = char;
+                    if (char.length > 2) cSpan.classList.add('small');
+                    keyDiv.appendChild(cSpan);
+
+                    const sSpan = document.createElement('div');
+                    sSpan.className = 'key-sub';
+                    keyDiv.appendChild(sSpan);
+
+                    const fBar = document.createElement('div');
+                    fBar.className = 'finger-bar';
+                    const fId = this.state.fingers[hand][idx];
+                    fBar.style.backgroundColor = FINGER_COLORS[fId] || 'transparent';
+                    keyDiv.appendChild(fBar);
+
+                    if (this.state.mode === 'base') {
+                        // 整数表示に変更
+                        const cost = Math.round(this.state.baseCosts[hand][idx]);
+                        sSpan.textContent = cost;
+
+                        // 遷移コストと同じスタイル(cost-*)を適用
+                        // 位置コスト用の閾値設定 (0=Best, 1=Good, 2=Warn, 3+=Dang)
+                        if (cost < 2) keyDiv.classList.add('cost-best');      // 0 (Home Row)
+                        else if (cost < 5) keyDiv.classList.add('cost-good'); // 1 (Top/Bot Row)
+                        else if (cost < 7) keyDiv.classList.add('cost-warn'); // 2 (Num Row)
+                        else keyDiv.classList.add('cost-dang');               // 3+ (Far reach)
+                    }
+                    else if (this.state.mode === 'cost') {
+                        if (this.state.selectedSource && this.state.selectedSource.hand === hand) {
+                            if (this.state.selectedSource.idx === idx) keyDiv.classList.add('active-source');
+                            else {
+                                // 整数表示に変更
+                                const cost = Math.round(this.state.costs[hand][this.state.selectedSource.idx][idx]);
+                                sSpan.textContent = cost;
+                                if (cost < 3) keyDiv.classList.add('cost-best');
+                                else if (cost < 5) keyDiv.classList.add('cost-good');
+                                else if (cost < 7) keyDiv.classList.add('cost-warn');
+                                else keyDiv.classList.add('cost-dang');
+                            }
+                        }
+                    }
+                    else if (this.state.mode === 'result' && this.state.lastResult) {
+                        const count = this.state.lastResult.keyCounts[hand][idx];
+                        const max = this.state.lastResult.maxKey || 1;
+
+                        if (count > 0) {
+                            // ▼ 色の設定 ------------------
+                            const BASE_COLOR = { r: 57, g: 211, b: 83 };
+                            // -------------------------------------------------------------------
+
+                            // 1. 基本の割合
+                            const rawRatio = count / max;
+
+                            // 2. 視認性補正 (ルート計算で低い値を持ち上げ、最大値をキャップ)
+                            let alpha = Math.pow(rawRatio, 0.5) * 1.2;
+                            if (alpha > 0.9) alpha = 0.9;
+                            if (alpha < 0.1) alpha = 0.1; // 最低限の視認性を確保
+
+                            // 3. スタイルの適用
+                            const { r, g, b } = BASE_COLOR;
+
+                            // 背景色: 指定したRGB + 計算した透明度
+                            keyDiv.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+                            // 枠線: 背景より少し不透明度を高くして輪郭をはっきりさせる
+                            keyDiv.style.borderColor = `rgba(${r}, ${g}, ${b}, ${Math.min(1, alpha + 0.4)})`;
+
+                            // 文字色: 視認性のため白固定 (または必要に応じて黒)
+                            keyDiv.style.color = 'white';
+
+                            // 打鍵数バッジ
+                            const cnt = document.createElement('div');
+                            cnt.className = 'key-count';
+                            cnt.textContent = count;
+                            keyDiv.appendChild(cnt);
+                        }
+                    }
+
+                    if (this.state.mode === 'layout') {
+                        keyDiv.draggable = true;
+                        keyDiv.ondragstart = (e) => {
+                            this.isDragging = true;
+                            this.dragSource = { hand, idx, char };
+                            keyDiv.classList.add('dragging');
+                            e.dataTransfer.effectAllowed = 'move';
+                        };
+                        keyDiv.ondragover = (e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+                            keyDiv.classList.add('drag-over');
+                        };
+                        keyDiv.ondragleave = () => keyDiv.classList.remove('drag-over');
+                        keyDiv.ondrop = (e) => {
+                            e.preventDefault();
+                            keyDiv.classList.remove('drag-over');
+                            if (this.dragSource) {
+                                const srcH = this.dragSource.hand, srcI = this.dragSource.idx;
+                                const tmp = this.state.layout[hand][idx];
+                                this.state.layout[hand][idx] = this.state.layout[srcH][srcI];
+                                this.state.layout[srcH][srcI] = tmp;
+
+                                // 配列が変わったのでCustomモードへ
+                                this.triggerCustomMode();
+
+                                this.renderGrid('L'); this.renderGrid('R');
+                            }
+                        };
+                        keyDiv.ondragend = () => {
+                            this.isDragging = false;
+                            document.querySelectorAll('.dragging').forEach(k => k.classList.remove('dragging'));
+                        };
+                        keyDiv.onclick = () => {
+                            const n = prompt("Key Char:", char);
+                            if (n !== null) {
+                                this.state.layout[hand][idx] = n;
+
+                                // 配列が変わったのでCustomモードへ
+                                this.triggerCustomMode();
+
+                                this.renderGrid(hand);
+                            }
+                        };
+                        keyDiv.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            this.state.toggleKey(hand, idx);
+                            // キーを無効化したのでCustom扱いに変更
+                            this.triggerCustomMode();
+                            this.renderGrid(hand);
+                        };
+                    }
+                    else if (this.state.mode === 'finger') {
+                        keyDiv.classList.add('finger-edit');
+                        keyDiv.onclick = () => {
+                            this.state.fingers[hand][idx] = this.activeTool;
+
+                            // 指設定が変わったのでCustomモードへ
+                            this.triggerCustomMode();
+
+                            this.renderGrid(hand);
+                        };
+                    }
+                    else if (this.state.mode === 'cost') {
+                        keyDiv.onclick = () => {
+                            if (this.state.selectedSource?.idx === idx && this.state.selectedSource?.hand === hand) {
+                                this.state.selectedSource = null;
+                            } else {
+                                this.state.selectedSource = { hand, idx };
+                            }
+                            this.renderGrid(hand);
+                        };
+                        keyDiv.onwheel = (e) => {
+                            e.preventDefault();
+                            if (!this.state.selectedSource || this.state.selectedSource.hand !== hand) return;
+                            const src = this.state.selectedSource.idx;
+                            if (src === idx) return;
+
+                            // 整数単位で増減 (-1 or +1)
+                            const delta = e.deltaY > 0 ? -1 : 1;
+                            // 現在値を四捨五入してから増減
+                            let v = Math.round(this.state.costs[hand][src][idx]) + delta;
+
+                            // 0~10 の範囲に制限
+                            if (v < 0) v = 0;
+                            if (v > 10) v = 10;
+
+                            this.state.costs[hand][src][idx] = v;
+                            this.renderGrid(hand);
+                        };
+                    }
+                    else if (this.state.mode === 'base') {
+                        keyDiv.onwheel = (e) => {
+                            e.preventDefault();
+                            // 遷移コストと同じく、奥へスクロール(UP)で +1、手前(DOWN)で -1 に変更
+                            const delta = e.deltaY > 0 ? -1 : 1;
+
+                            let v = Math.round(this.state.baseCosts[hand][idx]) + delta;
+
+                            // 0~10 の範囲に制限
+                            if (v < 0) v = 0;
+                            if (v > 10) v = 10;
+
+                            this.state.baseCosts[hand][idx] = v;
+                            this.renderGrid(hand);
+                        };
+                    }
+
+                    if (isSpace) thumbEl.appendChild(keyDiv);
+                    else el.appendChild(keyDiv);
+                });
+            }
+
+            runAnalysis() {
+                const text = document.getElementById('corpus-input').value;
+                const stats = this.analyzer.run(text);
+
+                let max = 0;
+                let maxChar = '-';
+                ['L','R'].forEach(h => stats.keyCounts[h].forEach((c, i) => {
+                    if (c > max) { max = c; maxChar = this.state.layout[h][i]; }
+                }));
+                stats.maxKey = max;
+                stats.maxKeyChar = maxChar;
+
+                this.state.lastResult = stats;
+                this.state.mode = 'result'; // setMode廃止対応
+                this.updateUI();
+
+                this.renderStats(stats);
+            }
+
+            renderStats(stats) {
+                this.dom.resPanel.style.display = 'block';
+                const f = (n) => Math.round(n).toLocaleString();
+
+                document.getElementById('res-total').textContent = stats.avgTotal.toFixed(2);
+                document.getElementById('res-total-load').textContent = f(stats.totalCost);
+                document.getElementById('res-trans-val').textContent = stats.avgTrans.toFixed(2);
+                document.getElementById('res-static-val').textContent = stats.avgStatic.toFixed(2);
+
+                document.getElementById('stat-keystrokes').textContent = f(stats.keystrokes);
+                const repPct = stats.repeatRate.toFixed(1);
+                document.getElementById('stat-repeat').textContent = `${f(stats.repeatCount)} (${repPct}%)`;
+                document.getElementById('stat-max-key').textContent = stats.maxKeyChar || "-";
+
+                const sfbRate = stats.keystrokes > 0 ? (stats.sfbCount / stats.keystrokes * 100).toFixed(2) : "0.00";
+                document.getElementById('stat-sfb').textContent = sfbRate + "%";
+
+                // --- 統計指標の計算 (Median, SD, 95%Tile) ---
+                const samples = stats.costSamples.sort((a, b) => a - b);
+                const len = samples.length;
+                let median = 0, sd = 0, tile95 = 0;
+
+                if (len > 0) {
+                    // Median
+                    const mid = Math.floor(len / 2);
+                    median = len % 2 !== 0 ? samples[mid] : (samples[mid - 1] + samples[mid]) / 2;
+
+                    // SD
+                    const rawMean = samples.reduce((sum, val) => sum + val, 0) / len;
+                    const variance = samples.reduce((sum, val) => sum + Math.pow(val - rawMean, 2), 0) / len;
+                    sd = Math.sqrt(variance);
+
+                    // 95% Tile
+                    const idx95 = Math.floor(len * 0.95);
+                    tile95 = samples[idx95];
+                }
+
+                document.getElementById('val-median').textContent = median.toFixed(1);
+                document.getElementById('val-sd').textContent = sd.toFixed(2);
+                document.getElementById('val-95').textContent = tile95.toFixed(1);
+
+                // --- ヒストグラムの描画 ---
+                const histEl = document.getElementById('cost-hist');
+                histEl.innerHTML = '';
+
+                // バケット作成 (コスト0〜20までを1刻みで集計。20以上は丸める)
+                const buckets = new Array(21).fill(0);
+                samples.forEach(v => {
+                    let idx = Math.floor(v);
+                    if (idx > 20) idx = 20;
+                    buckets[idx]++;
+                });
+
+                // 最大値を取得して正規化 (高さ計算用)
+                const maxCount = Math.max(...buckets) || 1;
+
+                buckets.forEach((count, i) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'h-bar';
+                    const hPct = (count / maxCount) * 100;
+                    bar.style.height = `${Math.max(hPct, 0)}%`; // 最低でも線は見せるなら数px確保だが、0なら0で
+                    bar.dataset.val = `Cost ${i}: ${count}打`;
+
+                    // 色分け: 低コスト(青) -> 高コスト(赤)
+                    if (i < 5) bar.style.backgroundColor = 'var(--c-best)';
+                    else if (i < 10) bar.style.backgroundColor = 'var(--c-good)';
+                    else if (i < 15) bar.style.backgroundColor = 'var(--c-warn)';
+                    else bar.style.backgroundColor = 'var(--c-dang)';
+
+                    // 見た目の調整: 頻度0でもスペースは確保
+                    bar.style.opacity = count > 0 ? 0.8 : 0.1;
+
+                    histEl.appendChild(bar);
+                });
+                // ---------------------------------------------------
+
+                const wList = document.getElementById('worst-list');
+                wList.innerHTML = '';
+                stats.worstTransitions.forEach(([k, v]) => {
+                    wList.innerHTML += `<div class="stat-item"><span>${k}</span><span style="color:var(--c-dang)">${Math.round(v)}</span></div>`;
+                });
+
+                const dict = I18N[this.state.lang];
+                const drawBar = (id, data, labelSrc) => {
+                    const el = document.getElementById(id); el.innerHTML = '';
+                    const total = data.reduce((a,b)=>a+b,0) || 1;
+                    data.forEach((val, i) => {
+                        const pct = (val/total*100).toFixed(1);
+                        const lbl = labelSrc ? labelSrc[i] : (i===0?'Num':i===1?'Top':i===2?'Home':i===3?'Bot':'Thb');
+                        const col = labelSrc ? FINGER_COLORS[i] : '#8b949e';
+                        el.innerHTML += `
+                            <div class="bar-row">
+                                <div class="bar-label">${lbl}</div>
+                                <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${col}"></div></div>
+                                <div class="bar-val">${Math.round(pct)}%</div>
+                            </div>`;
+                    });
+                };
+
+                drawBar('chart-finger-L', stats.fingerCounts.L, dict.fingers);
+                drawBar('chart-finger-R', stats.fingerCounts.R, dict.fingers);
+                drawBar('chart-row-L', stats.rowCounts.L, null);
+                drawBar('chart-row-R', stats.rowCounts.R, null);
+
+                // --- 連打詳細の描画 ---
+                const repArea = document.getElementById('repeat-detail-area');
+
+                if (stats.repeatCount > 0) {
+                    repArea.style.display = 'block';
+
+                    // コスト合計の表示
+                    document.getElementById('val-rep-cost').textContent = stats.avgRepeatCost.toFixed(2);
+
+                    // 指ごとの連打グラフ描画
+                    // 既存の drawBar は % 表示用なので、個数表示用に簡易版を作って回す
+                    const rChart = document.getElementById('chart-repeat-finger');
+                    rChart.innerHTML = '';
+
+                    // 最大値（グラフのスケール用）
+                    const maxRep = Math.max(...stats.fingerRepeats) || 1;
+
+                    stats.fingerRepeats.forEach((count, fIdx) => {
+                        if (count === 0) return; // 0回の指は表示しない（ノイズ削減）
+
+                        // ラベルと色
+                        const lbl = dict.fingers[fIdx]; // I18N辞書から指名取得
+                        const col = FINGER_COLORS[fIdx];
+                        const width = (count / maxRep) * 100;
+
+                        rChart.innerHTML += `
+                            <div class="bar-row" style="margin-bottom:4px;">
+                                <div class="bar-label" style="width:40px; font-size:0.7rem;">${lbl}</div>
+                                <div class="bar-track" style="background:rgba(255,255,255,0.05);">
+                                    <div class="bar-fill" style="width:${width}%; background:${col}; opacity:0.8;"></div>
+                                </div>
+                                <div class="bar-val" style="width:25px; font-size:0.7rem;">${count}</div>
+                            </div>`;
+                    });
+                } else {
+                    repArea.style.display = 'none';
+                }
+            }
+        }
+
+        // --- Stepper Control Helper ---
+        window.stepVal = function(id, step) {
+            const input = document.getElementById(id);
+            if (!input) return;
+            let val = parseFloat(input.value);
+            val = Math.round((val + step) * 10) / 10;
+            if (val < 0) val = 0;
+            input.value = val.toFixed(1);
+            // 変更イベントを発火させて既存ロジック(UIクラス)に通知
+            input.dispatchEvent(new Event('change'));
+
+            // Focus Effect
+            input.parentElement.style.borderColor = 'var(--accent)';
+            setTimeout(() => input.parentElement.style.borderColor = '', 200);
+        };
+
+        const app = new UI();
+
+    </script>
+</body>
+</html>
