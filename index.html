@@ -1497,7 +1497,8 @@
 
                     const last = history[activeH].idx;
                     if (last !== null) {
-                        if (last === k.idx) {
+                        // ▼▼▼ gap === 0 (間に逆の手が挟まっていない) 場合を条件として追加 ▼▼▼
+                        if (last === k.idx && history[activeH].gap === 0) {
                             stats.repeatCount++;
                             const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
                                           ? this.state.repeatCosts[f]
