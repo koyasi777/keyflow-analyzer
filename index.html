@@ -1512,7 +1512,8 @@
                             }
                         } else {
                             const lastF = this.state.fingers[activeH][last];
-                            if (lastF === f && f !== null) stats.sfbCount++;
+                            // ▼▼▼ 「同じ指」かつ「異なるキー」の場合のみ SFB とする ▼▼▼
+                            if (lastF === f && f !== null && last !== k.idx) stats.sfbCount++;
 
                             let rawCost = this.state.costs[activeH][last][k.idx];
                             const gap = history[activeH].gap;
