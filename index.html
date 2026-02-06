@@ -280,7 +280,34 @@
             width: 380px; background: var(--bg-panel); border-left: 1px solid var(--border);
             padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; flex-shrink: 0;
             max-width: 80vw;
+
+            /* サイドバー自身の幅を監視可能にする */
+            container-type: inline-size;
+            container-name: sb;
         }
+
+        /* 2カラム化のためのグリッドレイアウト定義 */
+        .result-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0; /* 縦積みのときはGap不要（各要素のmargin-bottomで制御済みのため） */
+        }
+
+        /* サイドバーの幅が 560px を超えたら自動で2カラムにする */
+        @container sb (min-width: 560px) {
+            .result-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* 1:1 分割 */
+                gap: 2.6rem;
+                align-items: start; /* 上揃え */
+            }
+
+            /* 2カラム時の微調整: 右側のマージンを少し詰める */
+            .result-grid > div {
+                min-width: 0; /* Grid内でのコンテンツはみ出し防止 */
+            }
+        }
+
         .panel h3 {
             font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;
             color: var(--text-dim); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; letter-spacing: 0.5px;
@@ -347,8 +374,8 @@
 
         .gap-name { font-weight: bold; font-size: 1rem; margin-bottom: 0.2rem; }
         .gap-sub { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem; height: 2.4em; }
-        .input-group { 
-            display: flex; align-items: center; gap: 12px; 
+        .input-group {
+            display: flex; align-items: center; gap: 12px;
         }
         .input-group span { font-size: 0.8rem; color: var(--text-dim); font-weight: bold; }
 
@@ -366,7 +393,7 @@
         .stepper-box:hover, .stepper-box:focus-within { border-color: var(--text-dim); }
         .stepper-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 
-        .gap-input { 
+        .gap-input {
             width: 50px !important; background: transparent !important; border: none !important;
             color: var(--text-main) !important; text-align: center !important;
             font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.9rem; padding: 0; height: 100%;
@@ -834,82 +861,91 @@
 
                 <div class="panel" id="results-panel" style="display:none;">
                     <h3 data-i18n="panel_results">Metrics</h3>
-                    <div class="score-box">
-                        <span class="label"><span data-i18n="res_total">Efficiency Score</span> (Cost/Key)</span>
-                        <span class="value" id="res-total">0.00</span>
-                    </div>
 
-                    <div class="stat-item">
-                        <span data-i18n="res_work">Total Load</span>
-                        <span id="res-total-load">0</span>
-                    </div>
-                    <div class="stat-item"><span data-i18n="res_trans">Dynamic Flow</span><span id="res-trans-val">0.00</span></div>
-                    <div class="stat-item"><span data-i18n="res_static">Static Load</span><span id="res-static-val">0.00</span></div>
+                    <div class="result-grid">
 
-                    <div class="hist-area">
-                        <div class="hist-header">
-                            <span data-i18n="lbl_dist">Cost Distribution</span>
-                            <span style="font-size:0.6rem; opacity:0.7;">Low ← Cost → High</span>
-                        </div>
-                        <div class="hist-bars" id="cost-hist"></div>
-                    </div>
+                        <div class="res-col-main" style="margin-bottom:20px;">
+                            <div class="score-box">
+                                <span class="label"><span data-i18n="res_total">Efficiency Score</span> (Cost/Key)</span>
+                                <span class="value" id="res-total">0.00</span>
+                            </div>
 
-                    <h4 style="font-size:0.7rem; color:var(--text-dim); margin-bottom:0.5rem; text-transform:uppercase;" data-i18n="lbl_stability">Stability Metrics</h4>
-                    <div class="stability-grid">
-                        <div class="s-item tooltip" data-i18n-tooltip="desc_median">
-                            <span class="s-label" data-i18n="lbl_median">Median</span>
-                            <span class="s-val" id="val-median">0.0</span>
-                        </div>
-                        <div class="s-item tooltip" data-i18n-tooltip="desc_sd">
-                            <span class="s-label" data-i18n="lbl_sd">SD (Mura)</span>
-                            <span class="s-val" id="val-sd">0.0</span>
-                        </div>
-                        <div class="s-item tooltip" data-i18n-tooltip="desc_95">
-                            <span class="s-label" data-i18n="lbl_95">95% Tile</span>
-                            <span class="s-val" id="val-95">0.0</span>
-                        </div>
-                    </div>
+                            <div class="stat-item">
+                                <span data-i18n="res_work">Total Load</span>
+                                <span id="res-total-load">0</span>
+                            </div>
+                            <div class="stat-item"><span data-i18n="res_trans">Dynamic Flow</span><span id="res-trans-val">0.00</span></div>
+                            <div class="stat-item"><span data-i18n="res_static">Static Load</span><span id="res-static-val">0.00</span></div>
 
-                    <div class="stat-item"><span data-i18n="stat_keystrokes">Keystrokes</span><span id="stat-keystrokes" class="highlight">0</span></div>
-                    <div class="stat-item"><span data-i18n="stat_repeat">Repeats</span><span id="stat-repeat">0</span></div>
+                            <div class="hist-area">
+                                <div class="hist-header">
+                                    <span data-i18n="lbl_dist">Cost Distribution</span>
+                                    <span style="font-size:0.6rem; opacity:0.7;">Low ← Cost → High</span>
+                                </div>
+                                <div class="hist-bars" id="cost-hist"></div>
+                            </div>
 
-                    <div id="repeat-detail-area" style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; margin-bottom:10px; display:none;">
-                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:6px; color:var(--text-dim);">
-                            <span data-i18n="lbl_rep_cost">Repeat Cost</span>
-                            <span id="val-rep-cost" style="color:var(--c-warn); font-weight:bold;">0.0</span>
-                        </div>
-                        <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:4px;" data-i18n="lbl_rep_finger">By Finger</div>
-                        <div id="chart-repeat-finger"></div>
-                    </div>
+                            <h4 style="font-size:0.7rem; color:var(--text-dim); margin-bottom:0.5rem; text-transform:uppercase;" data-i18n="lbl_stability">Stability Metrics</h4>
+                            <div class="stability-grid">
+                                <div class="s-item tooltip" data-i18n-tooltip="desc_median">
+                                    <span class="s-label" data-i18n="lbl_median">Median</span>
+                                    <span class="s-val" id="val-median">0.0</span>
+                                </div>
+                                <div class="s-item tooltip" data-i18n-tooltip="desc_sd">
+                                    <span class="s-label" data-i18n="lbl_sd">SD (Mura)</span>
+                                    <span class="s-val" id="val-sd">0.0</span>
+                                </div>
+                                <div class="s-item tooltip" data-i18n-tooltip="desc_95">
+                                    <span class="s-label" data-i18n="lbl_95">95% Tile</span>
+                                    <span class="s-val" id="val-95">0.0</span>
+                                </div>
+                            </div>
 
-                    <div class="stat-item"><span data-i18n="stat_sfb">SFB Rate</span><span id="stat-sfb" style="color:var(--f-pinky)">0%</span></div>
-                    <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
+                            <div class="stat-item"><span data-i18n="stat_keystrokes">Keystrokes</span><span id="stat-keystrokes" class="highlight">0</span></div>
+                            <div class="stat-item"><span data-i18n="stat_repeat">Repeats</span><span id="stat-repeat">0</span></div>
 
-                    <h3 style="margin-top:2rem;" data-i18n="res_worst">Top Inefficiencies</h3>
-                    <div id="worst-list"></div>
+                            <div id="repeat-detail-area" style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; margin-bottom:10px; display:none;">
+                                <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:6px; color:var(--text-dim);">
+                                    <span data-i18n="lbl_rep_cost">Repeat Cost</span>
+                                    <span id="val-rep-cost" style="color:var(--c-warn); font-weight:bold;">0.0</span>
+                                </div>
+                                <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:4px;" data-i18n="lbl_rep_finger">By Finger</div>
+                                <div id="chart-repeat-finger"></div>
+                            </div>
 
-                    <h3 style="margin-top:2rem;" data-i18n="graph_finger">Finger Balance</h3>
-                    <div class="stats-split">
-                        <div class="stats-col">
-                            <h4>L</h4>
-                            <div id="chart-finger-L"></div>
+                            <div class="stat-item"><span data-i18n="stat_sfb">SFB Rate</span><span id="stat-sfb" style="color:var(--f-pinky)">0%</span></div>
+                            <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
                         </div>
-                        <div class="stats-col">
-                            <h4>R</h4>
-                            <div id="chart-finger-R"></div>
-                        </div>
-                    </div>
 
-                    <h3 style="margin-top:1rem;" data-i18n="graph_row">Row Usage</h3>
-                    <div class="stats-split">
-                        <div class="stats-col">
-                            <h4>L</h4>
-                            <div id="chart-row-L"></div>
+                        <div class="res-col-sub">
+                            <h3 style="margin-top:5px;" data-i18n="graph_finger">Finger Balance</h3>
+                            <div class="stats-split">
+                                <div class="stats-col">
+                                    <h4>L</h4>
+                                    <div id="chart-finger-L"></div>
+                                </div>
+                                <div class="stats-col">
+                                    <h4>R</h4>
+                                    <div id="chart-finger-R"></div>
+                                </div>
+                            </div>
+
+                            <h3 style="margin-top:1rem;" data-i18n="graph_row">Row Usage</h3>
+                            <div class="stats-split">
+                                <div class="stats-col">
+                                    <h4>L</h4>
+                                    <div id="chart-row-L"></div>
+                                </div>
+                                <div class="stats-col">
+                                    <h4>R</h4>
+                                    <div id="chart-row-R"></div>
+                                </div>
+                            </div>
+
+                            <h3 style="margin-top:2rem;" data-i18n="res_worst">Top Inefficiencies</h3>
+                            <div id="worst-list"></div>
                         </div>
-                        <div class="stats-col">
-                            <h4>R</h4>
-                            <div id="chart-row-R"></div>
-                        </div>
+
                     </div>
                 </div>
             </section>
