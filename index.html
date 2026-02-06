@@ -3228,9 +3228,35 @@
 
                 // Export Button
                 document.getElementById('btn-export').onclick = () => {
+                    // 1. Determine current domain and export raw data string
                     const isLogic = this.state.domain === 'logic';
                     const dataStr = isLogic ? this.state.exportLogical() : this.state.exportPhysical();
-                    const prettyJson = JSON.stringify(JSON.parse(dataStr), null, 2);
+
+                    // 2. Initial formatting: Apply standard JSON pretty-printing (indentation: 2 spaces)
+                    let prettyJson = JSON.stringify(JSON.parse(dataStr), null, 2);
+
+                    // 3. Compact Optimization: Collapse primitive arrays into a single line.
+                    //    This improves readability for large numeric arrays (e.g., physical costs)
+                    //    while maintaining the structure of nested objects.
+                    //
+                    //    Regex Explanation:
+                    //    \[           : Start of an array
+                    //    \s* : Optional whitespace/newlines
+                    //    (            : Start capture group for array content
+                    //      (?:        : Non-capturing group for content alternatives
+                    //        (?:"(?:[^"\\]|\\.)*")  : Matches double-quoted strings (handles escaped quotes)
+                    //        |                      : OR
+                    //        [^\[\]\{\}"]           : Matches non-structural characters (numbers, null, booleans, commas)
+                    //      )+         : One or more times
+                    //    )            : End capture group
+                    //    \s* : Optional whitespace/newlines
+                    //    \]           : End of an array
+                    prettyJson = prettyJson.replace(/\[\s*((?:(?:"(?:[^"\\]|\\.)*")|[^\[\]\{\}"])+)\s*\]/g, (match, content) => {
+                        // Remove only newlines and indentation to preserve intentional spaces within strings.
+                        const collapsed = content.replace(/[\r\n]+\s*/g, ' ').trim();
+                        return `[${collapsed}]`;
+                    });
+
                     this.openModal('export', prettyJson);
                 };
 
