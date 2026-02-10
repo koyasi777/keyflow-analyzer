@@ -1750,7 +1750,7 @@
 
                 stats.worstTransitions = Object.entries(stats.transitions)
                     .sort(([,a], [,b]) => b - a)
-                    .slice(0, 8);
+                    .slice(0, 12);
 
                 const k = stats.keystrokes > 0 ? stats.keystrokes : 1;
 
@@ -2560,7 +2560,7 @@
                 wGrid.innerHTML = '';
 
                 // 第2引数 i (index) を使って順位を表示
-                stats.worstTransitions.slice(0, 10).forEach(([k, v], i) => {
+                stats.worstTransitions.slice(0, 12).forEach(([k, v], i) => {
                     wGrid.innerHTML += `
                         <div class="bad-pair">
                             <div class="bad-rank">#${i + 1}</div>
