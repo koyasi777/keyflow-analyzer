@@ -2482,8 +2482,15 @@
                     const rawMean = samples.reduce((a,b)=>a+b,0) / len;
                     const variance = samples.reduce((a,b)=>a+Math.pow(b-rawMean,2),0) / len;
                     sd = Math.sqrt(variance);
-                    const idx95 = Math.floor(len * 0.95);
-                    tile95 = samples[idx95];
+
+                    // 95% tile (Nearest Rank)
+                    const p = 0.95;
+                    const idx95 = Math.ceil(p * len) - 1;
+
+                    // 念のため範囲クランプ（p変更や境界入力でも壊れない）
+                    const safeIdx = Math.min(Math.max(idx95, 0), len - 1);
+
+                    tile95 = samples[safeIdx];
                 }
 
                 document.getElementById('kpi-sd').textContent = sd.toFixed(2);
