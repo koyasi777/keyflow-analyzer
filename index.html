@@ -1556,9 +1556,21 @@
             constructor(state) { this.state = state; }
 
             normalizeChar(char) {
-                const c = char.toLowerCase();
+                let c = char.toLowerCase();
+
+                // ▼▼▼ 記号の揺らぎを吸収（正規化） ▼▼▼
+                // スマートクォート（’や‘）を、ストレートクォート（'）に変換
+                if (c === '’' || c === '‘') c = "'";
+
+                // ダブルクォートも同様に（”や“ → "）
+                if (c === '”' || c === '“') c = '"';
+
+                // 全角スペース → space
                 if (c === ' ' || c === '　') return 'space';
+
+                // 改行 → ent
                 if (c === '\n' || c === '\r') return 'ent';
+
                 return c;
             }
 
