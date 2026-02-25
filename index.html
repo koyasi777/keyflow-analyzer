@@ -1555,25 +1555,6 @@
         class Analyzer {
             constructor(state) { this.state = state; }
 
-            normalizeChar(char) {
-                let c = char.toLowerCase();
-
-                // ▼▼▼ 記号の揺らぎを吸収（正規化） ▼▼▼
-                // スマートクォート（’や‘）を、ストレートクォート（'）に変換
-                if (c === '’' || c === '‘') c = "'";
-
-                // ダブルクォートも同様に（”や“ → "）
-                if (c === '”' || c === '“') c = '"';
-
-                // 全角スペース → space
-                if (c === ' ' || c === '　') return 'space';
-
-                // 改行 → ent
-                if (c === '\n' || c === '\r') return 'ent';
-
-                return c;
-            }
-
             getLayoutMap() {
                 const map = {};
                 ['L','R'].forEach(hand => {
@@ -1647,11 +1628,48 @@
                     return sCost + tCost;
                 };
 
-                for (let char of text) {
-                    const normalized = this.normalizeChar(char);
-                    const candidates = keyMap[normalized]; // 配列が返ってくる
+                // ▼▼▼ 辞書の準備と事前正規化 ▼▼▼
+                const validTokens = Object.keys(keyMap)
+                    .filter(k => k !== 'space' && k !== 'ent')
+                    .sort((a, b) => b.length - a.length); // 降順ソート（最長一致用）
 
-                    if (!candidates || candidates.length === 0) continue;
+                const normalizedText = text.toLowerCase()
+                    .replace(/[’‘]/g, "'")
+                    .replace(/[”“]/g, '"')
+                    .replace(/　/g, " ");
+
+                let i = 0;
+                while (i < normalizedText.length) {
+                    let matchedToken = null;
+                    let stepLength = 1;
+                    const char = normalizedText[i];
+
+                    // 1. 制御文字・特殊キーの評価
+                    if (char === ' ') {
+                        matchedToken = 'space';
+                    } else if (char === '\n' || char === '\r') {
+                        matchedToken = 'ent';
+                        // CRLF (\r\n) 環境の改行二重カウント防止処理
+                        if (char === '\r' && normalizedText[i+1] === '\n') stepLength = 2;
+                    }
+                    // 2. マクロを含む一般キーの最長一致評価
+                    else {
+                        for (const token of validTokens) {
+                            if (normalizedText.startsWith(token, i)) {
+                                matchedToken = token;
+                                stepLength = token.length; // マッチした文字数分ジャンプ幅をセット
+                                break;
+                            }
+                        }
+                    }
+
+                    const candidates = keyMap[matchedToken];
+
+                    // マッチしない（レイアウトに存在しない）文字はスキップ
+                    if (!candidates || candidates.length === 0) {
+                        i += stepLength;
+                        continue;
+                    }
 
                     let k = null;
 
@@ -1758,6 +1776,9 @@
 
                     history[activeH].idx = k.idx;
                     history[activeH].gap = 0;
+
+                    // ▼▼▼ 次の評価対象へポインタを進める ▼▼▼
+                    i += stepLength;
                 }
 
                 stats.worstTransitions = Object.entries(stats.transitions)
