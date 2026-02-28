@@ -963,6 +963,23 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_layer_title">Layer Switch Penalty</div>
+                            <p class="logic-desc" data-i18n="set_layer_desc">Penalty cost applied when accessing secondary characters on the same key (e.g. Shift or Fn layer).</p>
+                        </div>
+                        <div style="display:flex; justify-content:center; margin-top:1rem;">
+                            <div class="input-group">
+                                <span>Cost +</span>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('layer-cost-in', -0.5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="layer-cost-in" value="2.0" step="0.5" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('layer-cost-in', 0.5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -1298,6 +1315,7 @@
                 "3": 1,
                 "4": 1.5
             },
+            "layerCost": 2.0,
             "weights": {
                 "trans": 65
             }
@@ -1368,6 +1386,11 @@
                 set_repeat_title: "Repeat Penalty (Same Key)",
                 set_repeat_desc: "Cost penalty for pressing the same key consecutively. Adjust based on finger agility.",
                 lbl_pinky: "Pinky", lbl_ring: "Ring", lbl_mid: "Mid", lbl_idx: "Index", lbl_thb: "Thumb",
+
+                // Layer Penalty & Prompt
+                set_layer_title: "Layer Switch Penalty",
+                set_layer_desc: "Penalty cost applied when accessing secondary characters on the same key (e.g. Shift or Fn layer).",
+                msg_key_prompt: "Key Char (Separate layers with a space. e.g. ', <'):",
 
                 lbl_rep_cost: "Avg. Repeat Cost",
                 lbl_rep_finger: "Repeats by Finger",
@@ -1456,6 +1479,11 @@
                 set_repeat_desc: "同じキーを連続して打つ際の追加コストです。指の動きにくさに応じて調整してください。",
                 lbl_pinky: "小指", lbl_ring: "薬指", lbl_mid: "中指", lbl_idx: "人差", lbl_thb: "親指",
 
+                // Layer Penalty & Prompt
+                set_layer_title: "レイヤー切替ペナルティ",
+                set_layer_desc: "ShiftやFnなど、同じキーの裏レイヤーにアクセスする際の追加コストです。",
+                msg_key_prompt: "キー文字 (裏レイヤーは半角スペースで区切る。例: , <):",
+
                 lbl_rep_cost: "平均連打コスト",
                 lbl_rep_finger: "指ごとの連打回数",
 
@@ -1494,6 +1522,7 @@
                 this.baseCosts = defaults.baseCosts;
                 this.gapConfig = defaults.gapConfig;
                 this.repeatCosts = defaults.repeatCosts || { "0": 2.5, "1": 2.0, "2": 1.5, "3": 1.0, "4": 1.2 };
+                this.layerCost = defaults.layerCost !== undefined ? defaults.layerCost : 2.0;
                 this.weights = defaults.weights || { trans: 65 };
 
                 this.layoutName = "Custom";
@@ -1547,6 +1576,7 @@
                     baseCosts: this.baseCosts,
                     gapConfig: this.gapConfig,
                     repeatCosts: this.repeatCosts,
+                    layerCost: this.layerCost,
                     weights: this.weights
                 });
             }
@@ -1560,13 +1590,21 @@
                 ['L','R'].forEach(hand => {
                     this.state.layout[hand].forEach((keyVal, idx) => {
                         if (keyVal === null) return;
-                        const v = keyVal.toLowerCase();
-                        let target = v;
-                        if (v === 'space' || v === 'spc') target = 'space';
-                        else if (v === 'ent' || v === 'enter' || v === 'return') target = 'ent';
 
-                        if (!map[target]) map[target] = [];
-                        map[target].push({hand, idx});
+                        // 前後の空白をトリムし、空白のみでトークンを分割
+                        const tokens = keyVal.trim().split(/\s+/);
+
+                        tokens.forEach((rawToken, tokenIndex) => {
+                            if (!rawToken) return;
+                            const v = rawToken.toLowerCase();
+                            let target = v;
+                            if (v === 'space' || v === 'spc') target = 'space';
+                            else if (v === 'ent' || v === 'enter' || v === 'return') target = 'ent';
+
+                            if (!map[target]) map[target] = [];
+                            // tokenIndex > 0 なら裏レイヤー扱いとする
+                            map[target].push({ hand, idx, isLayer: tokenIndex > 0 });
+                        });
                     });
                 });
                 return map;
@@ -1603,6 +1641,7 @@
                     const gap = history[activeH].gap; // gapは「他方の手を何回使ったか」
 
                     let sCost = this.state.baseCosts[activeH][cand.idx]; // 位置コスト
+                    if (cand.isLayer) sCost += this.state.layerCost; // 裏レイヤーペナルティ加算
                     let tCost = 0; // 遷移コスト
 
                     if (last !== null) {
@@ -1716,7 +1755,7 @@
                     }
 
                     // 1打鍵のコスト計算
-                    const sCost = this.state.baseCosts[activeH][k.idx];
+                    const sCost = this.state.baseCosts[activeH][k.idx] + (k.isLayer ? this.state.layerCost : 0); // ペナルティ加算
                     let tCost = 0; // 今回の遷移コスト
 
                     const last = history[activeH].idx;
@@ -1882,6 +1921,13 @@
                     }
                 });
 
+                // レイヤー切り替えコスト設定のイベントと初期値反映
+                const elLayer = document.getElementById('layer-cost-in');
+                if (elLayer) {
+                    elLayer.value = this.state.layerCost; // 初期値セット
+                    elLayer.onchange = (e) => this.state.layerCost = parseFloat(e.target.value);
+                }
+
                 // ウェイト設定スライダーのイベント
                 const wSlider = document.getElementById('weight-slider');
                 const dStatic = document.getElementById('disp-static');
@@ -1987,6 +2033,7 @@
                             this.state.baseCosts = d.baseCosts;
                             if(d.gapConfig) this.state.gapConfig = d.gapConfig;
                             if(d.repeatCosts) this.state.repeatCosts = d.repeatCosts;
+                            if(d.layerCost !== undefined) this.state.layerCost = d.layerCost;
                             if(d.weights) this.state.weights = d.weights;
 
                             // Update Sliders UI
@@ -2001,6 +2048,9 @@
                                 const el = document.getElementById(`rep-${i}`);
                                 if(el) el.value = this.state.repeatCosts[i];
                             });
+                            // Layer Cost Inputの更新
+                            const elLayerIn = document.getElementById('layer-cost-in');
+                            if(elLayerIn) elLayerIn.value = this.state.layerCost;
 
                             alert(dict.alert_load_phys);
                             this.setDomain('physical');
@@ -2285,11 +2335,28 @@
                         return;
                     }
 
+                    // 前後の空白をトリムし、空白のみで分割
+                    const parts = char.trim().split(/\s+/);
+
                     const cSpan = document.createElement('div');
                     cSpan.className = 'key-char';
-                    cSpan.textContent = char;
-                    if (char.length > 2) cSpan.classList.add('small');
+                    cSpan.textContent = parts[0];
+                    if (parts[0].length > 2) cSpan.classList.add('small');
                     keyDiv.appendChild(cSpan);
+
+                    // 裏レイヤー表示
+                    if (parts.length > 1) {
+                        const layerSpan = document.createElement('div');
+                        layerSpan.style.position = 'absolute';
+                        layerSpan.style.top = '2px';
+                        layerSpan.style.right = '4px';
+                        layerSpan.style.fontSize = '0.65rem';
+                        layerSpan.style.color = 'var(--accent)';
+                        layerSpan.style.fontWeight = '800';
+                        layerSpan.style.pointerEvents = 'none';
+                        layerSpan.textContent = parts.slice(1).join(' ');
+                        keyDiv.appendChild(layerSpan);
+                    }
 
                     const sSpan = document.createElement('div');
                     sSpan.className = 'key-sub';
@@ -2398,9 +2465,10 @@
                             document.querySelectorAll('.dragging').forEach(k => k.classList.remove('dragging'));
                         };
                         keyDiv.onclick = () => {
-                            const n = prompt("Key Char:", char);
-                            if (n !== null) {
-                                this.state.layout[hand][idx] = n;
+                            const dict = I18N[this.state.lang];
+                            const n = prompt(dict.msg_key_prompt, char);
+                            if (n !== null && n.trim() !== '') {
+                                this.state.layout[hand][idx] = n.trim();
 
                                 // 配列が変わったのでCustomモードへ
                                 this.triggerCustomMode();
