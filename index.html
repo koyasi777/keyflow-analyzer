@@ -240,6 +240,7 @@
 
         .key.active-source { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); z-index: 10; }
         .key-char.small { font-size: 0.8rem; }
+        .key-char.ctrl-key { font-size: 0.65rem; color: var(--text-dim); font-weight: 800; letter-spacing: -0.5px; text-transform: capitalize; }
 
         /* Cost Colors */
         .key.cost-best { border-color: var(--c-best); color: var(--c-best); background: rgba(88, 166, 255, 0.08); }
@@ -1116,6 +1117,9 @@
         const TOTAL_KEYS_L = ROWS * COLS_L;
         const TOTAL_KEYS_R = (ROWS * COLS_R) + 1; // +1 for Space Key
 
+        // コーパスとの衝突を避けるための制御キー予約語リスト
+        const CONTROL_KEYS = new Set(['shift', 'ctrl', 'alt', 'meta', 'win', 'cmd', 'tab', 'esc', 'caps', 'delete', 'del', 'backspace', 'bs', 'fn']);
+
         const FINGER_COLORS = {
             0: 'var(--f-pinky)', 1: 'var(--f-ring)', 2: 'var(--f-middle)',
             3: 'var(--f-index)', 4: 'var(--f-thumb)'
@@ -1669,7 +1673,8 @@
 
                 // ▼▼▼ 辞書の準備と事前正規化 ▼▼▼
                 const validTokens = Object.keys(keyMap)
-                    .filter(k => k !== 'space' && k !== 'ent')
+                    // space, ent に加え、制御キーの予約語を除外
+                    .filter(k => k !== 'space' && k !== 'ent' && !CONTROL_KEYS.has(k))
                     .sort((a, b) => b.length - a.length); // 降順ソート（最長一致用）
 
                 const normalizedText = text.toLowerCase()
@@ -2340,22 +2345,50 @@
 
                     const cSpan = document.createElement('div');
                     cSpan.className = 'key-char';
-                    cSpan.textContent = parts[0];
-                    if (parts[0].length > 2) cSpan.classList.add('small');
+
+                    const mainChar = parts[0];
+                    cSpan.textContent = mainChar;
+
+                    // メイン文字が制御キー予約語に含まれるか判定
+                    if (CONTROL_KEYS.has(mainChar.toLowerCase())) {
+                        cSpan.classList.add('ctrl-key'); // 制御キー専用の縮小・色変更スタイル
+                    } else if (mainChar.length > 2) {
+                        cSpan.classList.add('small');    // 通常の長い文字列（マクロ等）
+                    }
+
                     keyDiv.appendChild(cSpan);
 
                     // 裏レイヤー表示
                     if (parts.length > 1) {
-                        const layerSpan = document.createElement('div');
-                        layerSpan.style.position = 'absolute';
-                        layerSpan.style.top = '2px';
-                        layerSpan.style.right = '4px';
-                        layerSpan.style.fontSize = '0.65rem';
-                        layerSpan.style.color = 'var(--accent)';
-                        layerSpan.style.fontWeight = '800';
-                        layerSpan.style.pointerEvents = 'none';
-                        layerSpan.textContent = parts.slice(1).join(' ');
-                        keyDiv.appendChild(layerSpan);
+                        const layerContainer = document.createElement('div');
+                        layerContainer.style.position = 'absolute';
+                        layerContainer.style.top = '2px';
+                        layerContainer.style.right = '4px';
+                        layerContainer.style.display = 'flex';
+                        layerContainer.style.gap = '2px';
+                        layerContainer.style.pointerEvents = 'none';
+                        // 長すぎる文字列のはみ出しを防止
+                        layerContainer.style.maxWidth = '38px';
+                        layerContainer.style.overflow = 'hidden';
+
+                        parts.slice(1).forEach(subChar => {
+                            const layerSpan = document.createElement('span');
+                            layerSpan.textContent = subChar;
+                            layerSpan.style.fontWeight = '800';
+
+                            // 裏レイヤーの文字が制御キーかどうかを判定
+                            if (CONTROL_KEYS.has(subChar.toLowerCase())) {
+                                layerSpan.style.fontSize = '0.55rem'; // さらに小さく
+                                layerSpan.style.color = 'var(--text-dim)'; // 目立たせないグレー
+                                layerSpan.style.textTransform = 'capitalize';
+                            } else {
+                                layerSpan.style.fontSize = '0.65rem';
+                                layerSpan.style.color = 'var(--accent)'; // 通常の裏レイヤーはアクセントカラー
+                            }
+                            layerContainer.appendChild(layerSpan);
+                        });
+
+                        keyDiv.appendChild(layerContainer);
                     }
 
                     const sSpan = document.createElement('div');
