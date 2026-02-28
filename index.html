@@ -2100,12 +2100,20 @@
                 // Modal: Copy Action
                 this.btnModalCopy.onclick = () => {
                     const dict = I18N[this.state.lang];
-                    this.modalText.select();
-                    document.execCommand('copy');
 
-                    const originalText = this.btnModalCopy.textContent;
-                    this.btnModalCopy.textContent = dict.msg_copied;
-                    setTimeout(() => this.btnModalCopy.textContent = originalText, 1500);
+                    // モダンな Clipboard API を使用
+                    navigator.clipboard.writeText(this.modalText.value)
+                        .then(() => {
+                            // コピー成功時の処理
+                            const originalText = this.btnModalCopy.textContent;
+                            this.btnModalCopy.textContent = dict.msg_copied;
+                            setTimeout(() => this.btnModalCopy.textContent = originalText, 1500);
+                        })
+                        .catch(err => {
+                            // 万が一コピーに失敗した場合のエラーハンドリング
+                            console.error('クリップボードへのコピーに失敗しました:', err);
+                            alert('コピーに失敗しました。お手数ですが手動でコピーしてください。');
+                        });
                 };
 
                 // Modal: Import Action
@@ -2838,13 +2846,26 @@
                 const wGrid = document.getElementById('worst-grid');
                 wGrid.innerHTML = '';
 
+                // XSS対策用のHTMLエスケープ関数
+                const escapeHTML = (str) => {
+                    return String(str).replace(/[&'`"<>]/g, function(match) {
+                        return {
+                            '&': '&amp;',
+                            "'": '&#x27;',
+                            '`': '&#x60;',
+                            '"': '&quot;',
+                            '<': '&lt;',
+                            '>': '&gt;'
+                        }[match];
+                    });
+                };
+
                 // 第2引数 i (index) を使って順位を表示
                 stats.worstTransitions.slice(0, 12).forEach(([k, v], i) => {
                     wGrid.innerHTML += `
                         <div class="bad-pair">
                             <div class="bad-rank">#${i + 1}</div>
-                            <div class="bad-pair-key">${k}</div>
-                            <div class="bad-pair-val">${Math.round(v)}</div>
+                            <div class="bad-pair-key">${escapeHTML(k)}</div> <div class="bad-pair-val">${Math.round(v)}</div>
                         </div>`;
                 });
 
