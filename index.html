@@ -268,14 +268,19 @@
         .p-btn:hover { transform: scale(1.1); }
         .p-btn.active { border-color: white; transform: scale(1.15); box-shadow: 0 0 15px rgba(0,0,0,0.3); }
 
-        .layout-meta {
-            display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 1rem;
+        .logical-meta-area {
+            display: none; flex-direction: column; align-items: center; gap: 12px;
+            margin-bottom: 1rem; background: var(--bg-panel); padding: 1rem 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border); width: 100%; max-width: 650px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0;
         }
-        .layout-meta input, .layout-meta select {
+        .meta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%; }
+        .meta-input {
             background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
             padding: 8px 12px; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
+            outline: none; transition: all 0.2s;
         }
-        .layout-meta input:focus, .layout-meta select:focus { border-color: var(--accent); }
+        .meta-input:focus { border-color: var(--accent); }
 
         .sidebar {
             width: 380px; background: var(--bg-panel); border-left: 1px solid var(--border);
@@ -467,6 +472,19 @@
 
         .tooltip:hover::after, .tooltip:hover::before { opacity: 1; }
 
+        /* --- 下方向展開用ツールチップ (サイドバー右端用) --- */
+        .tooltip.tooltip-down::after {
+            bottom: auto; top: 100%; /* 下に展開 */
+            margin-top: 8px; margin-bottom: 0;
+            right: -5px; left: auto; transform: none; /* 右端を基準に左へ広げる */
+        }
+        .tooltip.tooltip-down::before {
+            bottom: auto; top: 100%; /* 下に展開 */
+            margin-top: -4px; margin-bottom: 0;
+            right: 8px; left: auto; transform: none; /* 矢印の位置を右寄りに固定 */
+            border-top-color: transparent; border-bottom-color: var(--accent); /* 矢印の向きを反転 */
+        }
+
         /* --- 位置の個別最適化 --- */
 
         /* 1つ目 (Median): 左揃え */
@@ -609,38 +627,18 @@
             /* インポート/エクスポートボタン：中央揃え */
             .context-actions { justify-content: center; }
 
-            /* --- 4. プリセット入力欄 (Layout Meta) --- */
-            /* 入力グループを縦積みに強制変更 */
-            .layout-meta .input-group {
-                flex-direction: column !important;
-                height: auto !important;
-                align-items: stretch !important;
-                gap: 8px !important;
-                padding: 12px !important;
+            /* --- 4. プリセット入力欄 (Logical Meta) --- */
+            .meta-row {
+                flex-direction: column; align-items: stretch; gap: 8px;
             }
-
-            /* 不要な仕切り線を消す */
-            .layout-meta .input-group > div[style*="width:1px"] {
+            .meta-row > div[style*="width:1px"] {
                 display: none !important;
             }
-
-            /* ラベル調整 */
-            .layout-meta label {
-                text-align: left;
-                font-size: 0.75rem;
-                color: var(--accent);
-                margin-bottom: -4px;
+            .meta-row label {
+                text-align: left; font-size: 0.75rem; color: var(--accent); margin-bottom: -4px;
             }
-
-            /* 入力フォームを幅いっぱいに */
-            .layout-meta select,
-            .layout-meta input {
-                width: 100% !important;
-                margin: 0 !important;
-                background: var(--bg-input) !important;
-                border: 1px solid var(--border) !important;
-                padding: 8px !important;
-                text-align: center;
+            .meta-input {
+                width: 100% !important; max-width: none !important; margin: 0 !important; text-align: center;
             }
 
             /* --- 5. 設定画面 & 解析結果 (Panels) --- */
@@ -831,8 +829,10 @@
                     <div id="thumb-area"></div>
                 </div>
 
+                <div id="logical-meta-area" class="logical-meta-area"></div>
+
                 <div class="control-area" id="control-area">
-                    </div>
+                </div>
 
                 <div class="settings-view" id="settings-view">
                     <div class="logic-card">
@@ -989,6 +989,41 @@
             <section class="sidebar" id="sidebar">
                 <div class="panel">
                     <h3 data-i18n="panel_corpus">Corpus Text</h3>
+
+                    <div style="margin-bottom:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; padding:10px;">
+    
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                            <span style="font-size:0.75rem; font-weight:bold; color:var(--text-main); text-transform:uppercase; letter-spacing:0.5px;" data-i18n="lbl_romaji_macro">Auto-Replace Corpus</span>
+                            
+                            <span class="tooltip tooltip-down" style="color:var(--text-dim); cursor:help;" data-i18n-tooltip="desc_romaji_macro">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                            </span>
+                        </div>
+
+                        <div style="display:flex; gap:8px;">
+
+                            <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+                                <span style="font-size:0.6rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" data-i18n="lbl_sokuon">Double Consonants (っ)</span>
+
+                                <select id="filter-sokuon" class="kb-select" style="padding:4px; font-size:0.65rem; width:100%; text-overflow:ellipsis;">
+                                    <option value="none" data-i18n="opt_raw">Do not replace</option>
+                                    <option value="ltu" data-i18n="opt_ltu">Replace with 'ltu'</option>
+                                    <option value="xtu" data-i18n="opt_xtu">Replace with 'xtu'</option>
+                                </select>
+                            </div>
+
+                            <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+                                <span style="font-size:0.6rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" data-i18n="lbl_hatsuon">Nasal (ん)</span>
+
+                                <select id="filter-hatsuon" class="kb-select" style="padding:4px; font-size:0.65rem; width:100%; text-overflow:ellipsis;">
+                                    <option value="none" data-i18n="opt_raw">Do not replace</option>
+                                    <option value="nn" data-i18n="opt_nn">Replace with 'nn'</option>
+                                    <option value="xn" data-i18n="opt_xn">Replace with 'xn'</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
                     <textarea id="corpus-input" spellcheck="false"></textarea>
                     <button id="btn-analyze" class="primary" style="margin-top:1rem;" data-i18n="btn_analyze">ANALYZE</button>
                 </div>
@@ -1419,6 +1454,18 @@
                 btn_imp_exec: "Import",
                 msg_copied: "Copied!",
                 err_invalid_json: "Invalid JSON format.",
+
+                lbl_romaji_macro: "Auto-Replace Corpus",
+                lbl_sokuon: "Sokuon (っ)",
+                lbl_hatsuon: "Hatsuon (ん)",
+                opt_raw: "Do not replace (Raw)",
+                opt_ltu: "Replace with 'ltu'",
+                opt_xtu: "Replace with 'xtu'",
+                opt_nn: "Replace with 'nn'",
+                opt_xn: "Replace with 'xn'",
+                desc_romaji_macro: "Automatically replaces implicit Romaji sequences (like 'tt' or 'n') with explicit dedicated keys (like 'ltu' or 'nn') before calculating physical costs.",
+                lbl_custom_replace: "Custom Rules",
+                desc_custom_replace: "Map input text to physical keys (e.g., ltu=l, nn=q). Handled as a logical layout property.",
             },
             ja: {
                 fingers: ["小指", "薬指", "中指", "人差", "親指"],
@@ -1511,6 +1558,18 @@
                 btn_imp_exec: "インポート実行",
                 msg_copied: "コピーしました!",
                 err_invalid_json: "JSON形式が正しくありません。",
+
+                lbl_romaji_macro: "評価用テキストの自動置換",
+                lbl_sokuon: "促音 (っ)",
+                lbl_hatsuon: "撥音 (ん)",
+                opt_raw: "置換しない (入力通り)",
+                opt_ltu: "「ltu」に強制置換",
+                opt_xtu: "「xtu」に強制置換",
+                opt_nn: "「nn」に強制置換",
+                opt_xn: "「xn」に強制置換",
+                desc_romaji_macro: "【配列評価用のストローク変換ルール】\nコーパスに入力された「っ」や「ん」に相当する連続入力を、指定した単独キー(ltu等)に自動で書き換えてから打鍵コストを計算します。\n※置換せずにそのままの入力で評価したい場合は「置換しない」を選択してください。",
+                lbl_custom_replace: "カスタムルール",
+                desc_custom_replace: "【論理配列固有のマクロ/IME展開】\nカンマ区切りで「コーパス内文字列=配列上のキー」を指定します(例: ltu=l, nn=q)。この設定は論理配列データとして保存されます。",
             }
         };
 
@@ -1530,6 +1589,7 @@
                 this.weights = defaults.weights || { trans: 65 };
 
                 this.layoutName = "Custom";
+                this.customRules = ""; // 論理配列ごとのカスタムルール
                 this.lang = "ja";
 
                 // ドメイン管理
@@ -1559,6 +1619,7 @@
                 }
                 // データ側にname定義があればそれを使い、なければキーを大文字化
                 this.layoutName = p.name || name.toUpperCase();
+                this.customRules = p.customRules || ""; // プリセット変更時にリセット
             }
 
             toggleKey(hand, idx) {
@@ -1568,7 +1629,7 @@
 
             // 論理データ（配列）のみエクスポート
             exportLogical() {
-                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName });
+                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName, customRules: this.customRules });
             }
 
             // 物理データ（設定）のみエクスポート
@@ -1671,13 +1732,42 @@
                     return sCost + tCost;
                 };
 
+                // ▼▼▼ L2: Pre-processor (ローマ字展開・正規化) ▼▼▼
+                const filterSokuon = document.getElementById('filter-sokuon')?.value || 'none';
+                const filterHatsuon = document.getElementById('filter-hatsuon')?.value || 'none';
+                const customRules = this.state.customRules || ''; // 状態から取得
+
+                let processedText = text.toLowerCase();
+
+                // 1. 撥音(ん)の展開
+                // 'nn', 'xn', または 'n' (母音とy以外が続く場合、または行末) をキャッチして統一
+                if (filterHatsuon !== 'none') {
+                    processedText = processedText.replace(/(?:nn|xn|n(?=[^aiueoy]|$))/g, filterHatsuon);
+                }
+
+                // 2. 促音(っ)の展開
+                if (filterSokuon !== 'none') {
+                    processedText = processedText.replace(/([bcdfghjklmpqrstvwxyz])\1/g, `${filterSokuon}$1`);
+                }
+
+                // 3. 論理配列固有のカスタムルールの適用
+                if (customRules.trim() !== '') {
+                    const rules = customRules.split(',').map(r => r.split('='));
+                    for (const [before, after] of rules) {
+                        if (before && after !== undefined) {
+                            processedText = processedText.split(before.trim().toLowerCase()).join(after.trim().toLowerCase());
+                        }
+                    }
+                }
+                // ▲▲▲ L2: Pre-processor 終了 ▲▲▲
+
                 // ▼▼▼ 辞書の準備と事前正規化 ▼▼▼
                 const validTokens = Object.keys(keyMap)
                     // space, ent に加え、制御キーの予約語を除外
                     .filter(k => k !== 'space' && k !== 'ent' && !CONTROL_KEYS.has(k))
                     .sort((a, b) => b.length - a.length); // 降順ソート（最長一致用）
 
-                const normalizedText = text.toLowerCase()
+                const normalizedText = processedText
                     .replace(/[’‘]/g, "'")
                     .replace(/[”“]/g, '"')
                     .replace(/　/g, " ");
@@ -1873,6 +1963,7 @@
                 this.dom = {
                     gridL: document.getElementById('grid-left'),
                     gridR: document.getElementById('grid-right'),
+                    logicalMeta: document.getElementById('logical-meta-area'),
                     ctrlArea: document.getElementById('control-area'),
                     resPanel: document.getElementById('results-panel'),
                     sidebar: document.getElementById('sidebar'),
@@ -2029,8 +2120,20 @@
                         if (d.type === 'logical') {
                             this.state.layout = d.layout;
                             this.state.fingers = d.fingers;
-                            if(d.name) this.state.layoutName = d.name;
+                            this.state.customRules = d.customRules || "";
+
+                            // 1. まずUIのロックを解除する（この瞬間は一時的に "CUSTOM" になる）
                             this.triggerCustomMode();
+
+                            // 2. その後に、インポートしたデータ内の名前で正しく上書きする
+                            if (d.name) {
+                                this.state.layoutName = d.name;
+                                // 入力欄とヘッダーのタイトル表示も合わせて更新
+                                const nameInput = document.getElementById('layout-name-in');
+                                if (nameInput) nameInput.value = d.name;
+                                if (this.dom.kbTitle) this.dom.kbTitle.textContent = d.name;
+                            }
+
                             alert(dict.alert_load_layout);
                             this.setDomain('logic');
                         } else if (d.type === 'physical') {
@@ -2134,19 +2237,21 @@
             triggerCustomMode() {
                 const presetSelect = document.getElementById('kb-preset-in');
                 const nameInput = document.getElementById('layout-name-in');
+                const rulesInput = document.getElementById('custom-rules-in');
 
                 if (presetSelect && presetSelect.value !== 'custom') {
                     presetSelect.value = 'custom';
                 }
 
-                if (nameInput) {
-                    // 読み取り専用を解除して CUSTOM に書き換え
-                    if (nameInput.hasAttribute('readonly')) {
-                        nameInput.removeAttribute('readonly');
-                        nameInput.value = "CUSTOM";
-                        this.state.layoutName = "CUSTOM";
-                        if (this.dom.kbTitle) this.dom.kbTitle.textContent = "CUSTOM";
-                    }
+                if (nameInput && nameInput.hasAttribute('readonly')) {
+                    nameInput.removeAttribute('readonly');
+                    nameInput.value = "CUSTOM";
+                    this.state.layoutName = "CUSTOM";
+                    if (this.dom.kbTitle) this.dom.kbTitle.textContent = "CUSTOM";
+                }
+
+                if (rulesInput && rulesInput.hasAttribute('readonly')) {
+                    rulesInput.removeAttribute('readonly');
                 }
             }
 
@@ -2174,7 +2279,7 @@
                 const ctrl = document.getElementById('control-area');
 
                 if (mode === 'settings') {
-                    settings.style.display = 'flex'; kb.style.display = 'none'; ctrl.style.display = 'none';
+                    settings.style.display = 'flex'; kb.style.display = 'none'; ctrl.style.display = 'none'; this.dom.logicalMeta.style.display = 'none';
                 } else {
                     settings.style.display = 'none'; kb.style.display = 'flex'; ctrl.style.display = 'flex';
                     this.renderGrid('L');
@@ -2185,85 +2290,89 @@
                     // 1. タイトル更新
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
 
-                    // 2. Layoutモードの場合、プルダウンと入力ボックスを表示
+                    // 2. Layoutモードの場合、プルダウン等を専用エリアに表示
                     if (mode === 'layout') {
-                        // 現在のプリセット状態を簡易判定（名前がPRESETSにあるか）
                         const isPreset = PRESETS[this.state.layoutName.toLowerCase()] !== undefined;
                         const readOnlyAttr = isPreset ? 'readonly' : '';
                         const presetValue = isPreset ? this.state.layoutName.toLowerCase() : 'custom';
 
-                        html += `
-                            <div class="layout-meta">
-                                <div class="input-group" style="background:var(--bg-main); padding: 4px 8px;">
-                                    <label style="font-size:0.8rem; color:var(--text-dim); margin-right:8px;">${dict.lbl_preset}</label>
+                        this.dom.logicalMeta.style.display = 'flex';
+                        this.dom.logicalMeta.innerHTML = `
+                            <div class="meta-row">
+                                <label style="font-size:0.8rem; color:var(--text-dim);">${dict.lbl_preset}</label>
+                                <select id="kb-preset-in" class="meta-input kb-select" style="border:none;">
+                                    <option value="custom">Custom</option>
+                                    <option value="qwerty">QWERTY</option>
+                                    <option value="dvorak">Dvorak</option>
+                                    <option value="onishi">大西配列</option>
+                                    <option value="seoto">瀬音配列</option>
+                                </select>
+                                <div style="width:1px; height:20px; background:var(--border);"></div>
+                                <label style="font-size:0.8rem; color:var(--text-dim);">${dict.lbl_name}</label>
+                                <input type="text" id="layout-name-in" value="${this.state.layoutName}" ${readOnlyAttr} class="meta-input" style="width:150px; font-weight:bold;">
+                            </div>
+                            <div class="meta-row">
+                                <label class="tooltip tooltip-down" data-tooltip="${dict.desc_custom_replace}" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold;">${dict.lbl_custom_replace}</label>
+                                <input type="text" id="custom-rules-in" value="${this.state.customRules}" ${readOnlyAttr} class="meta-input" style="flex:1; max-width:400px; font-family:'JetBrains Mono', monospace;" placeholder="ex: ltu=l, nn=q">
+                            </div>
+                        `;
 
-                                    <select id="kb-preset-in" class="kb-select" style="border:none; background:transparent; margin-right:12px;">
-                                        <option value="custom">Custom</option>
-                                        <option value="qwerty">QWERTY</option>
-                                        <option value="dvorak">Dvorak</option>
-                                        <option value="onishi">大西配列</option>
-                                        <option value="seoto">瀬音配列</option>
-                                    </select>
+                        // コントロールエリアは説明文のみ
+                        ctrl.innerHTML = html;
 
-                                    <div style="width:1px; height:20px; background:var(--border); margin-right:12px;"></div>
-
-                                    <label style="font-size:0.8rem; color:var(--text-dim); margin-right:8px;">${dict.lbl_name}</label>
-                                    <input type="text" id="layout-name-in" value="${this.state.layoutName}" ${readOnlyAttr}
-                                           style="background:transparent; border:none; color:white; width:150px; font-weight:bold;">
-                                </div>
-                            </div>`;
-                    } else if (mode === 'finger') {
-                        html += `<div class="finger-palette">`;
-                        [0,1,2,3,4].forEach(f => {
-                            const act = this.activeTool === f ? 'active' : '';
-                            html += `<div class="p-btn ${act}" style="background:${FINGER_COLORS[f]}" onclick="app.setTool(${f})">${dict.fingers[f][0]}</div>`;
-                        });
-                        html += `</div>`;
-                    }
-                    ctrl.innerHTML = html;
-
-                    // イベントリスナーの登録 (innerHTML書き換え後に実行)
-                    if (mode === 'layout') {
+                        // イベントリスナーの登録
                         const presetIn = document.getElementById('kb-preset-in');
                         const nameIn = document.getElementById('layout-name-in');
+                        const rulesIn = document.getElementById('custom-rules-in');
 
-                        // 初期選択状態のセット
                         if (presetIn) {
-                            const currentKey = this.state.layoutName.toLowerCase();
-                            if (PRESETS[currentKey]) {
-                                presetIn.value = currentKey;
-                            } else {
-                                presetIn.value = 'custom';
-                            }
-
-                            // プルダウン変更時の処理
+                            presetIn.value = presetValue;
                             presetIn.onchange = (e) => {
                                 const val = e.target.value;
                                 if (val === 'custom') {
-                                    // Custom選択時: 入力を空にして編集可能に
                                     nameIn.removeAttribute('readonly');
+                                    rulesIn.removeAttribute('readonly');
                                     nameIn.value = "CUSTOM";
                                     this.state.layoutName = "CUSTOM";
                                     this.dom.kbTitle.textContent = "CUSTOM";
                                 } else {
-                                    // プリセット選択時: プリセットをロードし、入力ボックスをReadOnlyに
                                     this.state.loadPreset(val);
                                     this.renderGrid('L'); this.renderGrid('R');
-
-                                    nameIn.value = this.state.layoutName; // loadPresetでUpper化されている
+                                    nameIn.value = this.state.layoutName;
                                     nameIn.setAttribute('readonly', true);
+                                    rulesIn.value = this.state.customRules;
+                                    rulesIn.setAttribute('readonly', true);
                                     this.dom.kbTitle.textContent = this.state.layoutName;
                                 }
                             };
                         }
 
-                        // 名前変更時の処理
                         if (nameIn) {
                             nameIn.oninput = (e) => {
                                 this.state.layoutName = e.target.value;
                                 this.dom.kbTitle.textContent = e.target.value;
                             };
                         }
+
+                        if (rulesIn) {
+                            rulesIn.oninput = (e) => {
+                                this.state.customRules = e.target.value;
+                                this.triggerCustomMode();
+                            };
+                        }
+                    } else {
+                        // Fingering 等他のモードの時は非表示
+                        this.dom.logicalMeta.style.display = 'none';
+
+                        if (mode === 'finger') {
+                            html += `<div class="finger-palette">`;
+                            [0,1,2,3,4].forEach(f => {
+                                const act = this.activeTool === f ? 'active' : '';
+                                html += `<div class="p-btn ${act}" style="background:${FINGER_COLORS[f]}" onclick="app.setTool(${f})">${dict.fingers[f][0]}</div>`;
+                            });
+                            html += `</div>`;
+                        }
+                        ctrl.innerHTML = html;
                     }
                 }
 
