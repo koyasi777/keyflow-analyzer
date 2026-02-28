@@ -2432,34 +2432,63 @@
                         const max = this.state.lastResult.maxKey || 1;
 
                         if (count > 0) {
-                            // ▼ 色の設定 ------------------
-                            const BASE_COLOR = { r: 57, g: 211, b: 83 };
-                            // -------------------------------------------------------------------
-
-                            // 1. 基本の割合
+                            // 1. 基本の割合とアルファ値の計算
                             const rawRatio = count / max;
-
-                            // 2. 視認性補正 (ルート計算で低い値を持ち上げ、最大値をキャップ)
                             let alpha = Math.pow(rawRatio, 0.5) * 1.2;
                             if (alpha > 0.9) alpha = 0.9;
-                            if (alpha < 0.1) alpha = 0.1; // 最低限の視認性を確保
+                            if (alpha < 0.1) alpha = 0.1;
 
-                            // 3. スタイルの適用
-                            const { r, g, b } = BASE_COLOR;
+                            // 2. 厳密な背景色ブレンド計算 (Base: #21262d, Heat: rgb(57, 211, 83))
+                            const r = Math.round(57 * alpha + 33 * (1 - alpha));
+                            const g = Math.round(211 * alpha + 38 * (1 - alpha));
+                            const b = Math.round(83 * alpha + 45 * (1 - alpha));
 
-                            // 背景色: 指定したRGB + 計算した透明度
-                            keyDiv.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                            // 3. WCAG相対輝度 (Relative Luminance) に基づく知覚的明るさの算出
+                            // RGBそれぞれの視覚的重み付けを適用
+                            const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
 
-                            // 枠線: 背景より少し不透明度を高くして輪郭をはっきりさせる
-                            keyDiv.style.borderColor = `rgba(${r}, ${g}, ${b}, ${Math.min(1, alpha + 0.4)})`;
+                            // 4. 視認性閾値の最適化
+                            const isLightBg = luminance > 140;
 
-                            // 文字色: 視認性のため白固定 (または必要に応じて黒)
-                            keyDiv.style.color = 'white';
+                            // 5. 状態に応じた最適なカラーパレットの動的定義
+                            const mainTextColor = isLightBg ? '#010409' : '#ffffff';
 
-                            // 打鍵数バッジ
+                            // 裏レイヤーの文字色定義
+                            const layerTextColor = isLightBg ? '#4A148C' : '#EAD6FF';
+
+                            // 小さい文字でも読みやすいよう、透過率を0.65に少し引き上げ
+                            const dimTextColor = isLightBg ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.65)';
+
+                            // --- スタイルの直接適用 (カスケーディング負けの防止) ---
+                            keyDiv.style.backgroundColor = `rgba(57, 211, 83, ${alpha})`;
+                            keyDiv.style.borderColor = `rgba(57, 211, 83, ${Math.min(1, alpha + 0.4)})`;
+
+                            // 主文字 (.key-char) を直接上書き
+                            const charEl = keyDiv.querySelector('.key-char');
+                            if (charEl) {
+                                charEl.style.color = charEl.classList.contains('ctrl-key') ? dimTextColor : mainTextColor;
+                            }
+
+                            // サブ文字 (.key-sub) を直接上書き
+                            const subEl = keyDiv.querySelector('.key-sub');
+                            if (subEl) {
+                                subEl.style.color = dimTextColor;
+                            }
+
+                            // 裏レイヤー (動的に追加されたspan) を上書き
+                            keyDiv.querySelectorAll('div > span').forEach(span => {
+                                if (span.style.textTransform === 'capitalize') {
+                                    span.style.color = dimTextColor;
+                                } else {
+                                    span.style.color = layerTextColor;
+                                }
+                            });
+
+                            // 打鍵数バッジの追加と色調整
                             const cnt = document.createElement('div');
                             cnt.className = 'key-count';
                             cnt.textContent = count;
+                            cnt.style.color = isLightBg ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)';
                             keyDiv.appendChild(cnt);
                         }
                     }
