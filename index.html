@@ -1387,7 +1387,7 @@
                 mode_cost: "Transition Cost", mode_base: "Position Cost", mode_settings: "Logic",
 
                 hand_left: "LEFT HAND", hand_right: "RIGHT HAND",
-                panel_corpus: "Corpus Text (Romaji / Alphanumeric)", btn_analyze: "RUN ANALYSIS",
+                panel_corpus: "Corpus Text", btn_analyze: "RUN ANALYSIS",
 
                 panel_results: "Analysis Results", res_total: "Efficiency Score", res_work: "Total Work (Load)",
                 res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
@@ -1473,7 +1473,7 @@
                 msg_copied: "Copied!",
                 err_invalid_json: "Invalid JSON format.",
 
-                lbl_romaji_macro: "Auto-Replace Corpus",
+                lbl_romaji_macro: "Romaji Preprocessor (tt/nn)",
                 lbl_sokuon: "Sokuon (っ)",
                 lbl_hatsuon: "Hatsuon (ん)",
                 opt_raw: "Do not replace (Raw)",
@@ -1481,7 +1481,7 @@
                 opt_xtu: "Replace with 'xtu'",
                 opt_nn: "Replace with 'nn'",
                 opt_xn: "Replace with 'xn'",
-                desc_romaji_macro: "Automatically replaces implicit Romaji sequences (like 'tt' or 'n') with explicit dedicated keys (like 'ltu' or 'nn') before calculating physical costs.",
+                desc_romaji_macro: "[Romaji Input Only] Automatically expands implicit consonant repeats (tt) or standalone 'n' into explicit keystrokes (e.g., ltu, nn). Ineffective for direct Kana input.",
                 lbl_custom_replace: "Custom Rules",
                 desc_custom_replace: "Map input text to physical keys (e.g., ltu=l, nn=q). Handled as a logical layout property.",
                 lbl_show_flow: "Show Flow",
@@ -1494,7 +1494,7 @@
                 mode_cost: "遷移コスト", mode_base: "位置コスト", mode_settings: "解析ロジック",
 
                 hand_left: "左手 (Left)", hand_right: "右手 (Right)",
-                panel_corpus: "評価用テキスト (※日本語はローマ字で入力)", btn_analyze: "解析実行 (RUN)",
+                panel_corpus: "評価用コーパス (配列定義に合わせて入力)", btn_analyze: "解析実行 (RUN)",
 
                 // 結果パネル:
                 panel_results: "解析結果", res_total: "総合スコア (平均)", res_work: "総運動量 (Total)",
@@ -1578,7 +1578,7 @@
                 msg_copied: "コピーしました!",
                 err_invalid_json: "JSON形式が正しくありません。",
 
-                lbl_romaji_macro: "評価用テキストの自動置換",
+                lbl_romaji_macro: "ローマ字入力の自動展開 (っ/ん)",
                 lbl_sokuon: "促音 (っ)",
                 lbl_hatsuon: "撥音 (ん)",
                 opt_raw: "置換しない (入力通り)",
@@ -1586,7 +1586,7 @@
                 opt_xtu: "「xtu」に強制置換",
                 opt_nn: "「nn」に強制置換",
                 opt_xn: "「xn」に強制置換",
-                desc_romaji_macro: "【配列評価用のストローク変換ルール】\nコーパスに入力された「っ」や「ん」に相当する連続入力を、指定した単独キー(ltu等)に自動で書き換えてから打鍵コストを計算します。\n※置換せずにそのままの入力で評価したい場合は「置換しない」を選択してください。",
+                desc_romaji_macro: "【ローマ字コーパス専用】\n入力されたアルファベットの連続子音(tt等)や単独の'n'を、指定した単独キー(ltu, nn等)に事前展開します。\n※コーパスに直接「かな」を入力して評価する場合、この置換処理は完全にスキップされます。",
                 lbl_custom_replace: "カスタムルール",
                 desc_custom_replace: "【論理配列固有のマクロ/IME展開】\nカンマ区切りで「コーパス内文字列=配列上のキー」を指定します(例: ltu=l, nn=q)。この設定は論理配列データとして保存されます。",
                 lbl_show_flow: "フロー表示",
@@ -2244,7 +2244,7 @@
                 });
 
                 this.setDomain('logic');
-                document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\n(Note: Please input Romanized text for Japanese analysis.)\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
+                document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\nInput text matching your layout's logical key definitions (e.g., Alphanumeric, Romaji, or direct Kana strings).\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
             }
 
             updateText() {
