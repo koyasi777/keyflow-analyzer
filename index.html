@@ -1155,6 +1155,15 @@
         // コーパスとの衝突を避けるための制御キー予約語リスト
         const CONTROL_KEYS = new Set(['shift', 'ctrl', 'alt', 'meta', 'win', 'cmd', 'tab', 'esc', 'caps', 'delete', 'del', 'backspace', 'bs', 'fn']);
 
+        const parseKeyToken = (str) => {
+            if (!str) return { val: '', disp: '' };
+            if (str === ':') return { val: ':', disp: ':' }; // 完全一致のエッジケース
+            const idx = str.indexOf(':');
+            if (idx === -1) return { val: str, disp: str };
+            if (idx === 0) return { val: ':', disp: str.slice(1).replace(/^:/, '') || ':' };
+            return { val: str.slice(0, idx), disp: str.slice(idx + 1) || str.slice(0, idx) };
+        };
+
         const FINGER_COLORS = {
             0: 'var(--f-pinky)', 1: 'var(--f-ring)', 2: 'var(--f-middle)',
             3: 'var(--f-index)', 4: 'var(--f-thumb)'
@@ -1429,7 +1438,7 @@
                 // Layer Penalty & Prompt
                 set_layer_title: "Layer Switch Penalty",
                 set_layer_desc: "Penalty cost applied when accessing secondary characters on the same key (e.g. Shift or Fn layer).",
-                msg_key_prompt: "Key Char (Separate layers with a space. e.g. ', <'):",
+                msg_key_prompt: "Key Char (Space to add layer. Use 'val:disp' for display name. e.g. 'wa:わ'):",
 
                 lbl_rep_cost: "Avg. Repeat Cost",
                 lbl_rep_finger: "Repeats by Finger",
@@ -1533,7 +1542,7 @@
                 // Layer Penalty & Prompt
                 set_layer_title: "レイヤー切替ペナルティ",
                 set_layer_desc: "ShiftやFnなど、同じキーの裏レイヤーにアクセスする際の追加コストです。",
-                msg_key_prompt: "キー文字 (裏レイヤーは半角スペースで区切る。例: , <):",
+                msg_key_prompt: "キー文字 (裏レイヤーは半角スペース区切り。「入力:表示」の形式で表示名を変えられます。 例: wa:わ):",
 
                 lbl_rep_cost: "平均連打コスト",
                 lbl_rep_finger: "指ごとの連打回数",
@@ -1661,7 +1670,7 @@
 
                         tokens.forEach((rawToken, tokenIndex) => {
                             if (!rawToken) return;
-                            const v = rawToken.toLowerCase();
+                            const v = parseKeyToken(rawToken).val.toLowerCase();
                             let target = v;
                             if (v === 'space' || v === 'spc') target = 'space';
                             else if (v === 'ent' || v === 'enter' || v === 'return') target = 'ent';
@@ -1893,8 +1902,9 @@
 
                             tCost = rawCost * fatigue;
 
-                            const k1 = this.state.layout[activeH][last];
-                            const k2 = this.state.layout[activeH][k.idx];
+                            const getDisp = (raw) => raw ? parseKeyToken(raw.trim().split(/\s+/)[0]).disp : '';
+                            const k1 = getDisp(this.state.layout[activeH][last]);
+                            const k2 = getDisp(this.state.layout[activeH][k.idx]);
                             const keyName = `${k1}→${k2}`;
                             stats.transitions[keyName] = (stats.transitions[keyName] || 0) + tCost;
                         }
@@ -2464,12 +2474,13 @@
                     cSpan.className = 'key-char';
 
                     const mainChar = parts[0];
-                    cSpan.textContent = mainChar;
+                    const parsedMain = parseKeyToken(mainChar);
+                    cSpan.textContent = parsedMain.disp;
 
                     // メイン文字が制御キー予約語に含まれるか判定
-                    if (CONTROL_KEYS.has(mainChar.toLowerCase())) {
+                    if (CONTROL_KEYS.has(parsedMain.val.toLowerCase())) {
                         cSpan.classList.add('ctrl-key'); // 制御キー専用の縮小・色変更スタイル
-                    } else if (mainChar.length > 2) {
+                    } else if (parsedMain.disp.length > 2) {
                         cSpan.classList.add('small');    // 通常の長い文字列（マクロ等）
                     }
 
@@ -2489,12 +2500,13 @@
                         layerContainer.style.overflow = 'hidden';
 
                         parts.slice(1).forEach(subChar => {
+                            const parsedSub = parseKeyToken(subChar);
                             const layerSpan = document.createElement('span');
-                            layerSpan.textContent = subChar;
+                            layerSpan.textContent = parsedSub.disp;
                             layerSpan.style.fontWeight = '800';
 
                             // 裏レイヤーの文字が制御キーかどうかを判定
-                            if (CONTROL_KEYS.has(subChar.toLowerCase())) {
+                            if (CONTROL_KEYS.has(parsedSub.val.toLowerCase())) {
                                 layerSpan.style.fontSize = '0.55rem'; // さらに小さく
                                 layerSpan.style.color = 'var(--text-dim)'; // 目立たせないグレー
                                 layerSpan.style.textTransform = 'capitalize';
@@ -2731,7 +2743,11 @@
                 let max = 0;
                 let maxChar = '-';
                 ['L','R'].forEach(h => stats.keyCounts[h].forEach((c, i) => {
-                    if (c > max) { max = c; maxChar = this.state.layout[h][i]; }
+                    if (c > max) {
+                        max = c;
+                        const rawChar = this.state.layout[h][i];
+                        maxChar = rawChar ? parseKeyToken(rawChar.trim().split(/\s+/)[0]).disp : '-';
+                    }
                 }));
                 stats.maxKey = max;
                 stats.maxKeyChar = maxChar;
