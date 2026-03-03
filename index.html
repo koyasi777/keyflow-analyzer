@@ -1287,6 +1287,34 @@
                     L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
                     R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
                 }
+            },
+            watanuki: {
+                name: "四月一日配列",
+                L: [null, "1", "2", "3", "4", "5", null, "q", "f", "u", ",", "l", null, "e", "i", "a", "o", "-", null, "x", "c", "v", ".", "/"],
+                R: ["6", "7", "8", "9", "0", null, null, "p", "r", "y", "w", "j", null, null, "h", "t", "n", "k", "s", null, null, "b", "d", "m", "g", "z", null, null, "Space"],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
+            },
+            yamato: {
+                name: "大和配列",
+                L: [null, "1", "2", "3", "4", "5", null, "m", "y", "r", "w", "p", null, "k", "s", "t", "n", "h", null, "z", "d", "b", "g", "j"],
+                R: ["6", "7", "8", "9", "0", null, null, "x", "l", "q", "c", "'", null, null, "f", "a", "o", "i", "e", null, null, "v", "u", "-", ",", ".", null, null, "Space"],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
+            },
+            kumonoi: {
+                name: "雲乃井配列",
+                L: [null, null, null, null, null, null, null, "d", "e", "i", "l", "x", "z", "p", "y", ",", "t", "c", null, null, null, null, "s", "m"],
+                R: [null, null, null, null, null, null, null, "v", "j", "a", "o", "w", null, null, "h", "n", "u", "g", "f", "b", null, "r", "k", null, null, null, null, null, "Space"],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 1, 1, 2, 3, 3, 0, 1, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 1, 0, 0, 3, 3, 2, 1, 1, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                },
+                customRules: "xn=c, ltu=j, -=l"
             }
         };
 
@@ -2352,8 +2380,11 @@
                                     <option value="custom">Custom</option>
                                     <option value="qwerty">QWERTY</option>
                                     <option value="dvorak">Dvorak</option>
-                                    <option value="onishi">大西配列</option>
                                     <option value="seoto">せおと配列</option>
+                                    <option value="onishi">大西配列</option>
+                                    <option value="watanuki">四月一日配列</option>
+                                    <option value="yamato">大和配列</option>
+                                    <option value="kumonoi">雲乃井配列</option>
                                 </select>
                                 <div style="width:1px; height:20px; background:var(--border);"></div>
                                 <label style="font-size:0.8rem; color:var(--text-dim);">${dict.lbl_name}</label>
