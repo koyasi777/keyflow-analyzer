@@ -1278,9 +1278,9 @@
                 ],
                 R: [
                     "6", "7", "8", "9", "0", null, null,
-                    "X", "yo", "O wo:を", "Y ~", "w", null, null,
-                    "L", "A BS", "I nn:ん", "u -", "e ltu:っ", null, null,
-                    "C", ",", "yu", ".", "V", null, null,
+                    "X", "yo", "O wo:を", "w ~", "YA", null, null,
+                    "y", "A BS", "I nn:ん", "u -", "e ltu:っ", null, null,
+                    "V", ",", "L", ".", "C", null, null,
                     "Space"
                 ],
                 fingers: {
@@ -1315,6 +1315,66 @@
                     R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 1, 0, 0, 3, 3, 2, 1, 1, 0, null, 3, 3, 2, 1, 0, null, null, 4]
                 },
                 customRules: "xn=c, ltu=j, -=l"
+            },
+            eucalyn: {
+                name: "Eucalyn配列",
+                L: [
+                    null, "1", "2", "3", "4", "5",
+                    null, "q", "w", ",", ".", ";",
+                    null, "a", "o", "e", "i", "u",
+                    null, "z", "x", "c", "v", "f"
+                ],
+                R: [
+                    "6", "7", "8", "9", "0", null, null,
+                    "m", "r", "d", "y", "p", null, null,
+                    "g", "t", "k", "s", "n", null, null,
+                    "b", "h", "j", "l", "/", null, null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
+            },
+            colemak: {
+                name: "Colemak",
+                L: [
+                    null, "1", "2", "3", "4", "5",
+                    null, "Q", "w", "f", "p", "g",
+                    null, "a", "r", "s", "t", "d",
+                    null, "Z", "x", "c", "v", "b"
+                ],
+                R: [
+                    "6", "7", "8", "9", "0", null, null,
+                    "j", "l", "u", "y", ";", null, null,
+                    "h", "n", "e", "i", "o", null, null,
+                    "k", "m", ",", ".", "/", null, null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
+            },
+            tomisuke: {
+                name: "Tomisuke配列",
+                L: [
+                    null, "'", "2", "3", "4", "5",
+                    null, "1", ",", ".", "-", ";",
+                    null, "a", "o", "e", "i", "u",
+                    null, "x", "c", "v", "w", "Q"
+                ],
+                R: [
+                    "6", "7", "8", "9", "0", null, null,
+                    "l", "r", "d", "y", "p", null, null,
+                    "g", "n", "t", "s", "k", "f", null,
+                    "j", "h", "m", "b", "z", null, null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
+                    R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
             }
         };
 
@@ -2379,7 +2439,10 @@
                                 <select id="kb-preset-in" class="meta-input kb-select" style="border:none;">
                                     <option value="custom">Custom</option>
                                     <option value="qwerty">QWERTY</option>
+                                    <option value="colemak">Colemak</option>
                                     <option value="dvorak">Dvorak</option>
+                                    <option value="eucalyn">Eucalyn</option>
+                                    <option value="tomisuke">Tomisuke</option>
                                     <option value="seoto">せおと配列</option>
                                     <option value="onishi">大西配列</option>
                                     <option value="watanuki">四月一日配列</option>
