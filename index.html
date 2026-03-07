@@ -691,6 +691,34 @@
         }
         .kpi-unit { font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 2px; }
 
+        .kpi-sub {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+            line-height: 1.2;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .kpi-value-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .kpi-value-row .kpi-value {
+            text-align: left;
+        }
+
+        .kpi-unit-inline {
+            margin: 0 0 4px 0;
+            line-height: 1;
+            font-size: 0.64rem;
+            white-space: nowrap;
+        }
+
         /* 評価コメント（Good/Badなど） */
         .kpi-eval { font-size: 0.65rem; margin-top: 4px; font-weight: bold; display: flex; align-items: center; gap:4px; }
 
@@ -1048,8 +1076,14 @@
                             <div class="res-dashboard">
                                 <div class="kpi-card tooltip" data-i18n-tooltip="lbl_score_desc">
                                     <div class="kpi-label" data-i18n="res_total">Efficiency Score</div>
-                                    <div class="kpi-value" id="kpi-score" style="color:var(--accent)">0.00</div>
-                                    <div class="kpi-unit" style="margin:0;">Cost / Key</div>
+                                    <div class="kpi-value-row">
+                                        <div class="kpi-value" id="kpi-score" style="color:var(--accent)">0.00</div>
+                                        <div class="kpi-unit kpi-unit-inline">Cost / Key</div>
+                                    </div>
+                                    <div class="kpi-sub">
+                                        <span data-i18n="stat_keystrokes">Keystrokes</span>:
+                                        <span id="kpi-score-keys" style="font-weight:bold; margin-left:4px;">0</span>
+                                    </div>
                                 </div>
                                 <div class="kpi-card tooltip" data-i18n-tooltip="lbl_sd_desc">
                                     <div class="kpi-label" data-i18n="lbl_sd">SD (Consistency)</div>
@@ -1550,7 +1584,7 @@
                 modal_desc_imp: "Paste the JSON text below.",
                 modal_desc_exp: "Copy and save the JSON text below.",
 
-                lbl_score_desc: "Average cost per keystroke based on your weight settings.",
+                lbl_score_desc: "Average cost per keystroke based on your weight settings. Interpret it together with total keystrokes.",
                 lbl_sd_desc: "Standard Deviation of cost. Lower means steadier typing rhythm.",
                 lbl_med_desc: "The median cost value. Represents the baseline performance excluding outliers.",
                 lbl_95_desc: "95% of keystrokes fall below this cost. Indicates peak difficulty.",
@@ -1655,7 +1689,7 @@
                 modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
-                lbl_score_desc: "【総合スコア】\n1打鍵あたりの平均コスト。\n(Weight設定に基づく)",
+                lbl_score_desc: "【総合スコア】\n1打鍵あたりの平均コスト。\n(Weight設定に基づく)\n※総打鍵数とセットで解釈してください。",
                 lbl_sd_desc: "【標準偏差 (SD)】\n打鍵コストのばらつき。\n値が小さいほど、一定のリズムで打鍵できます。",
                 lbl_med_desc: "【中央値】\n全打鍵の中央にあるコスト値。\n外れ値（極端な難打鍵）を除いた、配列の基本性能です。",
                 lbl_95_desc: "【95%タイル値】\n全体の95%が含まれるコストライン。\n突発的な高負荷がどれくらい発生するかを示します。",
@@ -3010,6 +3044,7 @@
 
                 // [1] Efficiency Score
                 document.getElementById('kpi-score').textContent = stats.avgTotal.toFixed(2);
+                document.getElementById('kpi-score-keys').textContent = f(stats.keystrokes);
 
                 // [2] SD & Median & 95% (Calc)
                 const samples = stats.costSamples.sort((a, b) => a - b);
