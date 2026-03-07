@@ -127,8 +127,9 @@
 
         /* HEADER & TITLE */
         .kb-header {
-            display: flex; align-items: center; justify-content: center; gap: 1rem;
-            margin-bottom: 1.5rem; width: 100%; position: relative; height: 40px;
+            display: flex; align-items: center; justify-content: center; gap: 0;
+            margin-bottom: 1.2rem; width: 100%; position: relative; min-height: 40px;
+            flex-direction: column; /* 縦並びに変更 */
 
             /* スペースキーと同じ補正ロジックを追加 */
             /* Right(7列) - Left(6列) = 1列分(46px) + gap(6px) = 52px */
@@ -825,6 +826,7 @@
 
                 <div class="kb-header">
                     <h2 class="kb-title" id="kb-title">CUSTOM</h2>
+                    <div id="kb-desc" style="font-size: 0.85rem; color: var(--text-dim); text-align: center; margin-top: 14px;"></div>
                 </div>
 
                 <div class="keyboard-container" id="kb-container">
@@ -1501,7 +1503,7 @@
                 gap1_sub: "1 keystroke by other hand.",
                 gap2_name: "Long Rest",
                 gap2_sub: "2+ keystrokes by other hand.",
-                lbl_preset: "Load Preset:", lbl_name: "Layout Name:",
+                lbl_preset: "Load Preset:", lbl_name: "Layout Name:", lbl_desc: "Description:",
 
                 imp_layout: "Import", exp_layout: "Export",
                 imp_phys: "Import", exp_phys: "Export",
@@ -1607,7 +1609,7 @@
                 gap1_sub: "反対の手を1回挟む。少し回復します。",
                 gap2_name: "2打鍵以上の休憩",
                 gap2_sub: "反対の手を2回以上挟む。さらに回復。",
-                lbl_preset: "プリセット読込:", lbl_name: "配列名:",
+                lbl_preset: "プリセット読込:", lbl_name: "配列名:", lbl_desc: "配列の説明:",
                 imp_layout: "インポート", exp_layout: "エクスポート",
                 imp_phys: "インポート", exp_phys: "エクスポート",
                 alert_load_layout: "配列データを読み込みました", alert_load_phys: "物理設定データを読み込みました",
@@ -1696,7 +1698,9 @@
                 this.weights = defaults.weights || { trans: 65 };
 
                 this.layoutName = "Custom";
+                this.layoutDesc = ""; // 配列の説明
                 this.customRules = ""; // 論理配列ごとのカスタムルール
+                this.enableCustomRules = true; // カスタムルールのON/OFFトグル
                 this.lang = "ja";
 
                 // ドメイン管理
@@ -1727,7 +1731,9 @@
                 }
                 // データ側にname定義があればそれを使い、なければキーを大文字化
                 this.layoutName = p.name || name.toUpperCase();
+                this.layoutDesc = p.desc || ""; // プリセットにdescがあれば読み込む
                 this.customRules = p.customRules || ""; // プリセット変更時にリセット
+                this.enableCustomRules = true;
             }
 
             toggleKey(hand, idx) {
@@ -1737,7 +1743,7 @@
 
             // 論理データ（配列）のみエクスポート
             exportLogical() {
-                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName, customRules: this.customRules });
+                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName, layoutDesc: this.layoutDesc, customRules: this.customRules, enableCustomRules: this.enableCustomRules });
             }
 
             // 物理データ（設定）のみエクスポート
@@ -1860,7 +1866,7 @@
                 }
 
                 // 3. 論理配列固有のカスタムルールの適用
-                if (customRules.trim() !== '') {
+                if (this.state.enableCustomRules && customRules.trim() !== '') {
                     const rules = customRules.split(',').map(r => r.split('='));
                     for (const [before, after] of rules) {
                         if (before && after !== undefined) {
@@ -2250,9 +2256,15 @@
                             this.state.layout = d.layout;
                             this.state.fingers = d.fingers;
                             this.state.customRules = d.customRules || "";
+                            this.state.layoutDesc = d.layoutDesc || "";
+                            this.state.enableCustomRules = d.enableCustomRules !== undefined ? d.enableCustomRules : true;
 
                             // 1. まずUIのロックを解除する（この瞬間は一時的に "CUSTOM" になる）
                             this.triggerCustomMode();
+
+                            // kb-desc の表示更新
+                            const descEl = document.getElementById('kb-desc');
+                            if (descEl) descEl.textContent = this.state.layoutDesc;
 
                             // 2. その後に、インポートしたデータ内の名前で正しく上書きする
                             if (d.name) {
@@ -2388,6 +2400,10 @@
                 if (rulesInput && rulesInput.hasAttribute('readonly')) {
                     rulesInput.removeAttribute('readonly');
                 }
+                const descInput = document.getElementById('layout-desc-in');
+                if (descInput && descInput.hasAttribute('readonly')) {
+                    descInput.removeAttribute('readonly');
+                }
             }
 
             updateUI() {
@@ -2422,8 +2438,14 @@
 
                     let html = `<div class="instruction">${dict['instr_' + mode]}</div>`;
 
-                    // 1. タイトル更新
+                    // 1. タイトルと説明文の更新 (全モード共通処理)
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
+                    const descDisplay = document.getElementById('kb-desc');
+                    if (descDisplay) {
+                        descDisplay.textContent = this.state.layoutDesc;
+                        // 説明文が空の時は要素を消して余白を詰める
+                        descDisplay.style.display = this.state.layoutDesc ? 'block' : 'none';
+                    }
 
                     // 2. Layoutモードの場合、プルダウン等を専用エリアに表示
                     if (mode === 'layout') {
@@ -2432,6 +2454,7 @@
                         const presetValue = isPreset ? this.state.layoutName.toLowerCase() : 'custom';
 
                         this.dom.logicalMeta.style.display = 'flex';
+
                         this.dom.logicalMeta.innerHTML = `
                             <div class="meta-row">
                                 <label style="font-size:0.8rem; color:var(--text-dim);">${dict.lbl_preset}</label>
@@ -2453,7 +2476,14 @@
                                 <input type="text" id="layout-name-in" value="${this.state.layoutName}" ${readOnlyAttr} class="meta-input" style="width:150px; font-weight:bold;">
                             </div>
                             <div class="meta-row">
-                                <label class="tooltip tooltip-down" data-tooltip="${dict.desc_custom_replace}" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold;">${dict.lbl_custom_replace}</label>
+                                <label style="font-size:0.8rem; color:var(--text-dim);">${dict.lbl_desc || "Description"}</label>
+                                <input type="text" id="layout-desc-in" value="${this.state.layoutDesc}" ${readOnlyAttr} class="meta-input" style="flex:1; max-width:400px;" placeholder="Optional">
+                            </div>
+                            <div class="meta-row">
+                                <label class="tooltip tooltip-down" data-tooltip="${dict.desc_custom_replace}" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                                    <input type="checkbox" id="toggle-custom-rules" ${this.state.enableCustomRules ? 'checked' : ''} style="cursor:pointer;">
+                                    ${dict.lbl_custom_replace}
+                                </label>
                                 <input type="text" id="custom-rules-in" value="${this.state.customRules}" ${readOnlyAttr} class="meta-input" style="flex:1; max-width:400px; font-family:'JetBrains Mono', monospace;" placeholder="ex: ltu=l, nn=q">
                             </div>
                         `;
@@ -2464,7 +2494,9 @@
                         // イベントリスナーの登録
                         const presetIn = document.getElementById('kb-preset-in');
                         const nameIn = document.getElementById('layout-name-in');
+                        const descIn = document.getElementById('layout-desc-in');
                         const rulesIn = document.getElementById('custom-rules-in');
+                        const ruleToggle = document.getElementById('toggle-custom-rules');
 
                         if (presetIn) {
                             presetIn.value = presetValue;
@@ -2472,19 +2504,56 @@
                                 const val = e.target.value;
                                 if (val === 'custom') {
                                     nameIn.removeAttribute('readonly');
+                                    descIn.removeAttribute('readonly');
                                     rulesIn.removeAttribute('readonly');
                                     nameIn.value = "CUSTOM";
+                                    descIn.value = "";
                                     this.state.layoutName = "CUSTOM";
+                                    this.state.layoutDesc = "";
                                     this.dom.kbTitle.textContent = "CUSTOM";
+                                    if (descDisplay) descDisplay.textContent = "";
                                 } else {
                                     this.state.loadPreset(val);
                                     this.renderGrid('L'); this.renderGrid('R');
                                     nameIn.value = this.state.layoutName;
                                     nameIn.setAttribute('readonly', true);
+                                    descIn.value = this.state.layoutDesc;
+                                    descIn.setAttribute('readonly', true);
                                     rulesIn.value = this.state.customRules;
                                     rulesIn.setAttribute('readonly', true);
                                     this.dom.kbTitle.textContent = this.state.layoutName;
+                                    if (descDisplay) descDisplay.textContent = this.state.layoutDesc;
+                                    if (ruleToggle) ruleToggle.checked = this.state.enableCustomRules;
                                 }
+                            };
+                        }
+
+                        if (nameIn) {
+                            nameIn.oninput = (e) => {
+                                this.state.layoutName = e.target.value;
+                                this.dom.kbTitle.textContent = e.target.value;
+                            };
+                        }
+
+                        if (descIn) {
+                            descIn.oninput = (e) => {
+                                this.state.layoutDesc = e.target.value;
+                                if (descDisplay) descDisplay.textContent = e.target.value;
+                                this.triggerCustomMode();
+                            };
+                        }
+
+                        if (ruleToggle) {
+                            ruleToggle.onchange = (e) => {
+                                this.state.enableCustomRules = e.target.checked;
+                                this.triggerCustomMode();
+                            };
+                        }
+
+                        if (rulesIn) {
+                            rulesIn.oninput = (e) => {
+                                this.state.customRules = e.target.value;
+                                this.triggerCustomMode();
                             };
                         }
 
