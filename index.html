@@ -2513,7 +2513,10 @@
                                     this.state.layoutName = "CUSTOM";
                                     this.state.layoutDesc = "";
                                     this.dom.kbTitle.textContent = "CUSTOM";
-                                    if (descDisplay) descDisplay.textContent = "";
+                                    if (descDisplay) {
+                                        descDisplay.textContent = "";
+                                        descDisplay.style.display = 'none';
+                                    }
                                 } else {
                                     this.state.loadPreset(val);
                                     this.renderGrid('L'); this.renderGrid('R');
@@ -2524,7 +2527,10 @@
                                     rulesIn.value = this.state.customRules;
                                     rulesIn.setAttribute('readonly', true);
                                     this.dom.kbTitle.textContent = this.state.layoutName;
-                                    if (descDisplay) descDisplay.textContent = this.state.layoutDesc;
+                                    if (descDisplay) {
+                                        descDisplay.textContent = this.state.layoutDesc;
+                                        descDisplay.style.display = this.state.layoutDesc ? 'block' : 'none';
+                                    }
                                     if (ruleToggle) ruleToggle.checked = this.state.enableCustomRules;
                                 }
                             };
@@ -2540,7 +2546,10 @@
                         if (descIn) {
                             descIn.oninput = (e) => {
                                 this.state.layoutDesc = e.target.value;
-                                if (descDisplay) descDisplay.textContent = e.target.value;
+                                if (descDisplay) {
+                                    descDisplay.textContent = e.target.value;
+                                    descDisplay.style.display = e.target.value ? 'block' : 'none';
+                                }
                                 this.triggerCustomMode();
                             };
                         }
