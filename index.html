@@ -3246,12 +3246,61 @@
                 const firstToken = raw ? raw.trim().split(/\s+/)[0] : '';
                 const parsed = parseKeyToken(firstToken);
 
+                const cols = hand === 'L' ? COLS_L : COLS_R;
+                const isThumb = hand === 'R' && idx === TOTAL_KEYS_R - 1;
+                const row = isThumb ? 4 : Math.floor(idx / cols);
+
                 return {
                     hand,
                     idx,
+                    row,
+                    isThumb,
                     raw,
                     val: (parsed.val || '').toLowerCase(),
                     disp: parsed.disp || ''
+                };
+            }
+
+            getArcSideForSource(info) {
+                // 左手のキーから出る線は左外側へ
+                // 右手のキーから出る線は右外側へ
+                return info.hand === 'L' ? -1 : 1;
+            }
+
+            getFlowControlPoint(start, end, fromInfo) {
+                const dx = end.x - start.x;
+                const dy = end.y - start.y;
+                const dist = Math.hypot(dx, dy);
+
+                const midX = start.x + dx / 2;
+                const midY = start.y + dy / 2;
+
+                const side = this.getArcSideForSource(fromInfo);
+
+                // ほぼ縦線と見なす条件
+                const isVerticalish = Math.abs(dx) < 8 && Math.abs(dy) > 8;
+
+                // 「中段」は Home row のみを想定
+                const isMiddleSource = fromInfo.row === 2;
+
+                // 基本の持ち上げ量（横フローの上向きアーチ感は維持）
+                const lift = Math.max(18, Math.min(72, dist * 0.30));
+
+                // 通常はごく弱い横バイアスだけ与える
+                // これで「同じキーから出る線の向き」が揃う
+                let sidePush = Math.max(8, Math.min(24, dist * 0.10));
+
+                // 上段・下段から出る線はしっかり横へ逃がす
+                // 中段から出る縦線は直線寄りのまま
+                if (isVerticalish) {
+                    sidePush = isMiddleSource
+                        ? 0
+                        : Math.max(22, Math.min(64, dist * 0.45));
+                }
+
+                return {
+                    x: midX + (side * sidePush),
+                    y: midY - lift
                 };
             }
 
@@ -3362,15 +3411,12 @@
 
                     const dx = end.x - start.x;
                     const dy = end.y - start.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const dist = Math.hypot(dx, dy);
 
-                    // アーチの制御点 (常にキーボードの上空へ膨らむようにマイナスY方向へオフセット)
-                    const midX = start.x + dx / 2;
-                    const arcHeight = dist * 0.3;
-                    const cpX = midX;
-                    const cpY = Math.min(start.y, end.y) - arcHeight;
+                    // 制御点を一元化
+                    const { x: cpX, y: cpY } = this.getFlowControlPoint(start, end, fromInfo);
 
-                    // 頻度を太さにマッピング (1px 〜 8px)
+                    // 頻度を太さにマッピング
                     const thickness = Math.max(0.5, (count / maxCount) * 20);
 
                     // ▼ 白系のグラデーションに変更し、コントラストを最大化する
