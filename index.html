@@ -2050,9 +2050,14 @@
                             const keyName = `${k1}→${k2}`;
                             stats.transitions[keyName] = (stats.transitions[keyName] || 0) + tCost;
 
+                            // フロー描画用は「表示名」ではなく「物理キーID」で保持する
+                            const fromId = `${activeH}:${last}`;
+                            const toId = `${activeH}:${k.idx}`;
+
                             // ▼ 左右を跨がない、純粋な同手内遷移のカウント（フロー描画用） ▼
-                            if (k1 && k2 && k1 !== k2) {
-                                stats.bigramCounts[keyName] = (stats.bigramCounts[keyName] || 0) + 1;
+                            if (k1 && k2 && fromId !== toId) {
+                                const flowKey = `${fromId}->${toId}`;
+                                stats.bigramCounts[flowKey] = (stats.bigramCounts[flowKey] || 0) + 1;
                             }
                         }
                     }
@@ -2118,7 +2123,7 @@
                 this.activeTool = 3;
 
                 // ▼ フロー可視化用の状態管理とCanvas生成 ▼
-                this.hoveredKeyChar = null;
+                this.hoveredKeyId = null;
                 this.flowCanvas = document.createElement('canvas');
                 this.flowCanvas.id = 'flow-canvas';
                 this.ctx = this.flowCanvas.getContext('2d');
@@ -2655,6 +2660,7 @@
                 }
 
                 if (mode !== 'result') {
+                    this.hoveredKeyId = null;
                     this.dom.resPanel.style.display = 'none';
                     // 解析結果モード以外（修正作業中など）は線を消去する
                     if (this.ctx) this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
@@ -2713,6 +2719,8 @@
                     const isSpace = isRight && (idx === totalKeys - 1);
                     const keyDiv = document.createElement('div');
                     keyDiv.className = 'key';
+                    keyDiv.dataset.hand = hand;
+                    keyDiv.dataset.idx = idx;
                     if (isSpace) keyDiv.classList.add('space-key');
 
                     if (char === null) {
@@ -2742,15 +2750,18 @@
                     cSpan.textContent = parsedMain.disp;
 
                     // ▼ フロー描画用のアンカー属性とホバー検知 ▼
-                    keyDiv.setAttribute('data-char', parsedMain.disp);
+                    const keyId = `${hand}:${idx}`;
+                    keyDiv.dataset.keyId = keyId;
+                    keyDiv.dataset.keyDisp = parsedMain.disp;
+
                     keyDiv.onmouseenter = () => {
                         if (this.state.mode !== 'result') return;
-                        this.hoveredKeyChar = parsedMain.disp;
+                        this.hoveredKeyId = keyId;
                         this.drawFlow();
                     };
                     keyDiv.onmouseleave = () => {
                         if (this.state.mode !== 'result') return;
-                        this.hoveredKeyChar = null;
+                        this.hoveredKeyId = null;
                         this.drawFlow();
                     };
 
@@ -2893,6 +2904,7 @@
                             // 打鍵数バッジの追加と色調整
                             const cnt = document.createElement('div');
                             cnt.className = 'key-count';
+                            cnt.dataset.defaultCount = String(count);
                             cnt.textContent = count;
                             cnt.style.color = isLightBg ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)';
                             keyDiv.appendChild(cnt);
@@ -3227,8 +3239,78 @@
                 this.drawFlow();
             }
 
+            getKeyInfoById(keyId) {
+                const [hand, idxStr] = String(keyId).split(':');
+                const idx = Number(idxStr);
+                const raw = this.state.layout[hand]?.[idx] ?? '';
+                const firstToken = raw ? raw.trim().split(/\s+/)[0] : '';
+                const parsed = parseKeyToken(firstToken);
+
+                return {
+                    hand,
+                    idx,
+                    raw,
+                    val: (parsed.val || '').toLowerCase(),
+                    disp: parsed.disp || ''
+                };
+            }
+
+            getHoveredFlowCounts() {
+                const flowCounts = {};
+                let totalOutgoing = 0;
+
+                if (!this.hoveredKeyId || !this.state.lastResult?.bigramCounts) {
+                    return { flowCounts, totalOutgoing };
+                }
+
+                Object.entries(this.state.lastResult.bigramCounts).forEach(([flowKey, count]) => {
+                    const [fromId, toId] = flowKey.split('->');
+                    if (fromId !== this.hoveredKeyId) return;
+
+                    flowCounts[toId] = (flowCounts[toId] || 0) + count;
+                    totalOutgoing += count;
+                });
+
+                return { flowCounts, totalOutgoing };
+            }
+
+            updateKeyCountOverlay() {
+                if (this.state.mode !== 'result') return;
+
+                const isHoverFlow = !!this.hoveredKeyId;
+                const { flowCounts, totalOutgoing } = this.getHoveredFlowCounts();
+
+                document.querySelectorAll('.key[data-key-id]').forEach(el => {
+                    if (el.classList.contains('is-disabled')) return;
+
+                    const badge = el.querySelector('.key-count');
+                    if (!badge) return;
+
+                    if (!isHoverFlow) {
+                        badge.textContent = badge.dataset.defaultCount || '';
+                        badge.style.opacity = '1';
+                        return;
+                    }
+
+                    const keyId = el.dataset.keyId;
+
+                    if (keyId === this.hoveredKeyId) {
+                        badge.textContent = totalOutgoing > 0 ? totalOutgoing : (badge.dataset.defaultCount || '');
+                        badge.style.opacity = '1';
+                    } else if (flowCounts[keyId]) {
+                        badge.textContent = flowCounts[keyId];
+                        badge.style.opacity = '1';
+                    } else {
+                        badge.textContent = '';
+                        badge.style.opacity = '0';
+                    }
+                });
+            }
+
             // ▼ フロー描画ロジック (アーチとグラデーション) ▼
             drawFlow() {
+                this.updateKeyCountOverlay();
+
                 if (!this.state.lastResult || this.state.mode !== 'result' || !this.state.showFlow) {
                     this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
                     return;
@@ -3248,12 +3330,12 @@
 
                 // DOM上の全有効キーの中心座標を取得
                 const keyCoords = {};
-                document.querySelectorAll('.key[data-char]').forEach(el => {
+                document.querySelectorAll('.key[data-key-id]').forEach(el => {
                     if (el.classList.contains('is-disabled')) return;
-                    const char = el.getAttribute('data-char');
-                    if (!char) return;
+                    const keyId = el.dataset.keyId;
+                    if (!keyId) return;
                     const elRect = el.getBoundingClientRect();
-                    keyCoords[char] = {
+                    keyCoords[keyId] = {
                         x: (elRect.left - rect.left) + elRect.width / 2,
                         y: (elRect.top - rect.top) + elRect.height / 2
                     };
@@ -3262,18 +3344,21 @@
                 // 太い線が上に描画されるように、カウントの昇順でソート
                 const entries = Object.entries(bigrams).sort((a, b) => a[1] - b[1]);
 
-                entries.forEach(([keyName, count]) => {
-                    const [k1, k2] = keyName.split('→');
-                    if (!k1 || !k2 || k1 === k2 || !keyCoords[k1] || !keyCoords[k2]) return;
+                entries.forEach(([flowKey, count]) => {
+                    const [fromId, toId] = flowKey.split('->');
+                    if (!fromId || !toId || fromId === toId || !keyCoords[fromId] || !keyCoords[toId]) return;
 
-                    // ▼ Spaceキー「から」の遷移だけでなく、Spaceキー「へ」の遷移も除外する ▼
-                    if (k1.toLowerCase() === 'space' || k2.toLowerCase() === 'space') return;
+                    const fromInfo = this.getKeyInfoById(fromId);
+                    const toInfo = this.getKeyInfoById(toId);
 
-                    // インタラクティブ・フィルタリング (ホバー対象以外の線をスキップ)
-                    if (this.hoveredKeyChar && k1 !== this.hoveredKeyChar && k2 !== this.hoveredKeyChar) return;
+                    // Spaceキー「から」「へ」両方の遷移を除外
+                    if (fromInfo.val === 'space' || fromInfo.val === 'spc' || toInfo.val === 'space' || toInfo.val === 'spc') return;
 
-                    const start = keyCoords[k1];
-                    const end = keyCoords[k2];
+                    // ホバー中は「そのキーから出る遷移」だけに絞る
+                    if (this.hoveredKeyId && fromId !== this.hoveredKeyId) return;
+
+                    const start = keyCoords[fromId];
+                    const end = keyCoords[toId];
 
                     const dx = end.x - start.x;
                     const dy = end.y - start.y;
@@ -3281,7 +3366,7 @@
 
                     // アーチの制御点 (常にキーボードの上空へ膨らむようにマイナスY方向へオフセット)
                     const midX = start.x + dx / 2;
-                    const arcHeight = dist * 0.3; 
+                    const arcHeight = dist * 0.3;
                     const cpX = midX;
                     const cpY = Math.min(start.y, end.y) - arcHeight;
 
