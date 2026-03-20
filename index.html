@@ -41,6 +41,7 @@
             --f-pinky: #ff7b72; --f-ring: #d29922; --f-middle: #3fb950; --f-index: #58a6ff; --f-thumb: #a371f7;
             --c-best: #58a6ff; --c-good: #3fb950; --c-warn: #d29922; --c-dang: #f85149;
             --h-1: #0e4429; --h-2: #006d32; --h-3: #26a641; --h-4: #39d353;
+            --emu-hit: 88, 166, 255;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
@@ -484,6 +485,61 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; user-select: none; position: relative; transition: all 0.1s ease;
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .key.emu-hit {
+            will-change: transform, box-shadow;
+            animation: emu-key-lift 1180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: calc(var(--emu-hit-elapsed, 0ms) * -1);
+        }
+
+        .key.emu-hit::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 10px;
+            border: 2px solid rgba(var(--emu-hit), 0.92);
+            box-shadow:
+                0 0 0 1px rgba(var(--emu-hit), 0.18),
+                0 0 18px rgba(var(--emu-hit), 0.30),
+                inset 0 0 14px rgba(var(--emu-hit), 0.10);
+            opacity: 0;
+            pointer-events: none;
+            animation: emu-key-flash 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: calc(var(--emu-hit-elapsed, 0ms) * -1);
+        }
+
+        @keyframes emu-key-flash {
+            0% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            18% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes emu-key-lift {
+            0% {
+                transform: translateY(0) scale(1);
+                box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            }
+            18% {
+                transform: translateY(-1px) scale(1.02);
+                box-shadow:
+                    0 2px 0 rgba(0,0,0,0.2),
+                    0 0 0 1px rgba(var(--emu-hit), 0.22),
+                    0 0 18px rgba(var(--emu-hit), 0.16);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            }
         }
 
         /* Space Key Specific Style */
@@ -2859,6 +2915,11 @@
                 this.flowCanvas.id = 'flow-canvas';
                 this.ctx = this.flowCanvas.getContext('2d');
 
+                this.emuPulseDuration = 680;
+                this.emuPulseCleanupTimer = null;
+                this.emuPulseMap = new Map();
+                this.prevEmuTargetLen = 0;
+
                 this.dom = {
                     gridL: document.getElementById('grid-left'),
                     gridR: document.getElementById('grid-right'),
@@ -3555,6 +3616,82 @@
                 this.updateUI();
             }
 
+            clearEmuPulseState() {
+                this.emuPulseMap.clear();
+                this.prevEmuTargetLen = 0;
+
+                if (this.emuPulseCleanupTimer) {
+                    clearTimeout(this.emuPulseCleanupTimer);
+                    this.emuPulseCleanupTimer = null;
+                }
+            }
+
+            registerEmuPulse(events) {
+                if (!events || events.length === 0) return;
+
+                const now = performance.now();
+
+                events.forEach(ev => {
+                    if (!ev) return;
+                    this.emuPulseMap.set(`${ev.hand}:${ev.idx}`, now);
+                });
+
+                this.scheduleEmuPulseCleanup();
+            }
+
+            pruneEmuPulseState() {
+                const now = performance.now();
+
+                for (const [keyId, startedAt] of this.emuPulseMap.entries()) {
+                    if ((now - startedAt) >= this.emuPulseDuration) {
+                        this.emuPulseMap.delete(keyId);
+                    }
+                }
+            }
+
+            scheduleEmuPulseCleanup() {
+                if (this.emuPulseCleanupTimer) {
+                    clearTimeout(this.emuPulseCleanupTimer);
+                    this.emuPulseCleanupTimer = null;
+                }
+
+                let nextDelay = null;
+                const now = performance.now();
+
+                for (const startedAt of this.emuPulseMap.values()) {
+                    const remaining = this.emuPulseDuration - (now - startedAt);
+                    if (remaining <= 0) continue;
+                    if (nextDelay === null || remaining < nextDelay) nextDelay = remaining;
+                }
+
+                if (nextDelay === null) return;
+
+                this.emuPulseCleanupTimer = setTimeout(() => {
+                    this.pruneEmuPulseState();
+
+                    if (this.state.appView === 'emulation') {
+                        this.renderEmuWorkspace();
+                    }
+
+                    this.scheduleEmuPulseCleanup();
+                }, Math.max(16, nextDelay));
+            }
+
+            getEmuPulseMeta(hand, idx) {
+                const keyId = `${hand}:${idx}`;
+                const startedAt = this.emuPulseMap.get(keyId);
+                if (startedAt === undefined) return null;
+
+                const elapsed = performance.now() - startedAt;
+
+                if (elapsed >= this.emuPulseDuration) {
+                    this.emuPulseMap.delete(keyId);
+                    return null;
+                }
+
+                return { elapsed };
+            }
+
             markEmuBundleCustom(side) {
                 const bundle = this.state.emu[side];
                 bundle.presetKey = 'custom';
@@ -3681,6 +3818,7 @@
                         this.state.emu.events = [];
                         this.state.emu.rawText = '';
                         this.hoveredKeyId = null;
+                        this.clearEmuPulseState();
                         this.refreshEmuAnalysis();
                     };
                 }
@@ -3895,6 +4033,14 @@
                     if (side === 'target') keyDiv.dataset.flowScope = 'target';
 
                     if (side === 'target') {
+                        const pulseMeta = this.getEmuPulseMeta(hand, idx);
+                        if (pulseMeta) {
+                            keyDiv.classList.add('emu-hit');
+                            keyDiv.style.setProperty('--emu-hit-elapsed', `${pulseMeta.elapsed}ms`);
+                        } else {
+                            keyDiv.style.removeProperty('--emu-hit-elapsed');
+                        }
+
                         keyDiv.onmouseenter = () => {
                             if (this.state.appView !== 'emulation') return;
                             this.hoveredKeyId = `${hand}:${idx}`;
@@ -4295,6 +4441,14 @@
                 const targetSequence = sourceSequence
                     .map(ev => this.projectSourceEventToTarget(ev))
                     .filter(Boolean);
+
+                if (targetSequence.length === 0) {
+                    this.clearEmuPulseState();
+                } else if (targetSequence.length > this.prevEmuTargetLen) {
+                    this.registerEmuPulse(targetSequence.slice(this.prevEmuTargetLen));
+                }
+
+                this.prevEmuTargetLen = targetSequence.length;
 
                 if (tokenLogEl) {
                     tokenLogEl.textContent = targetSequence.length
