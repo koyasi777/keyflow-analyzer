@@ -63,6 +63,284 @@
         .logo { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         .logo span { color: var(--accent); }
 
+        .app-switch {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .app-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .app-btn:hover { color: var(--text-main); }
+        .app-btn.active {
+            background: var(--accent-sub);
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .emu-workspace {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            gap: 1.5rem;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .emu-view-switch {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+            width: fit-content;
+            margin: 0 auto 1rem;
+        }
+
+        .emu-view-btn {
+            padding: 6px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .emu-view-btn:hover:not(.active) {
+            color: var(--text-main);
+        }
+
+        .emu-view-btn.active {
+            background: var(--accent-sub);
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .emu-pane-stack {
+            width: 100%;
+        }
+
+        .emu-pane {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .emu-pane.active {
+            display: flex;
+        }
+
+        .emu-pane-title-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .emu-mode-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding-right: 52px;
+            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .emu-mode-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .emu-mode-row .mode-group {
+            width: fit-content;
+        }
+
+        .emu-pane-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        .emu-pane-title-note {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 0;
+            line-height: 1.45;
+            text-align: center;
+            max-width: 560px;
+            margin-top: 0.25rem;
+        }
+
+        .emu-pane .logical-meta-area {
+            display: flex;
+            width: 100%;
+            max-width: 650px;
+            align-self: center;
+            margin: 0 auto 1rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .emu-pane .meta-row {
+            justify-content: flex-start;
+        }
+
+        .emu-pane .meta-row label {
+            min-width: 88px;
+            color: var(--text-dim);
+            font-size: 0.78rem;
+        }
+
+        .emu-finger-strip {
+            display: none;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .emu-kb-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding-right: 52px;
+        }
+
+        .emu-kb-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+
+        .emu-kb-desc {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .emu-kb-container {
+            margin-bottom: 0;
+            min-height: 270px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .emu-thumb-area {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            display: flex; justify-content: center; align-items: center;
+            height: 50px;
+            padding-right: 52px;
+        }
+
+        .emu-output-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .emu-output-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .emu-output-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .emu-inline-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .emu-log-box {
+            margin-top: 1rem;
+        }
+
+        .emu-log-row strong {
+            color: var(--text-main);
+        }
+
+        @media (max-width: 900px) {
+            .app-switch {
+                width: 100%;
+            }
+            .app-btn {
+                flex: 1;
+                text-align: center;
+            }
+            .emu-pane .meta-row label {
+                min-width: 0;
+            }
+            .emu-view-switch {
+                width: 100%;
+            }
+            .emu-view-btn {
+                flex: 1;
+                text-align: center;
+            }
+            .emu-mode-block {
+                width: 100%;
+                padding-right: 0;
+            }
+
+            .emu-mode-row {
+                width: 100%;
+            }
+
+            .emu-mode-row .mode-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         /* Domain Switcher (Moved to Workspace) */
         .domain-switch {
             display: flex; background: var(--bg-panel); border-radius: 8px; padding: 4px; border: 1px solid var(--border);
@@ -112,12 +390,6 @@
             display: flex; align-items: center; justify-content: center; z-index: 5;
         }
         .resizer:hover, .resizer.active { background: var(--accent); }
-
-        .mode-bar {
-            margin-bottom: 2rem; background: var(--bg-panel); padding: 4px;
-            border-radius: 8px; border: 1px solid var(--border);
-            display: flex; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
         .mode-btn {
             background: transparent; border: none; color: var(--text-dim);
             padding: 6px 16px; cursor: pointer; font-weight: 600; border-radius: 6px;
@@ -167,7 +439,7 @@
         .keyboard-container { display: flex; gap: 40px; margin-bottom: 2rem; transition: opacity 0.2s; align-items: flex-start; position: relative; padding-bottom: 60px; }
 
         /* ▼ Flow可視化用Canvasレイヤー ▼ */
-        #flow-canvas {
+        #flow-canvas, #emu-flow-canvas {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
@@ -175,10 +447,6 @@
             z-index: 20; /* キー要素(z-index:10)の上に重ねる */
         }
         .hand-wrapper { display: flex; flex-direction: column; align-items: center; }
-        .hand-label {
-            text-align: center; margin-bottom: 1rem; font-size: 0.75rem;
-            color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
-        }
 
         /* 4 Rows Grid (Left:6, Right:7) */
         .key-grid {
@@ -186,8 +454,17 @@
             grid-template-rows: repeat(4, 46px);
             gap: 6px;
         }
-        #grid-left { grid-template-columns: repeat(6, 46px); }
-        #grid-right { grid-template-columns: repeat(7, 46px); }
+        #grid-left,
+        #emu-source-grid-left,
+        #emu-target-grid-left {
+            grid-template-columns: repeat(6, 46px);
+        }
+
+        #grid-right,
+        #emu-source-grid-right,
+        #emu-target-grid-right {
+            grid-template-columns: repeat(7, 46px);
+        }
 
         /* Thumb Area (Space Key) */
         #thumb-area {
@@ -266,7 +543,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .instruction { margin-bottom: 0; line-height: 1.5; color: var(--text-dim); }
-        .highlight { color: var(--accent); font-weight: bold; }
 
         .finger-palette { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
         .p-btn {
@@ -290,6 +566,47 @@
             outline: none; transition: all 0.2s;
         }
         .meta-input:focus { border-color: var(--accent); }
+
+        .emu-capture {
+            width: 100%;
+            min-height: 160px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            cursor: text;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+        }
+        .emu-capture:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+        .emu-capture:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+        .emu-log-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+        .emu-log-row {
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: var(--text-dim);
+            word-break: break-word;
+        }
+        .emu-log-row strong {
+            color: var(--text-main);
+        }
 
         .sidebar {
             width: 380px; background: var(--bg-panel); border-left: 1px solid var(--border);
@@ -359,7 +676,6 @@
         .stats-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.9rem; }
         .stats-col h4 { font-size: 0.7rem; color: var(--text-dim); text-align: center; margin-bottom: 0.5rem; text-transform: uppercase; }
 
-        .bar-chart-container { margin-bottom: 0.5rem; }
         .bar-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.75rem; }
         .bar-label { width: 35px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; margin-right: 8px; }
         .bar-track { flex: 1; background: var(--bg-main); height: 6px; border-radius: 3px; overflow: hidden; margin-right: 8px; }
@@ -424,26 +740,7 @@
         .step-btn svg { width: 14px; height: 14px; stroke-width: 3; }
 
         /* --- Distribution & Stability Styles --- */
-        .hist-area { margin: 1rem 0; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
         .hist-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
-
-        /* ヒストグラムのバー領域 */
-        .hist-bars {
-            display: flex; align-items: flex-end; gap: 2px; height: 60px;
-            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); padding-top: 4px;
-        }
-        .h-bar {
-            flex: 1; background: var(--accent-dim); opacity: 0.6;
-            border-top-left-radius: 2px; border-top-right-radius: 2px;
-            transition: height 0.3s; position: relative;
-        }
-        .h-bar:hover { opacity: 1; background: var(--accent); }
-        /* ツールチップ的な簡易表示 */
-        .h-bar:hover::after {
-            content: attr(data-val); position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            font-size: 0.6rem; color: white; background: var(--bg-key); padding: 2px 4px; border-radius: 4px;
-            pointer-events: none; white-space: nowrap; z-index: 10;
-        }
 
         /* 安定性指標のグリッド */
         .stability-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
@@ -596,8 +893,17 @@
             /* キーサイズを少し小さくして画面幅に収める */
             .key { width: 38px; height: 38px; }
             .key-grid { grid-template-rows: repeat(4, 38px); gap: 4px; }
-            #grid-left { grid-template-columns: repeat(6, 38px); }
-            #grid-right { grid-template-columns: repeat(7, 38px); }
+            #grid-left,
+            #emu-source-grid-left,
+            #emu-target-grid-left {
+                grid-template-columns: repeat(6, 38px);
+            }
+
+            #grid-right,
+            #emu-source-grid-right,
+            #emu-target-grid-right {
+                grid-template-columns: repeat(7, 38px);
+            }
 
             /* スペースキー（親指エリア）の配置修正 */
             #thumb-area {
@@ -719,25 +1025,6 @@
             white-space: nowrap;
         }
 
-        /* 評価コメント（Good/Badなど） */
-        .kpi-eval { font-size: 0.65rem; margin-top: 4px; font-weight: bold; display: flex; align-items: center; gap:4px; }
-
-        /* Status Colors */
-        .st-good { color: var(--c-good); }
-        .st-warn { color: var(--c-warn); }
-        .st-bad  { color: var(--c-dang); }
-        .st-neu  { color: var(--text-dim); }
-
-        /* 詳細統計エリア (Median/95%Tile) */
-        .stats-depth {
-            display: flex; justify-content: space-between;
-            background: rgba(255,255,255,0.03); border-radius: 6px;
-            padding: 8px 12px; margin-bottom: 1.5rem; border: 1px solid var(--border);
-        }
-        .depth-item { text-align: center; }
-        .depth-lbl { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 2px; }
-        .depth-val { display: block; font-size: 0.9rem; font-weight: bold; font-family: 'JetBrains Mono'; }
-
         /* Histogram & Worst Grid (Keep structure but tweak size) */
         .hist-container {
             background: var(--bg-main); border: 1px solid var(--border);
@@ -797,23 +1084,22 @@
             left: auto; right: 20px; /* 矢印の位置も右端へ */
             transform: none;
         }
-
-        /* 詳細統計(stats-depth)の右端要素(95% tile)も同様に対応 */
-        .stats-depth .depth-item:nth-child(2).tooltip::after {
-            left: auto; right: 0; transform: none;
-        }
-        .stats-depth .depth-item:nth-child(2).tooltip::before {
-            left: auto; right: 20px; transform: none;
-        }
         /* --- ▲▲▲ DASHBOARD CSS END ▲▲▲ --- */
     </style>
 </head>
 <body>
     <div class="app-container">
         <header>
-            <div class="logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                KEYFLOW <span>ANALYZER</span>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    KEYFLOW <span>ANALYZER</span>
+                </div>
+
+                <div class="app-switch">
+                    <button id="btn-view-analyzer" class="app-btn active" data-i18n="view_analyzer">Analyzer</button>
+                    <button id="btn-view-emu" class="app-btn" data-i18n="view_emu">Emulation</button>
+                </div>
             </div>
 
             <div class="controls">
@@ -868,6 +1154,184 @@
                 </div>
 
                 <div id="logical-meta-area" class="logical-meta-area"></div>
+
+                <div id="emu-workspace" class="emu-workspace">
+                    <div class="emu-view-switch">
+                        <button id="emu-pane-btn-source" class="emu-view-btn active" data-pane="source" data-i18n="emu_source_title">Source Layout</button>
+                        <button id="emu-pane-btn-target" class="emu-view-btn" data-pane="target" data-i18n="emu_target_title">Target Layout</button>
+                    </div>
+
+                    <div class="emu-pane-stack">
+                        <section class="emu-pane active" id="emu-source-pane">
+                            <div class="emu-pane-title-row">
+                                <div class="emu-pane-title" data-i18n="emu_source_title">ソース配列</div>
+                                <div class="emu-pane-title-note" data-i18n="emu_source_note">あなたの現在の打鍵環境の設定です。使用されている配列を設定してください。</div>
+                            </div>
+
+                            <div class="logical-meta-area">
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_preset">Load Preset:</label>
+                                    <select id="emu-source-preset" class="meta-input kb-select" style="border:none;">
+                                        <option value="custom">Custom</option>
+                                        <option value="qwerty">QWERTY</option>
+                                        <option value="colemak">Colemak</option>
+                                        <option value="dvorak">Dvorak</option>
+                                        <option value="eucalyn">Eucalyn</option>
+                                        <option value="tomisuke">Tomisuke</option>
+                                        <option value="seoto">せおと配列</option>
+                                        <option value="onishi">大西配列</option>
+                                        <option value="yamato">大和配列</option>
+                                        <option value="watanuki">四月一日配列</option>
+                                        <option value="kumonoi">雲乃井配列</option>
+                                    </select>
+                                    <button id="emu-source-reset" class="secondary" type="button" data-i18n="emu_reset">Reset</button>
+                                    <button id="emu-source-import" class="secondary" type="button" data-i18n="header_import">Import</button>
+                                    <button id="emu-source-export" class="secondary" type="button" data-i18n="header_export">Export</button>
+                                </div>
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_name">Layout Name:</label>
+                                    <input type="text" id="emu-source-name" class="meta-input" style="flex:1; min-width:0;">
+                                </div>
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_desc">Description:</label>
+                                    <input type="text" id="emu-source-desc" class="meta-input" style="flex:1; min-width:0;">
+                                </div>
+                                <div class="meta-row">
+                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_custom_replace" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px; opacity:0.55;">
+                                        <input type="checkbox" id="emu-source-toggle-rules" disabled style="cursor:not-allowed;">
+                                        <span data-i18n="lbl_custom_replace">Custom Rules</span>
+                                    </label>
+                                    <input type="text" id="emu-source-rules" class="meta-input" style="flex:1; min-width:0; font-family:'JetBrains Mono', monospace; opacity:0.55;" placeholder="source側では無効" disabled readonly>
+                                </div>
+                            </div>
+
+                            <div class="emu-mode-block">
+                                <div class="emu-mode-row">
+                                    <div class="mode-group">
+                                        <button class="mode-btn emu-side-mode active" data-side="source" data-mode="layout" data-i18n="mode_layout">Layout</button>
+                                        <button class="mode-btn emu-side-mode" data-side="source" data-mode="finger" data-i18n="mode_finger">Fingering</button>
+                                    </div>
+                                </div>
+                                <div id="emu-source-finger-palette" class="finger-palette emu-finger-strip"></div>
+                            </div>
+
+                            <div class="emu-kb-header">
+                                <h2 class="emu-kb-title" id="emu-source-name-view">QWERTY</h2>
+                                <div class="emu-kb-desc" id="emu-source-desc-view"></div>
+                            </div>
+
+                            <div class="keyboard-container emu-kb-container" id="emu-source-kb">
+                                <div class="hand-wrapper">
+                                    <div class="key-grid" id="emu-source-grid-left"></div>
+                                </div>
+                                <div class="hand-wrapper">
+                                    <div class="key-grid" id="emu-source-grid-right"></div>
+                                </div>
+                                <div class="emu-thumb-area" id="emu-source-thumb"></div>
+                            </div>
+                        </section>
+
+                        <section class="emu-pane" id="emu-target-pane">
+                            <div class="emu-pane-title-row">
+                                <div class="emu-pane-title" data-i18n="emu_target_title">エミュレーション先配列</div>
+                                <div class="emu-pane-title-note" data-i18n="emu_target_note">エミュレートしたい配列を設定してください。</div>
+                            </div>
+
+                            <div class="logical-meta-area">
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_preset">Load Preset:</label>
+                                    <select id="emu-target-preset" class="meta-input kb-select" style="border:none;">
+                                        <option value="custom">Custom</option>
+                                        <option value="qwerty">QWERTY</option>
+                                        <option value="colemak">Colemak</option>
+                                        <option value="dvorak">Dvorak</option>
+                                        <option value="eucalyn">Eucalyn</option>
+                                        <option value="tomisuke">Tomisuke</option>
+                                        <option value="seoto">せおと配列</option>
+                                        <option value="onishi">大西配列</option>
+                                        <option value="yamato">大和配列</option>
+                                        <option value="watanuki">四月一日配列</option>
+                                        <option value="kumonoi">雲乃井配列</option>
+                                    </select>
+                                    <button id="emu-target-reset" class="secondary" type="button" data-i18n="emu_reset">Reset</button>
+                                    <button id="emu-target-import" class="secondary" type="button" data-i18n="header_import">Import</button>
+                                    <button id="emu-target-export" class="secondary" type="button" data-i18n="header_export">Export</button>
+                                </div>
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_name">Layout Name:</label>
+                                    <input type="text" id="emu-target-name-in" class="meta-input" style="flex:1; min-width:0;">
+                                </div>
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_desc">Description:</label>
+                                    <input type="text" id="emu-target-desc" class="meta-input" style="flex:1; min-width:0;">
+                                </div>
+                                <div class="meta-row">
+                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_custom_replace" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                                        <input type="checkbox" id="emu-target-toggle-rules" checked style="cursor:pointer;">
+                                        <span data-i18n="lbl_custom_replace">Custom Rules</span>
+                                    </label>
+                                    <input type="text" id="emu-target-rules" class="meta-input" style="flex:1; min-width:0; font-family:'JetBrains Mono', monospace;" placeholder="ex: ltu=l, nn=q">
+                                </div>
+                            </div>
+
+                            <div class="emu-mode-block">
+                                <div class="emu-mode-row">
+                                    <div class="mode-group">
+                                        <button class="mode-btn emu-side-mode active" data-side="target" data-mode="layout" data-i18n="mode_layout">Layout</button>
+                                        <button class="mode-btn emu-side-mode" data-side="target" data-mode="finger" data-i18n="mode_finger">Fingering</button>
+                                    </div>
+                                </div>
+                                <div id="emu-target-finger-palette" class="finger-palette emu-finger-strip"></div>
+                            </div>
+
+                            <div class="emu-kb-header">
+                                <h2 class="emu-kb-title" id="emu-target-name-view">QWERTY</h2>
+                                <div class="emu-kb-desc" id="emu-target-desc-view"></div>
+                            </div>
+
+                            <div class="keyboard-container emu-kb-container" id="emu-target-kb">
+                                <div class="hand-wrapper">
+                                    <div class="key-grid" id="emu-target-grid-left"></div>
+                                </div>
+                                <div class="hand-wrapper">
+                                    <div class="key-grid" id="emu-target-grid-right"></div>
+                                </div>
+                                <div class="emu-thumb-area" id="emu-target-thumb"></div>
+                            </div>
+
+                            <div class="emu-output-card">
+                                <div class="emu-output-toolbar">
+                                    <div class="emu-output-title" data-i18n="emu_output_title">Emulated Output</div>
+                                    <div class="emu-inline-actions">
+                                        <label style="font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--accent); font-weight:bold;">
+                                            <input type="checkbox" id="emu-show-flow" checked style="cursor:pointer;">
+                                            <span data-i18n="lbl_show_flow">Show Flow</span>
+                                        </label>
+                                        <button id="emu-clear" class="secondary" type="button">Clear</button>
+                                    </div>
+                                </div>
+
+                                <div
+                                    id="emu-capture"
+                                    class="emu-capture"
+                                    tabindex="0"
+                                    role="textbox"
+                                    aria-multiline="true"
+                                    aria-readonly="true"
+                                    spellcheck="false"
+                                    data-i18n-placeholder="emu_capture_placeholder"
+                                    data-placeholder="Focus here and type. Backspace removes the last keystroke."
+                                ></div>
+
+                                <div class="emu-log-box">
+                                    <div class="emu-log-row"><strong data-i18n="emu_raw_input">Raw Input</strong>: <span id="emu-source-log">-</span></div>
+                                    <div class="emu-log-row" style="margin-top:0.35rem;"><strong data-i18n="emu_target_tokens">Target Tokens</strong>: <span id="emu-token-log">-</span></div>
+                                    <div class="emu-log-row" style="margin-top:0.35rem;"><strong data-i18n="emu_target_layout">Target Layout</strong>: <span id="emu-target-name-log">QWERTY</span></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
 
                 <div class="control-area" id="control-area">
                 </div>
@@ -1025,14 +1489,14 @@
             <div class="resizer" id="drag-handle"></div>
 
             <section class="sidebar" id="sidebar">
-                <div class="panel">
+                <div class="panel" id="corpus-panel">
                     <h3 data-i18n="panel_corpus">Corpus Text</h3>
 
                     <div style="margin-bottom:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; padding:10px;">
-    
+
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                             <span style="font-size:0.75rem; font-weight:bold; color:var(--text-main); text-transform:uppercase; letter-spacing:0.5px;" data-i18n="lbl_romaji_macro">Auto-Replace Corpus</span>
-                            
+
                             <span class="tooltip tooltip-down" style="color:var(--text-dim); cursor:help;" data-i18n-tooltip="desc_romaji_macro">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                             </span>
@@ -1195,6 +1659,33 @@
         const COLS_R = 7;
         const TOTAL_KEYS_L = ROWS * COLS_L;
         const TOTAL_KEYS_R = (ROWS * COLS_R) + 1; // +1 for Space Key
+
+        const SLOT_CODE_MAP = {
+            L: [
+                'Backquote','Digit1','Digit2','Digit3','Digit4','Digit5',
+                null,'KeyQ','KeyW','KeyE','KeyR','KeyT',
+                null,'KeyA','KeyS','KeyD','KeyF','KeyG',
+                null,'KeyZ','KeyX','KeyC','KeyV','KeyB'
+            ],
+            R: [
+                'Digit6','Digit7','Digit8','Digit9','Digit0','Minus','Equal',
+                'KeyY','KeyU','KeyI','KeyO','KeyP','BracketLeft','BracketRight',
+                'KeyH','KeyJ','KeyK','KeyL','Semicolon','Quote',null,
+                'KeyN','KeyM','Comma','Period','Slash',null,null,
+                'Space'
+            ]
+        };
+
+        const CODE_TO_SLOT = (() => {
+            const out = {};
+            ['L','R'].forEach(hand => {
+                SLOT_CODE_MAP[hand].forEach((code, idx) => {
+                    if (!code) return;
+                    out[code] = { hand, idx };
+                });
+            });
+            return out;
+        })();
 
         // コーパスとの衝突を避けるための制御キー予約語リスト
         const CONTROL_KEYS = new Set(['shift', 'ctrl', 'alt', 'meta', 'win', 'cmd', 'tab', 'esc', 'caps', 'delete', 'del', 'backspace', 'bs', 'fn']);
@@ -1415,6 +1906,25 @@
             }
         };
 
+        function cloneBundleFromPreset(name) {
+            const p = PRESETS[name];
+            return {
+                presetKey: name,
+                name: p.name || name.toUpperCase(),
+                desc: p.desc || "",
+                customRules: p.customRules || "",
+                enableCustomRules: true,
+                layout: {
+                    L: [...p.L],
+                    R: [...p.R]
+                },
+                fingers: {
+                    L: p.fingers ? [...p.fingers.L] : Array(TOTAL_KEYS_L).fill(0),
+                    R: p.fingers ? [...p.fingers.R] : Array(TOTAL_KEYS_R).fill(0)
+                }
+            };
+        }
+
         /**
          * 物理設定のデフォルト値 (DEFAULT PHYSICAL CONFIG)
          * 今後設定を変更したい場合は、アプリ上で「Export (Physical)」を行い、
@@ -1507,8 +2017,21 @@
             en: {
                 fingers: ["Pinky", "Ring", "Mid", "Idx", "Thb"],
 
+                view_analyzer: "Analyzer",
+                view_emu: "Emulation",
+                emu_source_title: "Source Layout",
+                emu_source_note: "This is your current typing environment. Configure the layout you actually use.",
+                emu_target_title: "Target Layout",
+                emu_target_note: "Configure the layout you want to emulate, then type in the text box below.",
+                emu_output_title: "Emulated Output",
+                emu_capture_placeholder: "Focus here and type. Backspace removes the last keystroke.",
+                emu_reset: "Reset",
+                emu_raw_input: "Raw Input",
+                emu_target_tokens: "Target Tokens",
+                emu_target_layout: "Target Layout",
+
                 // Terminology: Logic vs Physical / Position / Transition
-                mode_layout: "Layout Editor", mode_finger: "Finger Assignment",
+                mode_layout: "Layout Editor", mode_finger: "Finger Assignment", mode_emu: "Emulation",
                 mode_cost: "Transition Cost", mode_base: "Position Cost", mode_settings: "Logic",
 
                 hand_left: "LEFT HAND", hand_right: "RIGHT HAND",
@@ -1614,8 +2137,21 @@
             ja: {
                 fingers: ["小指", "薬指", "中指", "人差", "親指"],
 
+                view_analyzer: "Analyzer",
+                view_emu: "Emulation",
+                emu_source_title: "ソース配列",
+                emu_source_note: "あなたの現在の打鍵環境の設定です。使用されている配列を設定してください。",
+                emu_target_title: "エミュレーション先配列",
+                emu_target_note: "エミュレートしたい配列を設定し、下のテキストボックスから入力を行ってください。",
+                emu_output_title: "エミュレート後の出力",
+                emu_capture_placeholder: "ここを選択して入力してください。Backspaceで直前の打鍵を削除します。",
+                emu_reset: "リセット",
+                emu_raw_input: "生入力",
+                emu_target_tokens: "ターゲットトークン",
+                emu_target_layout: "ターゲット配列",
+
                 // 用語: 硬派なシステム用語を採用
-                mode_layout: "レイアウト編集", mode_finger: "運指割当",
+                mode_layout: "レイアウト編集", mode_finger: "運指割当", mode_emu: "エミュレーション",
                 mode_cost: "遷移コスト", mode_base: "位置コスト", mode_settings: "解析ロジック",
 
                 hand_left: "左手 (Left)", hand_right: "右手 (Right)",
@@ -1742,7 +2278,24 @@
                 // ドメイン管理
                 this.domain = 'logic'; // 'logic' or 'physical'
                 this.mode = 'layout';
+                this.appView = 'analyzer'; // 'analyzer' or 'emulation'
                 this.showFlow = true;// ▼ フロー表示の初期状態
+
+                this.emu = {
+                    source: {
+                        ...cloneBundleFromPreset('qwerty'),
+                        enableCustomRules: false
+                    },
+                    target: cloneBundleFromPreset('qwerty'),
+                    sourceMode: 'layout',
+                    targetMode: 'layout',
+                    activePane: 'source',
+                    events: [],
+                    rawText: '',
+                    isCapturing: false,
+                    isComposing: false,
+                    ignoreRepeat: true
+                };
 
                 this.initLayoutData();
                 this.loadPreset('qwerty');
@@ -1800,29 +2353,207 @@
         class Analyzer {
             constructor(state) { this.state = state; }
 
-            getLayoutMap() {
+            getActiveBundle() {
+                return {
+                    layout: this.state.layout,
+                    fingers: this.state.fingers,
+                    name: this.state.layoutName,
+                    desc: this.state.layoutDesc,
+                    customRules: this.state.customRules,
+                    enableCustomRules: this.state.enableCustomRules
+                };
+            }
+
+            buildLayoutMapFrom(bundle) {
                 const map = {};
                 ['L','R'].forEach(hand => {
-                    this.state.layout[hand].forEach((keyVal, idx) => {
+                    bundle.layout[hand].forEach((keyVal, idx) => {
                         if (keyVal === null) return;
 
-                        // 前後の空白をトリムし、空白のみでトークンを分割
                         const tokens = keyVal.trim().split(/\s+/);
 
                         tokens.forEach((rawToken, tokenIndex) => {
                             if (!rawToken) return;
-                            const v = parseKeyToken(rawToken).val.toLowerCase();
-                            let target = v;
-                            if (v === 'space' || v === 'spc') target = 'space';
-                            else if (v === 'ent' || v === 'enter' || v === 'return') target = 'ent';
+                            const parsed = parseKeyToken(rawToken);
+                            let target = parsed.val.toLowerCase();
+
+                            if (target === 'space' || target === 'spc') target = 'space';
+                            else if (target === 'ent' || target === 'enter' || target === 'return') target = 'ent';
 
                             if (!map[target]) map[target] = [];
-                            // tokenIndex > 0 なら裏レイヤー扱いとする
                             map[target].push({ hand, idx, isLayer: tokenIndex > 0 });
                         });
                     });
                 });
                 return map;
+            }
+
+            getLayoutMap() {
+                return this.buildLayoutMapFrom(this.getActiveBundle());
+            }
+
+            calcStepCostForBundle(cand, history, bundle) {
+                const activeH = cand.hand;
+                const last = history[activeH].idx;
+                const gap = history[activeH].gap;
+
+                let sCost = this.state.baseCosts[activeH][cand.idx];
+                if (cand.isLayer) sCost += this.state.layerCost;
+
+                let tCost = 0;
+
+                if (last !== null) {
+                    const f = bundle.fingers[activeH][cand.idx];
+
+                    if (last === cand.idx) {
+                        tCost = (f !== null && this.state.repeatCosts[f] !== undefined)
+                            ? this.state.repeatCosts[f]
+                            : 1.5;
+                    } else {
+                        const rawCost = this.state.costs[activeH][last][cand.idx];
+                        let fatigue = this.state.gapConfig[0];
+
+                        if (gap === 1) fatigue = this.state.gapConfig[1];
+                        else if (gap >= 2) fatigue = this.state.gapConfig[2];
+
+                        tCost = rawCost * fatigue;
+                    }
+                }
+
+                return sCost + tCost;
+            }
+
+            runResolvedSequence(sequence, bundle) {
+                const stats = {
+                    totalCost: 0, transCost: 0, staticCost: 0,
+                    keystrokes: 0,
+                    sfbCount: 0,
+                    sfbConsCount: 0,
+                    repeatCount: 0,
+                    handSwitchCount: 0,
+                    repeatCostSum: 0,
+                    fingerRepeats: [0,0,0,0,0],
+                    keyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
+                    fingerCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
+                    rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
+                    transitions: {},
+                    bigramCounts: {},
+                    costSamples: []
+                };
+
+                let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
+
+                for (const item of sequence) {
+                    if (!item) continue;
+                    const k = item;
+
+                    stats.keystrokes++;
+                    stats.keyCounts[k.hand][k.idx]++;
+
+                    const cols = k.hand === 'L' ? COLS_L : COLS_R;
+                    let row = (k.hand === 'R' && k.idx === TOTAL_KEYS_R - 1) ? 4 : Math.floor(k.idx / cols);
+                    if (row > 4) row = 4;
+                    stats.rowCounts[k.hand][row]++;
+
+                    const f = bundle.fingers[k.hand][k.idx];
+                    if (f !== null && f !== undefined) stats.fingerCounts[k.hand][f]++;
+
+                    const activeH = k.hand;
+                    const otherH = activeH === 'L' ? 'R' : 'L';
+                    history[otherH].gap++;
+
+                    if (history[activeH].idx !== null || history[otherH].idx !== null) {
+                        if (history[activeH].gap > 0) {
+                            stats.handSwitchCount++;
+                        }
+                    }
+
+                    let sCost = this.state.baseCosts[activeH][k.idx];
+                    if (k.isLayer) sCost += this.state.layerCost;
+
+                    let tCost = 0;
+                    const last = history[activeH].idx;
+
+                    if (last !== null) {
+                        if (last === k.idx && history[activeH].gap === 0) {
+                            stats.repeatCount++;
+                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
+                                ? this.state.repeatCosts[f]
+                                : 1.5;
+                            tCost = rCost;
+                            stats.repeatCostSum += rCost;
+                            if (f !== null && f !== undefined) {
+                                stats.fingerRepeats[f]++;
+                            }
+                        } else {
+                            const lastF = bundle.fingers[activeH][last];
+
+                            if (lastF === f && f !== null && last !== k.idx) {
+                                stats.sfbCount++;
+                                if (history[activeH].gap === 0) {
+                                    stats.sfbConsCount++;
+                                }
+                            }
+
+                            const rawCost = this.state.costs[activeH][last][k.idx];
+                            let fatigue = this.state.gapConfig[0];
+                            if (history[activeH].gap === 1) fatigue = this.state.gapConfig[1];
+                            else if (history[activeH].gap >= 2) fatigue = this.state.gapConfig[2];
+
+                            tCost = rawCost * fatigue;
+
+                            const fromId = `${activeH}:${last}`;
+                            const toId = `${activeH}:${k.idx}`;
+                            if (fromId !== toId) {
+                                const flowKey = `${fromId}->${toId}`;
+                                stats.bigramCounts[flowKey] = (stats.bigramCounts[flowKey] || 0) + 1;
+                            }
+
+                            const getDisp = (raw) => raw ? parseKeyToken(raw.trim().split(/\s+/)[0]).disp : '';
+                            const k1 = getDisp(bundle.layout[activeH][last]);
+                            const k2 = getDisp(bundle.layout[activeH][k.idx]);
+                            const keyName = `${k1}→${k2}`;
+                            stats.transitions[keyName] = (stats.transitions[keyName] || 0) + tCost;
+                        }
+                    }
+
+                    stats.staticCost += sCost;
+                    stats.transCost += tCost;
+                    stats.totalCost += (sCost + tCost);
+                    stats.costSamples.push(sCost + tCost);
+
+                    history[activeH].idx = k.idx;
+                    history[activeH].gap = 0;
+                }
+
+                stats.worstTransitions = Object.entries(stats.transitions)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 12);
+
+                const k = stats.keystrokes > 0 ? stats.keystrokes : 1;
+
+                stats.avgTrans = stats.transCost / k;
+                stats.avgStatic = stats.staticCost / k;
+
+                const transRatio = (this.state.weights && this.state.weights.trans !== undefined)
+                    ? this.state.weights.trans
+                    : 65;
+
+                const wTrans = transRatio / 100.0;
+                const wStatic = 1.0 - wTrans;
+
+                stats.efficiencyScore = (stats.avgStatic * wStatic) + (stats.avgTrans * wTrans);
+                stats.avgTotal = stats.efficiencyScore;
+
+                stats.repeatRate = stats.keystrokes > 0
+                    ? (stats.repeatCount / stats.keystrokes * 100)
+                    : 0;
+
+                stats.avgRepeatCost = stats.repeatCount > 0
+                    ? (stats.repeatCostSum / stats.repeatCount)
+                    : 0;
+
+                return stats;
             }
 
             run(text) {
@@ -2132,10 +2863,18 @@
                     gridL: document.getElementById('grid-left'),
                     gridR: document.getElementById('grid-right'),
                     logicalMeta: document.getElementById('logical-meta-area'),
+                    emuWorkspace: document.getElementById('emu-workspace'),
                     ctrlArea: document.getElementById('control-area'),
                     resPanel: document.getElementById('results-panel'),
                     sidebar: document.getElementById('sidebar'),
+                    corpusPanel: document.getElementById('corpus-panel'),
                     resizer: document.getElementById('drag-handle'),
+                    domainSwitch: document.querySelector('.domain-switch'),
+                    toolbarContainer: document.querySelector('.toolbar-container'),
+                    kbContainer: document.getElementById('kb-container'),
+                    settingsView: document.getElementById('settings-view'),
+                    btnViewAnalyzer: document.getElementById('btn-view-analyzer'),
+                    btnViewEmu: document.getElementById('btn-view-emu'),
                     // ツールバー要素
                     toolbarLogic: document.getElementById('toolbar-logic'),
                     toolbarPhys: document.getElementById('toolbar-phys'),
@@ -2151,9 +2890,14 @@
                 document.getElementById('dom-logic').onclick = () => this.setDomain('logic');
                 document.getElementById('dom-phys').onclick = () => this.setDomain('physical');
 
+                // Top-level view切替
+                this.dom.btnViewAnalyzer.onclick = () => this.setAppView('analyzer');
+                this.dom.btnViewEmu.onclick = () => this.setAppView('emulation');
+
                 // モード切替
                 document.querySelectorAll('.mode-btn').forEach(b =>
                     b.onclick = () => {
+                        if (b.classList.contains('emu-side-mode')) return;
                         this.state.mode = b.dataset.mode;
                         this.updateUI();
                     });
@@ -2293,6 +3037,12 @@
                     try {
                         const d = JSON.parse(jsonText);
 
+                        if (this.modalContext?.kind === 'emu') {
+                            this.importEmuBundle(this.modalContext.side, d);
+                            closeModal();
+                            return;
+                        }
+
                         if (d.type === 'logical') {
                             this.state.layout = d.layout;
                             this.state.fingers = d.fingers;
@@ -2300,17 +3050,13 @@
                             this.state.layoutDesc = d.layoutDesc || "";
                             this.state.enableCustomRules = d.enableCustomRules !== undefined ? d.enableCustomRules : true;
 
-                            // 1. まずUIのロックを解除する（この瞬間は一時的に "CUSTOM" になる）
                             this.triggerCustomMode();
 
-                            // kb-desc の表示更新
                             const descEl = document.getElementById('kb-desc');
                             if (descEl) descEl.textContent = this.state.layoutDesc;
 
-                            // 2. その後に、インポートしたデータ内の名前で正しく上書きする
                             if (d.name) {
                                 this.state.layoutName = d.name;
-                                // 入力欄とヘッダーのタイトル表示も合わせて更新
                                 const nameInput = document.getElementById('layout-name-in');
                                 if (nameInput) nameInput.value = d.name;
                                 if (this.dom.kbTitle) this.dom.kbTitle.textContent = d.name;
@@ -2379,11 +3125,19 @@
 
                 // ▼ Canvasのマウントとリサイズイベント ▼
                 document.getElementById('kb-container').appendChild(this.flowCanvas);
+
+                this.emuFlowCanvas = document.createElement('canvas');
+                this.emuFlowCanvas.id = 'emu-flow-canvas';
+                this.emuCtx = this.emuFlowCanvas.getContext('2d');
+                document.getElementById('emu-target-kb').appendChild(this.emuFlowCanvas);
+
                 window.addEventListener('resize', () => {
-                    if (this.state.mode === 'result') this.drawFlow();
+                    if (this.state.mode === 'result' || this.state.appView === 'emulation') this.drawFlow();
                 });
 
+                this.initEmulation();
                 this.setDomain('logic');
+                this.setAppView('analyzer');
                 document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\nInput text matching your layout's logical key definitions (e.g., Alphanumeric, Romaji, or direct Kana strings).\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
             }
 
@@ -2401,6 +3155,13 @@
                 document.querySelectorAll('[data-i18n-tooltip]').forEach(el => {
                     if (dict[el.dataset.i18nTooltip]) {
                         el.setAttribute('data-tooltip', dict[el.dataset.i18nTooltip]);
+                    }
+                });
+
+                // 3. 擬似placeholder属性の書き換え
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                    if (dict[el.dataset.i18nPlaceholder]) {
+                        el.setAttribute('data-placeholder', dict[el.dataset.i18nPlaceholder]);
                     }
                 });
 
@@ -2448,47 +3209,76 @@
             }
 
             updateUI() {
-                const mode = this.state.mode;
+                let mode = this.state.mode;
                 const dict = I18N[this.state.lang];
                 this.state.selectedSource = null;
 
-                // 解析ロジック(settings)画面では、ヘッダー(配列名)を非表示にする
+                this.dom.btnViewAnalyzer.classList.toggle('active', this.state.appView === 'analyzer');
+                this.dom.btnViewEmu.classList.toggle('active', this.state.appView === 'emulation');
+
+                // --- Emulation top-level workspace ---
+                if (this.state.appView === 'emulation') {
+                    this.dom.domainSwitch.style.display = 'none';
+                    this.dom.toolbarContainer.style.display = 'none';
+                    this.dom.kbHeader.style.display = 'none';
+                    this.dom.kbContainer.style.display = 'none';
+                    this.dom.logicalMeta.style.display = 'none';
+                    this.dom.ctrlArea.style.display = 'none';
+                    this.dom.settingsView.style.display = 'none';
+                    this.dom.emuWorkspace.style.display = 'flex';
+                    this.dom.corpusPanel.style.display = 'none';
+
+                    this.renderEmuWorkspace();
+                    this.refreshEmuAnalysis();
+
+                    return;
+                }
+
+                // --- Analyzer workspace ---
+
+                this.dom.domainSwitch.style.display = 'flex';
+                this.dom.toolbarContainer.style.display = 'flex';
+                this.dom.emuWorkspace.style.display = 'none';
+                this.dom.corpusPanel.style.display = 'block';
+
                 if (this.dom.kbHeader) {
                     this.dom.kbHeader.style.display = (mode === 'settings') ? 'none' : 'flex';
                 }
 
-                // ボタンラベル更新
                 const isLogic = this.state.domain === 'logic';
                 this.dom.btnImp.querySelector('span').textContent = isLogic ? dict.imp_layout : dict.imp_phys;
                 this.dom.btnExp.querySelector('span').textContent = isLogic ? dict.exp_layout : dict.exp_phys;
 
-                // モードボタン更新
-                document.querySelectorAll('.mode-btn').forEach(b =>
-                    b.classList.toggle('active', b.dataset.mode === mode));
+                document.querySelectorAll('.mode-btn').forEach(b => {
+                    if (b.classList.contains('emu-side-mode')) return;
+                    b.classList.toggle('active', b.dataset.mode === mode);
+                });
 
-                const settings = document.getElementById('settings-view');
-                const kb = document.getElementById('kb-container');
-                const ctrl = document.getElementById('control-area');
+                const settings = this.dom.settingsView;
+                const kb = this.dom.kbContainer;
+                const ctrl = this.dom.ctrlArea;
 
                 if (mode === 'settings') {
-                    settings.style.display = 'flex'; kb.style.display = 'none'; ctrl.style.display = 'none'; this.dom.logicalMeta.style.display = 'none';
+                    settings.style.display = 'flex';
+                    kb.style.display = 'none';
+                    ctrl.style.display = 'none';
+                    this.dom.logicalMeta.style.display = 'none';
                 } else {
-                    settings.style.display = 'none'; kb.style.display = 'flex'; ctrl.style.display = 'flex';
+                    settings.style.display = 'none';
+                    kb.style.display = 'flex';
+                    ctrl.style.display = 'flex';
                     this.renderGrid('L');
                     this.renderGrid('R');
 
                     let html = `<div class="instruction">${dict['instr_' + mode]}</div>`;
 
-                    // 1. タイトルと説明文の更新 (全モード共通処理)
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
                     const descDisplay = document.getElementById('kb-desc');
                     if (descDisplay) {
                         descDisplay.textContent = this.state.layoutDesc;
-                        // 説明文が空の時は要素を消して余白を詰める
                         descDisplay.style.display = this.state.layoutDesc ? 'block' : 'none';
                     }
 
-                    // 2. Layoutモードの場合、プルダウン等を専用エリアに表示
                     if (mode === 'layout') {
                         const isPreset = PRESETS[this.state.layoutName.toLowerCase()] !== undefined;
                         const readOnlyAttr = isPreset ? 'readonly' : '';
@@ -2529,10 +3319,8 @@
                             </div>
                         `;
 
-                        // コントロールエリアは説明文のみ
                         ctrl.innerHTML = html;
 
-                        // イベントリスナーの登録
                         const presetIn = document.getElementById('kb-preset-in');
                         const nameIn = document.getElementById('layout-name-in');
                         const descIn = document.getElementById('layout-desc-in');
@@ -2606,22 +3394,7 @@
                                 this.triggerCustomMode();
                             };
                         }
-
-                        if (nameIn) {
-                            nameIn.oninput = (e) => {
-                                this.state.layoutName = e.target.value;
-                                this.dom.kbTitle.textContent = e.target.value;
-                            };
-                        }
-
-                        if (rulesIn) {
-                            rulesIn.oninput = (e) => {
-                                this.state.customRules = e.target.value;
-                                this.triggerCustomMode();
-                            };
-                        }
                     } else {
-                        // Fingering 等他のモードの時は非表示
                         this.dom.logicalMeta.style.display = 'none';
 
                         if (mode === 'finger') {
@@ -2632,8 +3405,7 @@
                             });
                             html += `</div>`;
                         }
-                        
-                        // ▼ Resultモード時のcontrol-areaにトグルスイッチを配置 ▼
+
                         if (mode === 'result') {
                             html += `
                                 <div style="margin-top: 12px; display: flex; justify-content: center;">
@@ -2646,7 +3418,6 @@
 
                         ctrl.innerHTML = html;
 
-                        // ▼ 配置したトグルスイッチにイベントをバインド ▼
                         if (mode === 'result') {
                             const flowToggle = document.getElementById('toggle-flow-ctrl');
                             if (flowToggle) {
@@ -2662,16 +3433,17 @@
                 if (mode !== 'result') {
                     this.hoveredKeyId = null;
                     this.dom.resPanel.style.display = 'none';
-                    // 解析結果モード以外（修正作業中など）は線を消去する
                     if (this.ctx) this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
                 }
             }
 
-            openModal(type, content = "") {
+            openModal(type, content = "", options = {}) {
                 const dict = I18N[this.state.lang];
-                // --- 現在のドメイン判定 ---
                 const isLogic = this.state.domain === 'logic';
-                // -----------------------------
+                const context = options.kind || 'main';
+                const side = options.side || null;
+
+                this.modalContext = { kind: context, side };
 
                 this.modal.classList.add('open');
                 this.modalText.value = content;
@@ -2680,21 +3452,27 @@
                 this.btnModalImport.textContent = dict.btn_imp_exec;
 
                 if (type === 'export') {
-                    // --- ドメインに応じたタイトルを選択 ---
-                    this.modalTitle.textContent = isLogic ? dict.modal_title_exp_layout : dict.modal_title_exp_phys;
-                    // -----------------------------------------
-                    this.modalDesc.textContent = dict.modal_desc_exp;
+                    if (context === 'emu') {
+                        const sideLabel = side === 'source' ? dict.emu_source_title : dict.emu_target_title;
+                        this.modalTitle.textContent = `${dict.header_export} (${sideLabel})`;
+                    } else {
+                        this.modalTitle.textContent = isLogic ? dict.modal_title_exp_layout : dict.modal_title_exp_phys;
+                    }
 
+                    this.modalDesc.textContent = dict.modal_desc_exp;
                     this.btnModalCopy.style.display = 'inline-block';
                     this.btnModalImport.style.display = 'none';
                     this.modalText.readOnly = true;
                     setTimeout(() => this.modalText.select(), 50);
                 } else {
-                    // --- ドメインに応じたタイトルを選択 ---
-                    this.modalTitle.textContent = isLogic ? dict.modal_title_imp_layout : dict.modal_title_imp_phys;
-                    // -----------------------------------------
-                    this.modalDesc.textContent = dict.modal_desc_imp;
+                    if (context === 'emu') {
+                        const sideLabel = side === 'source' ? dict.emu_source_title : dict.emu_target_title;
+                        this.modalTitle.textContent = `${dict.header_import} (${sideLabel})`;
+                    } else {
+                        this.modalTitle.textContent = isLogic ? dict.modal_title_imp_layout : dict.modal_title_imp_phys;
+                    }
 
+                    this.modalDesc.textContent = dict.modal_desc_imp;
                     this.btnModalCopy.style.display = 'none';
                     this.btnModalImport.style.display = 'inline-block';
                     this.modalText.readOnly = false;
@@ -2705,8 +3483,868 @@
 
             setTool(f) { this.activeTool = f; this.updateUI(); }
 
+            exportEmuBundle(side) {
+                const b = this.state.emu[side];
+                return JSON.stringify({
+                    type: 'emu-logical',
+                    name: b.name,
+                    desc: b.desc,
+                    customRules: b.customRules,
+                    enableCustomRules: b.enableCustomRules,
+                    layout: b.layout,
+                    fingers: b.fingers
+                }, null, 2);
+            }
+
+            importEmuBundle(side, data) {
+                const payload = (data.type === 'logical')
+                    ? {
+                        name: data.name,
+                        desc: data.layoutDesc || '',
+                        customRules: data.customRules || '',
+                        enableCustomRules: data.enableCustomRules !== false,
+                        layout: data.layout,
+                        fingers: data.fingers
+                    }
+                    : data;
+
+                if (!payload.layout?.L || !payload.layout?.R || !payload.fingers?.L || !payload.fingers?.R) {
+                    throw new Error('Invalid emulation layout JSON.');
+                }
+
+                this.state.emu[side] = {
+                    presetKey: 'custom',
+                    name: payload.name || 'CUSTOM',
+                    desc: payload.desc || '',
+                    customRules: payload.customRules || '',
+                    enableCustomRules: payload.enableCustomRules !== false,
+                    layout: {
+                        L: [...payload.layout.L],
+                        R: [...payload.layout.R]
+                    },
+                    fingers: {
+                        L: [...payload.fingers.L],
+                        R: [...payload.fingers.R]
+                    }
+                };
+
+                this.refreshEmuAnalysis();
+                this.renderEmuWorkspace();
+            }
+
+            getDisplayBundle() {
+                if (this.state.appView === 'emulation') {
+                    return this.state.emu.target;
+                }
+
+                return {
+                    layout: this.state.layout,
+                    fingers: this.state.fingers,
+                    name: this.state.layoutName,
+                    desc: this.state.layoutDesc,
+                    customRules: this.state.customRules,
+                    enableCustomRules: this.state.enableCustomRules
+                };
+            }
+
+            setAppView(view) {
+                this.state.appView = view;
+
+                this.dom.btnViewAnalyzer.classList.toggle('active', view === 'analyzer');
+                this.dom.btnViewEmu.classList.toggle('active', view === 'emulation');
+                this.updateUI();
+            }
+
+            markEmuBundleCustom(side) {
+                const bundle = this.state.emu[side];
+                bundle.presetKey = 'custom';
+                const sel = document.getElementById(`emu-${side}-preset`);
+                if (sel) sel.value = 'custom';
+            }
+
+            bindEmuSideControls(side) {
+                const bundle = this.state.emu[side];
+                const presetEl = document.getElementById(`emu-${side}-preset`);
+                const nameEl = document.getElementById(`emu-${side}-${side === 'target' ? 'name-in' : 'name'}`);
+                const descEl = document.getElementById(`emu-${side}-desc`);
+                const rulesEl = document.getElementById(`emu-${side}-rules`);
+                const toggleEl = document.getElementById(`emu-${side}-toggle-rules`);
+                const resetEl = document.getElementById(`emu-${side}-reset`);
+                const importEl = document.getElementById(`emu-${side}-import`);
+                const exportEl = document.getElementById(`emu-${side}-export`);
+
+                if (presetEl) {
+                    presetEl.onchange = (e) => {
+                        const val = e.target.value;
+                        if (val === 'custom') {
+                            this.state.emu[side].presetKey = 'custom';
+                            this.renderEmuWorkspace();
+                            return;
+                        }
+                        this.state.emu[side] = cloneBundleFromPreset(val);
+                        this.refreshEmuAnalysis();
+                        this.renderEmuWorkspace();
+                    };
+                }
+
+                if (nameEl) {
+                    nameEl.oninput = (e) => {
+                        this.state.emu[side].name = e.target.value || 'CUSTOM';
+                        this.markEmuBundleCustom(side);
+                        this.renderEmuWorkspace();
+                    };
+                }
+
+                if (descEl) {
+                    descEl.oninput = (e) => {
+                        this.state.emu[side].desc = e.target.value || '';
+                        this.markEmuBundleCustom(side);
+                        this.renderEmuWorkspace();
+                    };
+                }
+
+                if (rulesEl) {
+                    rulesEl.oninput = (e) => {
+                        if (side === 'source') return;
+                        this.state.emu[side].customRules = e.target.value || '';
+                        this.markEmuBundleCustom(side);
+                    };
+                }
+
+                if (toggleEl) {
+                    toggleEl.onchange = (e) => {
+                        if (side === 'source') {
+                            e.target.checked = false;
+                            return;
+                        }
+                        this.state.emu[side].enableCustomRules = e.target.checked;
+                        this.markEmuBundleCustom(side);
+                    };
+                }
+
+                if (resetEl) {
+                    resetEl.onclick = () => {
+                        const fallback = (this.state.emu[side].presetKey && this.state.emu[side].presetKey !== 'custom')
+                            ? this.state.emu[side].presetKey
+                            : 'qwerty';
+                        this.state.emu[side] = cloneBundleFromPreset(fallback);
+                        this.refreshEmuAnalysis();
+                        this.renderEmuWorkspace();
+                    };
+                }
+
+                if (importEl) {
+                    importEl.onclick = () => {
+                        this.openModal('import', '', { kind: 'emu', side });
+                    };
+                }
+
+                if (exportEl) {
+                    exportEl.onclick = () => {
+                        this.openModal('export', this.exportEmuBundle(side), { kind: 'emu', side });
+                    };
+                }
+            }
+
+            initEmulation() {
+                ['source', 'target'].forEach(side => this.bindEmuSideControls(side));
+
+                document.querySelectorAll('.emu-side-mode').forEach(btn => {
+                    btn.onclick = () => {
+                        const side = btn.dataset.side;
+                        const mode = btn.dataset.mode;
+                        this.state.emu[`${side}Mode`] = mode;
+                        this.renderEmuWorkspace();
+                    };
+                });
+
+                document.querySelectorAll('.emu-view-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        const pane = btn.dataset.pane;
+                        this.state.emu.activePane = pane;
+                        this.renderEmuWorkspace();
+                    };
+                });
+
+                const flowToggle = document.getElementById('emu-show-flow');
+                if (flowToggle) {
+                    flowToggle.checked = this.state.showFlow;
+                    flowToggle.onchange = (e) => {
+                        this.state.showFlow = e.target.checked;
+                        this.drawFlow();
+                    };
+                }
+
+                const btnClear = document.getElementById('emu-clear');
+                if (btnClear) {
+                    btnClear.onclick = () => {
+                        this.state.emu.events = [];
+                        this.state.emu.rawText = '';
+                        this.hoveredKeyId = null;
+                        this.refreshEmuAnalysis();
+                    };
+                }
+
+                const cap = document.getElementById('emu-capture');
+                if (cap) {
+                    cap.addEventListener('click', () => cap.focus());
+
+                    cap.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                    });
+
+                    cap.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                    });
+
+                    cap.addEventListener('compositionstart', (e) => {
+                        this.state.emu.isComposing = true;
+                        e.preventDefault();
+                    });
+
+                    cap.addEventListener('compositionend', (e) => {
+                        this.state.emu.isComposing = false;
+                        e.preventDefault();
+                    });
+
+                    cap.addEventListener('keydown', (e) => {
+                        if (this.state.appView !== 'emulation') return;
+                        if (this.state.emu.activePane !== 'target') return;
+
+                        if (e.ctrlKey || e.metaKey || e.altKey) {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        if (this.state.emu.isComposing || e.isComposing || e.key === 'Process') {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        if (['Shift','Control','Alt','Meta','CapsLock','Escape'].includes(e.key)) return;
+
+                        if (this.state.emu.ignoreRepeat && e.repeat) {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        if (e.key === 'Backspace') {
+                            e.preventDefault();
+                            this.state.emu.rawText = (this.state.emu.rawText || '').slice(0, -1);
+                            this.hoveredKeyId = null;
+                            this.refreshEmuAnalysis();
+                            return;
+                        }
+
+                        const fragment = this.normalizeEmuInputChar(e);
+                        if (fragment === null) {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        e.preventDefault();
+
+                        this.state.emu.rawText = (this.state.emu.rawText || '') + fragment;
+                        this.refreshEmuAnalysis();
+                    });
+                }
+
+                this.renderEmuWorkspace();
+                this.updateEmuCaptureDisplay('');
+            }
+
+            renderEmuWorkspace() {
+                this.renderEmuSide('source');
+                this.renderEmuSide('target');
+
+                const activePane = this.state.emu.activePane || 'source';
+
+                const sourcePane = document.getElementById('emu-source-pane');
+                const targetPane = document.getElementById('emu-target-pane');
+
+                if (sourcePane) sourcePane.classList.toggle('active', activePane === 'source');
+                if (targetPane) targetPane.classList.toggle('active', activePane === 'target');
+
+                const btnSource = document.getElementById('emu-pane-btn-source');
+                const btnTarget = document.getElementById('emu-pane-btn-target');
+
+                if (btnSource) btnSource.classList.toggle('active', activePane === 'source');
+                if (btnTarget) btnTarget.classList.toggle('active', activePane === 'target');
+
+                if (activePane === 'target') {
+                    this.drawFlow();
+                } else {
+                    this.hoveredKeyId = null;
+                    this.drawFlow();
+                }
+            }
+
+            renderEmuSide(side) {
+                const bundle = this.state.emu[side];
+                const mode = this.state.emu[`${side}Mode`];
+                const isSource = side === 'source';
+
+                if (isSource) {
+                    bundle.enableCustomRules = false;
+                }
+
+                const presetEl = document.getElementById(`emu-${side}-preset`);
+                const nameEl = document.getElementById(`emu-${side}-${side === 'target' ? 'name-in' : 'name'}`);
+                const descEl = document.getElementById(`emu-${side}-desc`);
+                const rulesEl = document.getElementById(`emu-${side}-rules`);
+                const toggleEl = document.getElementById(`emu-${side}-toggle-rules`);
+                const nameViewEl = document.getElementById(`emu-${side}-name-view`);
+                const descViewEl = document.getElementById(`emu-${side}-desc-view`);
+                const paletteEl = document.getElementById(`emu-${side}-finger-palette`);
+
+                if (presetEl) presetEl.value = (bundle.presetKey && PRESETS[bundle.presetKey]) ? bundle.presetKey : 'custom';
+                if (nameEl) nameEl.value = bundle.name || 'CUSTOM';
+                if (descEl) descEl.value = bundle.desc || '';
+
+                if (rulesEl) {
+                    rulesEl.value = bundle.customRules || '';
+                    rulesEl.disabled = isSource;
+                    rulesEl.readOnly = isSource;
+                    rulesEl.style.opacity = isSource ? '0.55' : '1';
+                    rulesEl.style.cursor = isSource ? 'not-allowed' : 'text';
+                }
+
+                if (toggleEl) {
+                    toggleEl.checked = isSource ? false : (bundle.enableCustomRules !== false);
+                    toggleEl.disabled = isSource;
+                    toggleEl.style.cursor = isSource ? 'not-allowed' : 'pointer';
+                }
+
+                if (nameViewEl) nameViewEl.textContent = bundle.name || 'CUSTOM';
+                if (descViewEl) {
+                    descViewEl.textContent = bundle.desc || '';
+                    descViewEl.style.display = bundle.desc ? 'block' : 'none';
+                }
+
+                document.querySelectorAll(`.emu-side-mode[data-side="${side}"]`).forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
+                });
+
+                if (paletteEl) {
+                    paletteEl.innerHTML = '';
+                    if (mode === 'finger') {
+                        paletteEl.style.display = 'flex';
+                        const dict = I18N[this.state.lang];
+                        [0,1,2,3,4].forEach(f => {
+                            const el = document.createElement('div');
+                            el.className = `p-btn ${this.activeTool === f ? 'active' : ''}`;
+                            el.style.background = FINGER_COLORS[f];
+                            el.textContent = dict.fingers[f][0];
+                            el.onclick = () => {
+                                this.activeTool = f;
+                                this.renderEmuWorkspace();
+                            };
+                            paletteEl.appendChild(el);
+                        });
+                    } else {
+                        paletteEl.style.display = 'none';
+                    }
+                }
+
+                this.renderEmuKeyboardSide(side, 'L');
+                this.renderEmuKeyboardSide(side, 'R');
+            }
+
+            renderEmuKeyboardSide(side, hand) {
+                const bundle = this.state.emu[side];
+                const mode = this.state.emu[`${side}Mode`];
+                const gridEl = document.getElementById(`emu-${side}-grid-${hand === 'L' ? 'left' : 'right'}`);
+                const thumbEl = document.getElementById(`emu-${side}-thumb`);
+                if (!gridEl || !thumbEl) return;
+
+                gridEl.innerHTML = '';
+                if (hand === 'R') thumbEl.innerHTML = '';
+
+                const isRight = hand === 'R';
+                const totalKeys = isRight ? TOTAL_KEYS_R : TOTAL_KEYS_L;
+
+                bundle.layout[hand].forEach((char, idx) => {
+                    const isSpace = isRight && idx === totalKeys - 1;
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    keyDiv.dataset.hand = hand;
+                    keyDiv.dataset.idx = idx;
+                    if (isSpace) keyDiv.classList.add('space-key');
+
+                    if (char === null) {
+                        keyDiv.classList.add('is-disabled');
+                        keyDiv.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            if (mode === 'layout') {
+                                bundle.layout[hand][idx] = '';
+                                this.markEmuBundleCustom(side);
+                                this.renderEmuWorkspace();
+                                this.refreshEmuAnalysis();
+                            }
+                        };
+                        if (isSpace) thumbEl.appendChild(keyDiv);
+                        else gridEl.appendChild(keyDiv);
+                        return;
+                    }
+
+                    const parts = char.trim().split(/\s+/);
+                    const mainChar = parts[0];
+                    const parsedMain = parseKeyToken(mainChar);
+
+                    keyDiv.dataset.keyId = `${hand}:${idx}`;
+                    if (side === 'target') keyDiv.dataset.flowScope = 'target';
+
+                    if (side === 'target') {
+                        keyDiv.onmouseenter = () => {
+                            if (this.state.appView !== 'emulation') return;
+                            this.hoveredKeyId = `${hand}:${idx}`;
+                            this.drawFlow();
+                        };
+                        keyDiv.onmouseleave = () => {
+                            if (this.state.appView !== 'emulation') return;
+                            this.hoveredKeyId = null;
+                            this.drawFlow();
+                        };
+                    }
+
+                    const cSpan = document.createElement('div');
+                    cSpan.className = 'key-char';
+                    cSpan.textContent = parsedMain.disp;
+                    if (CONTROL_KEYS.has(parsedMain.val.toLowerCase())) cSpan.classList.add('ctrl-key');
+                    else if (parsedMain.disp.length > 2) cSpan.classList.add('small');
+                    keyDiv.appendChild(cSpan);
+
+                    if (parts.length > 1) {
+                        const layerContainer = document.createElement('div');
+                        layerContainer.style.position = 'absolute';
+                        layerContainer.style.top = '2px';
+                        layerContainer.style.right = '4px';
+                        layerContainer.style.display = 'flex';
+                        layerContainer.style.gap = '2px';
+                        layerContainer.style.pointerEvents = 'none';
+                        layerContainer.style.maxWidth = '38px';
+                        layerContainer.style.overflow = 'hidden';
+
+                        parts.slice(1).forEach(subChar => {
+                            const parsedSub = parseKeyToken(subChar);
+                            const layerSpan = document.createElement('span');
+                            layerSpan.textContent = parsedSub.disp;
+                            layerSpan.style.fontWeight = '800';
+
+                            if (CONTROL_KEYS.has(parsedSub.val.toLowerCase())) {
+                                layerSpan.style.fontSize = '0.55rem';
+                                layerSpan.style.color = 'var(--text-dim)';
+                                layerSpan.style.textTransform = 'capitalize';
+                            } else {
+                                layerSpan.style.fontSize = '0.65rem';
+                                layerSpan.style.color = 'var(--accent)';
+                            }
+                            layerContainer.appendChild(layerSpan);
+                        });
+
+                        keyDiv.appendChild(layerContainer);
+                    }
+
+                    const sSpan = document.createElement('div');
+                    sSpan.className = 'key-sub';
+                    keyDiv.appendChild(sSpan);
+
+                    const fBar = document.createElement('div');
+                    fBar.className = 'finger-bar';
+                    const fId = bundle.fingers[hand][idx];
+                    fBar.style.backgroundColor = FINGER_COLORS[fId] || 'transparent';
+                    keyDiv.appendChild(fBar);
+
+                    if (side === 'target' && this.state.lastResult && this.state.appView === 'emulation') {
+                        const count = this.state.lastResult.keyCounts[hand][idx];
+                        const max = this.state.lastResult.maxKey || 1;
+
+                        if (count > 0) {
+                            const rawRatio = count / max;
+                            let alpha = Math.pow(rawRatio, 0.5) * 1.2;
+                            if (alpha > 0.9) alpha = 0.9;
+                            if (alpha < 0.1) alpha = 0.1;
+
+                            const r = Math.round(57 * alpha + 33 * (1 - alpha));
+                            const g = Math.round(211 * alpha + 38 * (1 - alpha));
+                            const b = Math.round(83 * alpha + 45 * (1 - alpha));
+                            const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+                            const isLightBg = luminance > 140;
+
+                            const mainTextColor = isLightBg ? '#010409' : '#ffffff';
+                            const layerTextColor = isLightBg ? '#4A148C' : '#EAD6FF';
+                            const dimTextColor = isLightBg ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.65)';
+
+                            keyDiv.style.backgroundColor = `rgba(57, 211, 83, ${alpha})`;
+                            keyDiv.style.borderColor = `rgba(57, 211, 83, ${Math.min(1, alpha + 0.4)})`;
+
+                            cSpan.style.color = cSpan.classList.contains('ctrl-key') ? dimTextColor : mainTextColor;
+                            sSpan.style.color = dimTextColor;
+
+                            keyDiv.querySelectorAll('div > span').forEach(span => {
+                                if (span.style.textTransform === 'capitalize') span.style.color = dimTextColor;
+                                else span.style.color = layerTextColor;
+                            });
+
+                            const cnt = document.createElement('div');
+                            cnt.className = 'key-count';
+                            cnt.dataset.defaultCount = String(count);
+                            cnt.textContent = count;
+                            cnt.style.color = isLightBg ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)';
+                            keyDiv.appendChild(cnt);
+                        }
+                    }
+
+                    if (mode === 'layout') {
+                        keyDiv.draggable = true;
+                        keyDiv.ondragstart = (e) => {
+                            this.isDragging = true;
+                            this.dragSource = { context: 'emu', side, hand, idx };
+                            keyDiv.classList.add('dragging');
+                            e.dataTransfer.effectAllowed = 'move';
+                        };
+                        keyDiv.ondragover = (e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+                            keyDiv.classList.add('drag-over');
+                        };
+                        keyDiv.ondragleave = () => keyDiv.classList.remove('drag-over');
+                        keyDiv.ondrop = (e) => {
+                            e.preventDefault();
+                            keyDiv.classList.remove('drag-over');
+                            if (!this.dragSource || this.dragSource.context !== 'emu' || this.dragSource.side !== side) return;
+
+                            const srcH = this.dragSource.hand;
+                            const srcI = this.dragSource.idx;
+                            const tmp = bundle.layout[hand][idx];
+                            bundle.layout[hand][idx] = bundle.layout[srcH][srcI];
+                            bundle.layout[srcH][srcI] = tmp;
+
+                            this.markEmuBundleCustom(side);
+                            this.renderEmuWorkspace();
+                            this.refreshEmuAnalysis();
+                        };
+                        keyDiv.ondragend = () => {
+                            this.isDragging = false;
+                            document.querySelectorAll('.dragging').forEach(k => k.classList.remove('dragging'));
+                        };
+                        keyDiv.onclick = () => {
+                            const dict = I18N[this.state.lang];
+                            const n = prompt(dict.msg_key_prompt, char);
+                            if (n !== null && n.trim() !== '') {
+                                bundle.layout[hand][idx] = n.trim();
+                                this.markEmuBundleCustom(side);
+                                this.renderEmuWorkspace();
+                                this.refreshEmuAnalysis();
+                            }
+                        };
+                        keyDiv.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            bundle.layout[hand][idx] = null;
+                            this.markEmuBundleCustom(side);
+                            this.renderEmuWorkspace();
+                            this.refreshEmuAnalysis();
+                        };
+                    } else if (mode === 'finger') {
+                        keyDiv.classList.add('finger-edit');
+                        keyDiv.onclick = () => {
+                            bundle.fingers[hand][idx] = this.activeTool;
+                            this.markEmuBundleCustom(side);
+                            this.renderEmuWorkspace();
+                            this.refreshEmuAnalysis();
+                        };
+                    }
+
+                    if (isSpace) thumbEl.appendChild(keyDiv);
+                    else gridEl.appendChild(keyDiv);
+                });
+            }
+
+            normalizeEmuInputChar(e) {
+                if (!e) return null;
+                if (e.key === ' ') return ' ';
+                if (e.key === 'Enter') return '\n';
+                if (e.key === 'Tab') return '\t';
+                if (typeof e.key === 'string' && e.key.length === 1) return e.key.toLowerCase();
+                return null;
+            }
+
+            tokenizeEmuSourceText(text) {
+                const bundle = this.state.emu.source;
+                const keyMap = this.analyzer.buildLayoutMapFrom(bundle);
+
+                const normalizedText = String(text || '')
+                    .toLowerCase()
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\r/g, '\n')
+                    .replace(/　/g, ' ');
+
+                const validTokens = Object.keys(keyMap)
+                    .filter(token => !CONTROL_KEYS.has(token))
+                    .sort((a, b) => b.length - a.length);
+
+                const events = [];
+                let i = 0;
+
+                while (i < normalizedText.length) {
+                    let matchedToken = null;
+                    let stepLength = 1;
+                    const ch = normalizedText[i];
+
+                    if (ch === ' ') {
+                        matchedToken = 'space';
+                    } else if (ch === '\n') {
+                        matchedToken = 'ent';
+                    } else if (ch === '\t') {
+                        matchedToken = 'tab';
+                    } else {
+                        for (const token of validTokens) {
+                            if (token === 'space' || token === 'ent' || token === 'tab') continue;
+                            if (normalizedText.startsWith(token, i)) {
+                                matchedToken = token;
+                                stepLength = token.length;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!matchedToken) {
+                        i += stepLength;
+                        continue;
+                    }
+
+                    const candidates = keyMap[matchedToken];
+                    if (!candidates || candidates.length === 0) {
+                        i += stepLength;
+                        continue;
+                    }
+
+                    const chosen = candidates.find(c => !c.isLayer) || candidates[0];
+                    const raw = bundle.layout[chosen.hand]?.[chosen.idx] || '';
+
+                    const tokens = raw.trim().split(/\s+/).map((token, tokenIndex) => {
+                        const parsed = parseKeyToken(token);
+                        let val = parsed.val.toLowerCase();
+
+                        if (val === 'space' || val === 'spc') val = 'space';
+                        else if (val === 'ent' || val === 'enter' || val === 'return') val = 'ent';
+
+                        return {
+                            val,
+                            disp: parsed.disp,
+                            isLayer: tokenIndex > 0
+                        };
+                    });
+
+                    const hit = tokens.find(t => t.val === matchedToken) || tokens[0];
+
+                    if (hit) {
+                        events.push({
+                            hand: chosen.hand,
+                            idx: chosen.idx,
+                            token: hit.val,
+                            disp: hit.disp,
+                            isLayer: hit.isLayer
+                        });
+                    }
+
+                    i += stepLength;
+                }
+
+                return events;
+            }
+
+            formatEmuRawTextForLog(text) {
+                if (!text) return '-';
+                return String(text)
+                    .replace(/ /g, '␠')
+                    .replace(/\n/g, ' ↵ ')
+                    .replace(/\t/g, ' ⇥ ');
+            }
+
+            expandEmuDisplayToken(token, bundle) {
+                const normalized = String(token || '').toLowerCase();
+
+                if (!bundle || bundle.enableCustomRules === false) return null;
+
+                const inverseRules = new Map();
+
+                String(bundle.customRules || '')
+                    .split(',')
+                    .map(rule => rule.split('='))
+                    .forEach(([from, to]) => {
+                        const lhs = String(from || '').trim().toLowerCase();
+                        const rhs = String(to || '').trim().toLowerCase();
+                        if (!lhs || !rhs) return;
+
+                        // analyzer では "yo=q" だが、表示では逆に q -> yo
+                        inverseRules.set(rhs, lhs);
+                    });
+
+                return inverseRules.get(normalized) || null;
+            }
+
+            updateEmuCaptureDisplay(text = '') {
+                const cap = document.getElementById('emu-capture');
+                if (!cap) return;
+
+                cap.textContent = text || '';
+                cap.scrollTop = cap.scrollHeight;
+            }
+
+            projectSourceEventToTarget(sourceEvent) {
+                const bundle = this.state.emu.target;
+                if (!sourceEvent) return null;
+
+                const raw = bundle.layout[sourceEvent.hand]?.[sourceEvent.idx];
+                if (raw === null || raw === undefined || raw === '') return null;
+
+                const tokens = raw.trim().split(/\s+/).map((token, tokenIndex) => {
+                    const parsed = parseKeyToken(token);
+                    let val = parsed.val.toLowerCase();
+
+                    if (val === 'space' || val === 'spc') val = 'space';
+                    else if (val === 'ent' || val === 'enter' || val === 'return') val = 'ent';
+
+                    return {
+                        val,
+                        disp: parsed.disp,
+                        isLayer: tokenIndex > 0
+                    };
+                });
+
+                let hit = null;
+
+                // source が layer なら target でも layer を優先
+                if (sourceEvent.isLayer) {
+                    hit = tokens.find(t => t.isLayer);
+                } else {
+                    hit = tokens.find(t => !t.isLayer);
+                }
+
+                if (!hit) hit = tokens[0];
+                if (!hit) return null;
+
+                return {
+                    code: sourceEvent.code,
+                    hand: sourceEvent.hand,
+                    idx: sourceEvent.idx,
+                    token: hit.val,
+                    disp: hit.disp,
+                    isLayer: hit.isLayer,
+                    rawKey: sourceEvent.rawKey,
+                    ts: sourceEvent.ts
+                };
+            }
+
+            renderTargetOutputText(targetSequence) {
+                let out = '';
+                const bundle = this.state.emu.target;
+
+                for (const ev of targetSequence) {
+                    if (!ev) continue;
+
+                    const token = String(ev.token || '').toLowerCase();
+                    const disp = String(ev.disp || ev.token || '');
+
+                    if (token === 'space') {
+                        out += ' ';
+                        continue;
+                    }
+
+                    if (token === 'ent') {
+                        out += '\n';
+                        continue;
+                    }
+
+                    if (token === 'tab') {
+                        out += '\t';
+                        continue;
+                    }
+
+                    if (token === 'bs' || token === 'backspace' || token === 'del' || token === 'delete') {
+                        out = out.slice(0, -1);
+                        continue;
+                    }
+
+                    if (CONTROL_KEYS.has(token)) {
+                        continue;
+                    }
+
+                    const expanded = this.expandEmuDisplayToken(token, bundle);
+
+                    // 解析は token のまま、表示だけ逆引きで展開
+                    out += expanded || disp;
+                }
+
+                return out;
+            }
+
+            refreshEmuAnalysis() {
+                const sourceLogEl = document.getElementById('emu-source-log');
+                const tokenLogEl = document.getElementById('emu-token-log');
+                const targetNameEl = document.getElementById('emu-target-name-log');
+
+                const sourceSequence = this.tokenizeEmuSourceText(this.state.emu.rawText || '');
+                this.state.emu.events = sourceSequence;
+
+                if (sourceLogEl) {
+                    sourceLogEl.textContent = this.formatEmuRawTextForLog(this.state.emu.rawText || '');
+                }
+
+                const targetSequence = sourceSequence
+                    .map(ev => this.projectSourceEventToTarget(ev))
+                    .filter(Boolean);
+
+                if (tokenLogEl) {
+                    tokenLogEl.textContent = targetSequence.length
+                        ? targetSequence.map(x => x.token).join(' ')
+                        : '-';
+                }
+
+                if (targetNameEl) {
+                    targetNameEl.textContent = this.state.emu.target.name;
+                }
+
+                const renderedText = this.renderTargetOutputText(targetSequence);
+                this.updateEmuCaptureDisplay(renderedText);
+
+                if (targetSequence.length === 0) {
+                    this.state.lastResult = null;
+                    if (this.state.appView === 'emulation') {
+                        this.renderEmuWorkspace();
+                    }
+                    this.dom.resPanel.style.display = 'none';
+                    this.drawFlow();
+                    return;
+                }
+
+                const stats = this.analyzer.runResolvedSequence(targetSequence, this.state.emu.target);
+
+                let max = 0;
+                let maxChar = '-';
+                ['L','R'].forEach(h => stats.keyCounts[h].forEach((c, i) => {
+                    if (c > max) {
+                        max = c;
+                        const rawChar = this.state.emu.target.layout[h][i];
+                        maxChar = rawChar ? parseKeyToken(rawChar.trim().split(/\s+/)[0]).disp : '-';
+                    }
+                }));
+                stats.maxKey = max;
+                stats.maxKeyChar = maxChar;
+
+                this.state.lastResult = stats;
+
+                if (this.state.appView === 'emulation') {
+                    this.renderEmuWorkspace();
+                }
+
+                this.renderStats(stats);
+            }
+
             // ヒートマップ表示ロジックを含む renderGrid
-            renderGrid(hand) {
+            renderGrid(hand, bundle = null) {
+                const renderBundle = bundle || this.getDisplayBundle();
                 const el = this.dom[hand === 'L' ? 'gridL' : 'gridR'];
                 const thumbEl = document.getElementById('thumb-area');
                 el.innerHTML = '';
@@ -2715,7 +4353,7 @@
                 const isRight = hand === 'R';
                 const totalKeys = isRight ? TOTAL_KEYS_R : TOTAL_KEYS_L;
 
-                this.state.layout[hand].forEach((char, idx) => {
+                renderBundle.layout[hand].forEach((char, idx) => {
                     const isSpace = isRight && (idx === totalKeys - 1);
                     const keyDiv = document.createElement('div');
                     keyDiv.className = 'key';
@@ -2755,12 +4393,12 @@
                     keyDiv.dataset.keyDisp = parsedMain.disp;
 
                     keyDiv.onmouseenter = () => {
-                        if (this.state.mode !== 'result') return;
+                        if (this.state.appView !== 'analyzer' || this.state.mode !== 'result') return;
                         this.hoveredKeyId = keyId;
                         this.drawFlow();
                     };
                     keyDiv.onmouseleave = () => {
-                        if (this.state.mode !== 'result') return;
+                        if (this.state.appView !== 'analyzer' || this.state.mode !== 'result') return;
                         this.hoveredKeyId = null;
                         this.drawFlow();
                     };
@@ -2814,7 +4452,7 @@
 
                     const fBar = document.createElement('div');
                     fBar.className = 'finger-bar';
-                    const fId = this.state.fingers[hand][idx];
+                    const fId = renderBundle.fingers[hand][idx];
                     fBar.style.backgroundColor = FINGER_COLORS[fId] || 'transparent';
                     keyDiv.appendChild(fBar);
 
@@ -2844,7 +4482,7 @@
                             }
                         }
                     }
-                    else if (this.state.mode === 'result' && this.state.lastResult) {
+                    else if (this.state.appView === 'analyzer' && this.state.mode === 'result' && this.state.lastResult) {
                         const count = this.state.lastResult.keyCounts[hand][idx];
                         const max = this.state.lastResult.maxKey || 1;
 
@@ -3240,9 +4878,10 @@
             }
 
             getKeyInfoById(keyId) {
+                const bundle = (this.state.appView === 'emulation') ? this.state.emu.target : this.getDisplayBundle();
                 const [hand, idxStr] = String(keyId).split(':');
                 const idx = Number(idxStr);
-                const raw = this.state.layout[hand]?.[idx] ?? '';
+                const raw = bundle.layout[hand]?.[idx] ?? '';
                 const firstToken = raw ? raw.trim().split(/\s+/)[0] : '';
                 const parsed = parseKeyToken(firstToken);
 
@@ -3324,12 +4963,14 @@
             }
 
             updateKeyCountOverlay() {
-                if (this.state.mode !== 'result') return;
+                const isEmu = this.state.appView === 'emulation';
+                if (!isEmu && this.state.mode !== 'result') return;
 
                 const isHoverFlow = !!this.hoveredKeyId;
                 const { flowCounts, totalOutgoing } = this.getHoveredFlowCounts();
+                const selector = isEmu ? '#emu-target-kb .key[data-key-id]' : '.key[data-key-id]';
 
-                document.querySelectorAll('.key[data-key-id]').forEach(el => {
+                document.querySelectorAll(selector).forEach(el => {
                     if (el.classList.contains('is-disabled')) return;
 
                     const badge = el.querySelector('.key-count');
@@ -3360,26 +5001,34 @@
             drawFlow() {
                 this.updateKeyCountOverlay();
 
-                if (!this.state.lastResult || this.state.mode !== 'result' || !this.state.showFlow) {
+                const isEmu = this.state.appView === 'emulation';
+                const canDraw = isEmu || this.state.mode === 'result';
+
+                if (!this.state.lastResult || !canDraw || !this.state.showFlow) {
                     this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
+                    this.emuCtx.clearRect(0, 0, this.emuFlowCanvas.width, this.emuFlowCanvas.height);
                     return;
                 }
 
-                const container = document.getElementById('kb-container');
+                const container = isEmu ? document.getElementById('emu-target-kb') : document.getElementById('kb-container');
+                const canvas = isEmu ? this.emuFlowCanvas : this.flowCanvas;
+                const ctx = isEmu ? this.emuCtx : this.ctx;
+
+                if (!container || !canvas || !ctx) return;
+
                 const rect = container.getBoundingClientRect();
-                this.flowCanvas.width = rect.width;
-                this.flowCanvas.height = rect.height;
-                this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 const bigrams = this.state.lastResult.bigramCounts;
                 if (!bigrams || Object.keys(bigrams).length === 0) return;
 
-                // 頻度の最大値を取得（線の太さの正規化用）
                 const maxCount = Math.max(...Object.values(bigrams));
 
-                // DOM上の全有効キーの中心座標を取得
                 const keyCoords = {};
-                document.querySelectorAll('.key[data-key-id]').forEach(el => {
+                const selector = isEmu ? '#emu-target-kb .key[data-key-id]' : '.key[data-key-id]';
+                document.querySelectorAll(selector).forEach(el => {
                     if (el.classList.contains('is-disabled')) return;
                     const keyId = el.dataset.keyId;
                     if (!keyId) return;
@@ -3390,7 +5039,6 @@
                     };
                 });
 
-                // 太い線が上に描画されるように、カウントの昇順でソート
                 const entries = Object.entries(bigrams).sort((a, b) => a[1] - b[1]);
 
                 entries.forEach(([flowKey, count]) => {
@@ -3400,42 +5048,31 @@
                     const fromInfo = this.getKeyInfoById(fromId);
                     const toInfo = this.getKeyInfoById(toId);
 
-                    // Spaceキー「から」「へ」両方の遷移を除外
                     if (fromInfo.val === 'space' || fromInfo.val === 'spc' || toInfo.val === 'space' || toInfo.val === 'spc') return;
-
-                    // ホバー中は「そのキーから出る遷移」だけに絞る
                     if (this.hoveredKeyId && fromId !== this.hoveredKeyId) return;
 
                     const start = keyCoords[fromId];
                     const end = keyCoords[toId];
-
                     const dx = end.x - start.x;
                     const dy = end.y - start.y;
                     const dist = Math.hypot(dx, dy);
 
-                    // 制御点を一元化
                     const { x: cpX, y: cpY } = this.getFlowControlPoint(start, end, fromInfo);
-
-                    // 頻度を太さにマッピング
                     const thickness = Math.max(0.5, (count / maxCount) * 20);
 
-                    // ▼ 白系のグラデーションに変更し、コントラストを最大化する
-                    const gradient = this.ctx.createLinearGradient(start.x, start.y, end.x, end.y);
-                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)'); // 始点はほぼ透明
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)'); // 終点は不透明な白
+                    const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)');
 
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(start.x, start.y);
-                    this.ctx.quadraticCurveTo(cpX, cpY, end.x, end.y);
-                    this.ctx.strokeStyle = gradient;
-                    this.ctx.lineWidth = thickness;
-                    this.ctx.lineCap = 'round';
-
-                    // ▼ ぼんやりと光らせることで視認性を高める（ネオン効果）
-                    this.ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
-                    this.ctx.shadowBlur = 4;
-
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(start.x, start.y);
+                    ctx.quadraticCurveTo(cpX, cpY, end.x, end.y);
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = thickness;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+                    ctx.shadowBlur = 4;
+                    ctx.stroke();
                 });
             }
         }
