@@ -5120,11 +5120,16 @@
                 const isEmu = this.state.appView === 'emulation';
                 if (!isEmu && this.state.mode !== 'result') return;
 
+                const container = isEmu
+                    ? document.getElementById('emu-target-kb')
+                    : document.getElementById('kb-container');
+
+                if (!container) return;
+
                 const isHoverFlow = !!this.hoveredKeyId;
                 const { flowCounts, totalOutgoing } = this.getHoveredFlowCounts();
-                const selector = isEmu ? '#emu-target-kb .key[data-key-id]' : '.key[data-key-id]';
 
-                document.querySelectorAll(selector).forEach(el => {
+                container.querySelectorAll('.key[data-key-id]').forEach(el => {
                     if (el.classList.contains('is-disabled')) return;
 
                     const badge = el.querySelector('.key-count');
@@ -5181,11 +5186,11 @@
                 const maxCount = Math.max(...Object.values(bigrams));
 
                 const keyCoords = {};
-                const selector = isEmu ? '#emu-target-kb .key[data-key-id]' : '.key[data-key-id]';
-                document.querySelectorAll(selector).forEach(el => {
+                container.querySelectorAll('.key[data-key-id]').forEach(el => {
                     if (el.classList.contains('is-disabled')) return;
                     const keyId = el.dataset.keyId;
                     if (!keyId) return;
+
                     const elRect = el.getBoundingClientRect();
                     keyCoords[keyId] = {
                         x: (elRect.left - rect.left) + elRect.width / 2,
