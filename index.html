@@ -1233,6 +1233,7 @@
                                         <option value="colemak">Colemak</option>
                                         <option value="dvorak">Dvorak</option>
                                         <option value="eucalyn">Eucalyn</option>
+                                        <option value="onik">Onik</option>
                                         <option value="tomisuke">Tomisuke</option>
                                         <option value="seoto">せおと配列</option>
                                         <option value="onishi">大西配列</option>
@@ -1302,6 +1303,7 @@
                                         <option value="colemak">Colemak</option>
                                         <option value="dvorak">Dvorak</option>
                                         <option value="eucalyn">Eucalyn</option>
+                                        <option value="onik">Onik</option>
                                         <option value="tomisuke">Tomisuke</option>
                                         <option value="seoto">せおと配列</option>
                                         <option value="onishi">大西配列</option>
@@ -1958,6 +1960,39 @@
                 fingers: {
                     L: [0, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3, null, 0, 1, 2, 3, 3],
                     R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 0, 0, null, 3, 3, 2, 1, 0, null, null, 4]
+                }
+            },
+            onik: {
+                name: "Onik配列",
+                desc: "",
+                customRules: "",
+                L: [
+                    null, "1", "2", "3", "4", "5",
+                    "q", "f", "J", "G", "B", ".",
+                    "X", "A", "I", "T", "K", ",",
+                    "V", "C", "Z", "H", "R", ";"
+                ],
+                R: [
+                    "6", "7", "8", "9", "0", "=", null,
+                    "P", "Y", "U", "L", "[", "]", null,
+                    "w", "S", "E", "O", "N", null, null,
+                    "M", "D", "-", "/", null, null, null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [
+                        0, 0, 1, 2, 3, 3,
+                        0, 0, 1, 2, 3, 3,
+                        0, 0, 1, 2, 3, 3,
+                        0, 1, 2, 3, 3, 3
+                    ],
+                    R: [
+                        3, 3, 2, 1, 0, 0, 0,
+                        3, 3, 2, 1, 0, 0, 0,
+                        3, 3, 2, 1, 0, 0, null,
+                        3, 3, 2, 1, 0, null, null,
+                        4
+                    ]
                 }
             }
         };
@@ -3341,9 +3376,10 @@
                     }
 
                     if (mode === 'layout') {
-                        const isPreset = PRESETS[this.state.layoutName.toLowerCase()] !== undefined;
+                        const presetKey = Object.keys(PRESETS).find(key => PRESETS[key].name === this.state.layoutName) || null;
+                        const isPreset = presetKey !== null;
                         const readOnlyAttr = isPreset ? 'readonly' : '';
-                        const presetValue = isPreset ? this.state.layoutName.toLowerCase() : 'custom';
+                        const presetValue = isPreset ? presetKey : 'custom';
 
                         this.dom.logicalMeta.style.display = 'flex';
 
@@ -3356,6 +3392,7 @@
                                     <option value="colemak">Colemak</option>
                                     <option value="dvorak">Dvorak</option>
                                     <option value="eucalyn">Eucalyn</option>
+                                    <option value="onik">Onik</option>
                                     <option value="tomisuke">Tomisuke</option>
                                     <option value="seoto">せおと配列</option>
                                     <option value="onishi">大西配列</option>
