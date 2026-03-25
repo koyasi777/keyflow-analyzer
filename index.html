@@ -1370,7 +1370,7 @@
                                     <div class="emu-output-title" data-i18n="emu_output_title">Emulated Output</div>
                                     <div class="emu-inline-actions">
                                         <label style="font-size:0.85rem; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--accent); font-weight:bold;">
-                                            <input type="checkbox" id="emu-show-flow" checked style="cursor:pointer;">
+                                            <input type="checkbox" id="emu-show-flow" style="cursor:pointer;">
                                             <span data-i18n="lbl_show_flow">Show Flow</span>
                                         </label>
                                         <button id="emu-clear" class="secondary" type="button">Clear</button>
@@ -2444,7 +2444,8 @@
                 this.domain = 'logic'; // 'logic' or 'physical'
                 this.mode = 'layout';
                 this.appView = 'analyzer'; // 'analyzer' or 'emulation'
-                this.showFlow = true;// ▼ フロー表示の初期状態
+                this.analyzerShowFlow = true; // Analyzer側のフロー表示
+                this.emuShowFlow = false;      // Emulation側のフロー表示
 
                 this.emu = {
                     source: {
@@ -3586,7 +3587,7 @@
                             html += `
                                 <div style="margin-top: 12px; display: flex; justify-content: center;">
                                     <label style="font-size: 0.85rem; display:flex; align-items:center; gap: 8px; cursor:pointer; color:var(--accent); font-weight:bold;">
-                                        <input type="checkbox" id="toggle-flow-ctrl" ${this.state.showFlow ? 'checked' : ''} style="cursor:pointer;">
+                                        <input type="checkbox" id="toggle-flow-ctrl" ${this.state.analyzerShowFlow ? 'checked' : ''} style="cursor:pointer;">
                                         <span data-i18n="lbl_show_flow">${dict.lbl_show_flow || 'Show Flow'}</span>
                                     </label>
                                 </div>`;
@@ -3598,7 +3599,7 @@
                             const flowToggle = document.getElementById('toggle-flow-ctrl');
                             if (flowToggle) {
                                 flowToggle.onchange = (e) => {
-                                    this.state.showFlow = e.target.checked;
+                                    this.state.analyzerShowFlow = e.target.checked;
                                     this.drawFlow();
                                 };
                             }
@@ -3920,9 +3921,9 @@
 
                 const flowToggle = document.getElementById('emu-show-flow');
                 if (flowToggle) {
-                    flowToggle.checked = this.state.showFlow;
+                    flowToggle.checked = this.state.emuShowFlow;
                     flowToggle.onchange = (e) => {
-                        this.state.showFlow = e.target.checked;
+                        this.state.emuShowFlow = e.target.checked;
                         this.drawFlow();
                     };
                 }
@@ -5277,8 +5278,9 @@
 
                 const isEmu = this.state.appView === 'emulation';
                 const canDraw = isEmu || this.state.mode === 'result';
+                const showFlow = isEmu ? this.state.emuShowFlow : this.state.analyzerShowFlow;
 
-                if (!this.state.lastResult || !canDraw || !this.state.showFlow) {
+                if (!this.state.lastResult || !canDraw || !showFlow) {
                     this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
                     this.emuCtx.clearRect(0, 0, this.emuFlowCanvas.width, this.emuFlowCanvas.height);
                     return;
