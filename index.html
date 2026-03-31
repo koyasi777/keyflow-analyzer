@@ -4228,20 +4228,33 @@
                         layerContainer.style.maxWidth = '38px';
                         layerContainer.style.overflow = 'hidden';
 
-                        parts.slice(1).forEach(subChar => {
+                        const subParts = parts.slice(1);
+                        const hasMultipleSubLayers = subParts.length >= 2;
+
+                        subParts.forEach(subChar => {
                             const parsedSub = parseKeyToken(subChar);
                             const layerSpan = document.createElement('span');
                             layerSpan.textContent = parsedSub.disp;
                             layerSpan.style.fontWeight = '800';
 
-                            if (CONTROL_KEYS.has(parsedSub.val.toLowerCase())) {
-                                layerSpan.style.fontSize = '0.55rem';
-                                layerSpan.style.color = 'var(--text-dim)';
+                            const isControlKey = CONTROL_KEYS.has(parsedSub.val.toLowerCase());
+                            const isLongLayerText = parsedSub.disp.length >= 2;
+
+                            if (isLongLayerText || hasMultipleSubLayers) {
+                                layerSpan.style.fontSize = '0.45rem';
+                            } else if (isControlKey) {
+                                layerSpan.style.fontSize = '0.55rem'; // 制御キーは少し小さく
+                            } else {
+                                layerSpan.style.fontSize = '0.65rem'; // 通常
+                            }
+
+                            if (isControlKey) {
+                                layerSpan.style.color = 'var(--text-dim)'; // 目立たせないグレー
                                 layerSpan.style.textTransform = 'capitalize';
                             } else {
-                                layerSpan.style.fontSize = '0.65rem';
-                                layerSpan.style.color = 'var(--accent)';
+                                layerSpan.style.color = 'var(--accent)'; // 通常の裏レイヤーはアクセントカラー
                             }
+
                             layerContainer.appendChild(layerSpan);
                         });
 
@@ -4736,21 +4749,33 @@
                         layerContainer.style.maxWidth = '38px';
                         layerContainer.style.overflow = 'hidden';
 
-                        parts.slice(1).forEach(subChar => {
+                        const subParts = parts.slice(1);
+                        const hasMultipleSubLayers = subParts.length >= 2;
+
+                        subParts.forEach(subChar => {
                             const parsedSub = parseKeyToken(subChar);
                             const layerSpan = document.createElement('span');
                             layerSpan.textContent = parsedSub.disp;
                             layerSpan.style.fontWeight = '800';
 
-                            // 裏レイヤーの文字が制御キーかどうかを判定
-                            if (CONTROL_KEYS.has(parsedSub.val.toLowerCase())) {
-                                layerSpan.style.fontSize = '0.55rem'; // さらに小さく
+                            const isControlKey = CONTROL_KEYS.has(parsedSub.val.toLowerCase());
+                            const isLongLayerText = parsedSub.disp.length >= 2;
+
+                            if (isLongLayerText || hasMultipleSubLayers) {
+                                layerSpan.style.fontSize = '0.45rem';
+                            } else if (isControlKey) {
+                                layerSpan.style.fontSize = '0.55rem'; // 制御キーは少し小さく
+                            } else {
+                                layerSpan.style.fontSize = '0.65rem'; // 通常
+                            }
+
+                            if (isControlKey) {
                                 layerSpan.style.color = 'var(--text-dim)'; // 目立たせないグレー
                                 layerSpan.style.textTransform = 'capitalize';
                             } else {
-                                layerSpan.style.fontSize = '0.65rem';
                                 layerSpan.style.color = 'var(--accent)'; // 通常の裏レイヤーはアクセントカラー
                             }
+
                             layerContainer.appendChild(layerSpan);
                         });
 
