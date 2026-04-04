@@ -1233,6 +1233,7 @@
                                         <option value="colemak">Colemak</option>
                                         <option value="dvorak">Dvorak</option>
                                         <option value="eucalyn">Eucalyn</option>
+                                        <option value="mato">mato式</option>
                                         <option value="merlin">Merlin</option>
                                         <option value="oea">OEA</option>
                                         <option value="onik">Onik</option>
@@ -1310,6 +1311,7 @@
                                         <option value="colemak">Colemak</option>
                                         <option value="dvorak">Dvorak</option>
                                         <option value="eucalyn">Eucalyn</option>
+                                        <option value="mato">mato式</option>
                                         <option value="merlin">Merlin</option>
                                         <option value="oea">OEA</option>
                                         <option value="onik">Onik</option>
@@ -1965,6 +1967,40 @@
                     R: [3, 3, 2, 1, 0, 0, 0, 3, 3, 2, 1, 1, 0, 0, 3, 3, 2, 1, 1, 0, null, 3, 3, 2, 1, 0, null, null, 4]
                 },
                 customRules: "xn=c, ltu=j, -=l"
+            },
+            mato: {
+                name: "mato式",
+                desc: "",
+                customRules: "",
+                enableCustomRules: false,
+                L: [
+                    null, null, null, null, null, null,
+                    null, "l x", "w v", "k g", "r f", "p q",
+                    null, "h b", "s z", "t d", "n c", "m j",
+                    null, null, null, null, null, null
+                ],
+                R: [
+                    null, null, null, null, null, null, null,
+                    "", "u", "o", "y", "- /", null, null,
+                    "", "a", "e", "i", ", .", null, null,
+                    null, null, null, null, null, null, null,
+                    "Space"
+                ],
+                fingers: {
+                    L: [
+                        0, 0, 1, 2, 3, 3,
+                        null, 0, 1, 2, 3, 3,
+                        0, 0, 1, 2, 3, 3,
+                        null, 0, 1, 2, 3, 3
+                    ],
+                    R: [
+                        3, 3, 2, 1, 0, 0, 0,
+                        3, 3, 2, 1, 0, 0, 0,
+                        3, 3, 2, 1, 0, 0, null,
+                        3, 3, 2, 1, 0, null, null,
+                        4
+                    ]
+                }
             },
             oea: {
                 name: "OEA",
@@ -3534,6 +3570,7 @@
                                     <option value="colemak">Colemak</option>
                                     <option value="dvorak">Dvorak</option>
                                     <option value="eucalyn">Eucalyn</option>
+                                    <option value="mato">mato式</option>
                                     <option value="merlin">Merlin</option>
                                     <option value="oea">OEA</option>
                                     <option value="onik">Onik</option>
