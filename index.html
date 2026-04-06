@@ -1268,6 +1268,32 @@
                                     </label>
                                     <input type="text" id="emu-source-rules" class="meta-input" style="flex:1; min-width:0; font-family:'JetBrains Mono', monospace; opacity:0.55;" placeholder="source側では無効" disabled readonly>
                                 </div>
+
+                                <div class="meta-row">
+                                    <label data-i18n="lbl_layer_keys">Layer Keys:</label>
+                                    <div style="display:flex; flex:1; flex-wrap:wrap; gap:8px;">
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:0.78rem; color:var(--text-dim);" data-i18n="lbl_layer1">Layer 1</span>
+                                            <input type="text" id="emu-layer-1-display" class="meta-input" style="width:180px;" readonly>
+                                            <button id="emu-layer-1-set" class="secondary" type="button" data-i18n="btn_set_key">Set</button>
+                                            <button id="emu-layer-1-clear" class="secondary" type="button" data-i18n="btn_clear_key">Clear</button>
+                                        </div>
+
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:0.78rem; color:var(--text-dim);" data-i18n="lbl_layer2">Layer 2</span>
+                                            <input type="text" id="emu-layer-2-display" class="meta-input" style="width:180px;" readonly>
+                                            <button id="emu-layer-2-set" class="secondary" type="button" data-i18n="btn_set_key">Set</button>
+                                            <button id="emu-layer-2-clear" class="secondary" type="button" data-i18n="btn_clear_key">Clear</button>
+                                        </div>
+
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:0.78rem; color:var(--text-dim);" data-i18n="lbl_layer3">Layer 3</span>
+                                            <input type="text" id="emu-layer-3-display" class="meta-input" style="width:180px;" readonly>
+                                            <button id="emu-layer-3-set" class="secondary" type="button" data-i18n="btn_set_key">Set</button>
+                                            <button id="emu-layer-3-clear" class="secondary" type="button" data-i18n="btn_clear_key">Clear</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="emu-mode-block">
@@ -1771,6 +1797,62 @@
             if (idx === -1) return { val: str, disp: str };
             if (idx === 0) return { val: ':', disp: str.slice(1).replace(/^:/, '') || ':' };
             return { val: str.slice(0, idx), disp: str.slice(idx + 1) || str.slice(0, idx) };
+        };
+
+        const EMU_CODE_TO_POS = {
+            Backquote: { hand: 'L', idx: 0 },
+            Digit1: { hand: 'L', idx: 1 },
+            Digit2: { hand: 'L', idx: 2 },
+            Digit3: { hand: 'L', idx: 3 },
+            Digit4: { hand: 'L', idx: 4 },
+            Digit5: { hand: 'L', idx: 5 },
+
+            KeyQ: { hand: 'L', idx: 7 },
+            KeyW: { hand: 'L', idx: 8 },
+            KeyE: { hand: 'L', idx: 9 },
+            KeyR: { hand: 'L', idx: 10 },
+            KeyT: { hand: 'L', idx: 11 },
+
+            KeyA: { hand: 'L', idx: 13 },
+            KeyS: { hand: 'L', idx: 14 },
+            KeyD: { hand: 'L', idx: 15 },
+            KeyF: { hand: 'L', idx: 16 },
+            KeyG: { hand: 'L', idx: 17 },
+
+            KeyZ: { hand: 'L', idx: 19 },
+            KeyX: { hand: 'L', idx: 20 },
+            KeyC: { hand: 'L', idx: 21 },
+            KeyV: { hand: 'L', idx: 22 },
+            KeyB: { hand: 'L', idx: 23 },
+
+            Digit6: { hand: 'R', idx: 0 },
+            Digit7: { hand: 'R', idx: 1 },
+            Digit8: { hand: 'R', idx: 2 },
+            Digit9: { hand: 'R', idx: 3 },
+            Digit0: { hand: 'R', idx: 4 },
+            Minus: { hand: 'R', idx: 5 },
+            Equal: { hand: 'R', idx: 6 },
+
+            KeyY: { hand: 'R', idx: 7 },
+            KeyU: { hand: 'R', idx: 8 },
+            KeyI: { hand: 'R', idx: 9 },
+            KeyO: { hand: 'R', idx: 10 },
+            KeyP: { hand: 'R', idx: 11 },
+
+            KeyH: { hand: 'R', idx: 14 },
+            KeyJ: { hand: 'R', idx: 15 },
+            KeyK: { hand: 'R', idx: 16 },
+            KeyL: { hand: 'R', idx: 17 },
+            Quote: { hand: 'R', idx: 18 },
+            Semicolon: { hand: 'R', idx: 19 },
+
+            KeyN: { hand: 'R', idx: 21 },
+            KeyM: { hand: 'R', idx: 22 },
+            Comma: { hand: 'R', idx: 23 },
+            Period: { hand: 'R', idx: 24 },
+            Slash: { hand: 'R', idx: 25 },
+
+            Space: { hand: 'R', idx: 28 }
         };
 
         const FINGER_COLORS = {
@@ -2401,6 +2483,13 @@
                 lbl_custom_replace: "Custom Rules",
                 desc_custom_replace: "Map input text to physical keys (e.g., ltu=l, nn=q). Handled as a logical layout property.",
                 lbl_show_flow: "Show Flow",
+                lbl_layer_keys: "Layer Keys",
+                lbl_layer1: "Layer 1",
+                lbl_layer2: "Layer 2",
+                lbl_layer3: "Layer 3",
+                btn_set_key: "Set",
+                btn_clear_key: "Clear",
+                msg_press_layer_key: "Press a key...",
             },
             ja: {
                 fingers: ["小指", "薬指", "中指", "人差", "親指"],
@@ -2519,6 +2608,13 @@
                 lbl_custom_replace: "カスタムルール",
                 desc_custom_replace: "【論理配列固有のマクロ/IME展開】\nカンマ区切りで「コーパス内文字列=配列上のキー」を指定します(例: ltu=l, nn=q)。この設定は論理配列データとして保存されます。",
                 lbl_show_flow: "フロー表示",
+                lbl_layer_keys: "レイヤーキー",
+                lbl_layer1: "レイヤー1",
+                lbl_layer2: "レイヤー2",
+                lbl_layer3: "レイヤー3",
+                btn_set_key: "設定",
+                btn_clear_key: "解除",
+                msg_press_layer_key: "キーを入力してください...",
             }
         };
 
@@ -2561,6 +2657,15 @@
                     activePane: 'source',
                     events: [],
                     rawText: '',
+                    inputEvents: [],
+                    layerKeys: {
+                        1: null,
+                        2: null,
+                        3: null
+                    },
+                    activeLayers: new Set(),
+                    pendingLayerTap: {},
+                    captureLayerSlot: 0,
                     isCapturing: false,
                     isComposing: false,
                     ignoreRepeat: true
@@ -3986,7 +4091,13 @@
                         const fallback = (this.state.emu[side].presetKey && this.state.emu[side].presetKey !== 'custom')
                             ? this.state.emu[side].presetKey
                             : 'qwerty';
+
                         this.state.emu[side] = cloneBundleFromPreset(fallback);
+
+                        this.state.emu.activeLayers.clear();
+                        this.state.emu.pendingLayerTap = {};
+                        this.clearAllEmuLayerGrace();
+
                         this.refreshEmuAnalysis();
                         this.renderEmuWorkspace();
                     };
@@ -4039,6 +4150,10 @@
                     btnClear.onclick = () => {
                         this.state.emu.events = [];
                         this.state.emu.rawText = '';
+                        this.state.emu.inputEvents = [];
+                        this.state.emu.activeLayers.clear();
+                        this.state.emu.pendingLayerTap = {};
+                        this.clearAllEmuLayerGrace();
                         this.hoveredKeyId = null;
                         this.clearEmuPulseState();
                         this.refreshEmuAnalysis();
@@ -4071,42 +4186,239 @@
                         if (this.state.appView !== 'emulation') return;
                         if (this.state.emu.activePane !== 'target') return;
 
-                        if (e.ctrlKey || e.metaKey || e.altKey) {
+                        const layerSlot = this.getEmuLayerSlotByCode(e.code);
+
+                        this.debugEmu('keydown:entry', {
+                            key: e.key,
+                            code: e.code,
+                            layerSlot,
+                            activeLayers: Array.from(this.state.emu.activeLayers || []),
+                            shiftKey: e.shiftKey,
+                            ctrlKey: e.ctrlKey,
+                            altKey: e.altKey,
+                            metaKey: e.metaKey,
+                            repeat: e.repeat,
+                            isComposing: e.isComposing,
+                            pendingLayerTap: this.state.emu.pendingLayerTap
+                        });
+
+                        if (layerSlot) {
                             e.preventDefault();
+
+                            if (e.repeat) return;
+
+                            this.clearEmuLayerGrace(layerSlot);
+                            this.state.emu.activeLayers.add(layerSlot);
+
+                            this.state.emu.pendingLayerTap[layerSlot] = {
+                                code: e.code,
+                                tapText: this.normalizeEmuInputChar(e),
+                                usedAsLayer: false
+                            };
+
                             return;
                         }
 
                         if (this.state.emu.isComposing || e.isComposing || e.key === 'Process') {
+                            this.debugEmu('keydown:composing-blocked', {
+                                key: e.key,
+                                code: e.code
+                            });
                             e.preventDefault();
                             return;
                         }
 
-                        if (['Shift','Control','Alt','Meta','CapsLock','Escape'].includes(e.key)) return;
-
                         if (this.state.emu.ignoreRepeat && e.repeat) {
+                            this.debugEmu('keydown:repeat-blocked', {
+                                key: e.key,
+                                code: e.code
+                            });
                             e.preventDefault();
                             return;
                         }
 
                         if (e.key === 'Backspace') {
                             e.preventDefault();
-                            this.state.emu.rawText = (this.state.emu.rawText || '').slice(0, -1);
+
+                            if ((this.state.emu.inputEvents || []).length > 0) {
+                                this.state.emu.inputEvents.pop();
+                            } else {
+                                this.state.emu.rawText = (this.state.emu.rawText || '').slice(0, -1);
+                            }
+
+                            this.debugEmu('keydown:backspace', {
+                                inputEvents: this.state.emu.inputEvents,
+                                rawText: this.state.emu.rawText
+                            });
+
                             this.hoveredKeyId = null;
                             this.refreshEmuAnalysis();
                             return;
                         }
 
+                        const activeLayerLevel = this.getActiveEmuLayerLevel();
+
+                        if (activeLayerLevel > 0) {
+                            e.preventDefault();
+
+                            Object.values(this.state.emu.pendingLayerTap || {}).forEach(meta => {
+                                if (meta) meta.usedAsLayer = true;
+                            });
+
+                            const baseToken = this.normalizeEmuInputChar(e);
+                            const pos = EMU_CODE_TO_POS[e.code] || null;
+
+                            this.debugEmu('keydown:physical-candidate', {
+                                key: e.key,
+                                code: e.code,
+                                baseToken,
+                                activeLayerLevel,
+                                pos,
+                                pendingLayerTap: this.state.emu.pendingLayerTap
+                            });
+
+                            if (baseToken === null && !pos) {
+                                this.debugEmu('keydown:physical-dropped', {
+                                    reason: 'baseToken === null && !pos',
+                                    key: e.key,
+                                    code: e.code
+                                });
+                                return;
+                            }
+
+                            const pushed = {
+                                kind: 'physical',
+                                code: e.code,
+                                baseToken,
+                                layerLevel: activeLayerLevel,
+                                ts: Date.now()
+                            };
+
+                            this.state.emu.inputEvents.push(pushed);
+
+                            this.debugEmu('keydown:physical-pushed', pushed);
+
+                            this.refreshEmuAnalysis();
+                            return;
+                        }
+
+                        if (e.ctrlKey || e.metaKey || e.altKey) {
+                            this.debugEmu('keydown:modifier-blocked', {
+                                key: e.key,
+                                code: e.code
+                            });
+                            e.preventDefault();
+                            return;
+                        }
+
+                        if (['Shift','Control','Alt','Meta','CapsLock','Escape'].includes(e.key)) {
+                            this.debugEmu('keydown:ignored-meta-key', {
+                                key: e.key,
+                                code: e.code
+                            });
+                            return;
+                        }
+
                         const fragment = this.normalizeEmuInputChar(e);
+
+                        this.debugEmu('keydown:text-candidate', {
+                            key: e.key,
+                            code: e.code,
+                            fragment,
+                            activeLayerLevel
+                        });
+
                         if (fragment === null) {
                             e.preventDefault();
+                            this.debugEmu('keydown:text-dropped', {
+                                reason: 'fragment === null',
+                                key: e.key,
+                                code: e.code
+                            });
                             return;
                         }
 
                         e.preventDefault();
 
-                        this.state.emu.rawText = (this.state.emu.rawText || '') + fragment;
+                        const pushed = {
+                            kind: 'text',
+                            text: fragment,
+                            ts: Date.now()
+                        };
+
+                        this.state.emu.inputEvents.push(pushed);
+
+                        this.debugEmu('keydown:text-pushed', pushed);
+
                         this.refreshEmuAnalysis();
                     });
+
+                    cap.addEventListener('keyup', (e) => {
+                        if (this.state.appView !== 'emulation') return;
+                        if (this.state.emu.activePane !== 'target') return;
+
+                        const layerSlot = this.getEmuLayerSlotByCode(e.code);
+                        if (!layerSlot) return;
+
+                        e.preventDefault();
+
+                        const pending = this.state.emu.pendingLayerTap?.[layerSlot] || null;
+
+                        this.state.emu.activeLayers.delete(layerSlot);
+
+                        // ShiftLeft のような「tap 文字がない layer key」だけ、
+                        // keyup 直後の短い猶予を残す
+                        if (pending && !pending.usedAsLayer && pending.tapText === null) {
+                            this.setEmuLayerGrace(layerSlot);
+                        } else {
+                            this.clearEmuLayerGrace(layerSlot);
+                        }
+
+                        if (pending && !pending.usedAsLayer && pending.tapText !== null) {
+                            this.state.emu.inputEvents.push({
+                                kind: 'text',
+                                text: pending.tapText,
+                                ts: Date.now()
+                            });
+
+                            this.refreshEmuAnalysis();
+                        }
+
+                        if (this.state.emu.pendingLayerTap) {
+                            delete this.state.emu.pendingLayerTap[layerSlot];
+                        }
+                    });
+
+                    cap.addEventListener('blur', () => {
+                        this.state.emu.activeLayers.clear();
+                        this.state.emu.pendingLayerTap = {};
+                        this.clearAllEmuLayerGrace();
+                    });
+                }
+
+                if (!this._emuLayerCaptureBound) {
+                    window.addEventListener('keydown', (e) => {
+                        if (this.state.appView !== 'emulation') return;
+
+                        const captureSlot = this.state.emu.captureLayerSlot || 0;
+                        if (!captureSlot) return;
+
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        if (!e.code) return;
+
+                        this.state.emu.layerKeys[captureSlot] = e.code;
+                        this.state.emu.captureLayerSlot = 0;
+                        this.state.emu.activeLayers.delete(captureSlot);
+                        this.state.emu.pendingLayerTap = {};
+                        this.clearAllEmuLayerGrace();
+
+                        this.renderEmuWorkspace();
+                        this.refreshEmuAnalysis();
+                    }, true);
+
+                    this._emuLayerCaptureBound = true;
                 }
 
                 this.renderEmuWorkspace();
@@ -4160,6 +4472,43 @@
                 if (presetEl) presetEl.value = (bundle.presetKey && PRESETS[bundle.presetKey]) ? bundle.presetKey : 'custom';
                 if (nameEl) nameEl.value = bundle.name || 'CUSTOM';
                 if (descEl) descEl.value = bundle.desc || '';
+
+                if (isSource) {
+                    const dict = I18N[this.state.lang];
+                    const cap = document.getElementById('emu-capture');
+
+                    [1, 2, 3].forEach(level => {
+                        const displayEl = document.getElementById(`emu-layer-${level}-display`);
+                        const setBtn = document.getElementById(`emu-layer-${level}-set`);
+                        const clearBtn = document.getElementById(`emu-layer-${level}-clear`);
+
+                        if (displayEl) {
+                            displayEl.value = (this.state.emu.captureLayerSlot === level)
+                                ? (dict.msg_press_layer_key || 'Press a key...')
+                                : this.getEmuCodeLabel(this.state.emu.layerKeys[level]);
+                        }
+
+                        if (setBtn) {
+                            setBtn.onclick = () => {
+                                this.state.emu.captureLayerSlot = level;
+                                this.renderEmuWorkspace();
+                            };
+                        }
+
+                        if (clearBtn) {
+                            clearBtn.onclick = () => {
+                                this.state.emu.layerKeys[level] = null;
+                                this.state.emu.activeLayers.delete(level);
+                                this.clearAllEmuLayerGrace();
+                                if (this.state.emu.captureLayerSlot === level) {
+                                    this.state.emu.captureLayerSlot = 0;
+                                }
+                                this.renderEmuWorkspace();
+                                this.refreshEmuAnalysis();
+                            };
+                        }
+                    });
+                }
 
                 if (rulesEl) {
                     rulesEl.value = bundle.customRules || '';
@@ -4441,6 +4790,17 @@
                 });
             }
 
+            isEmuDebugEnabled() {
+                return window.__EMU_DEBUG__ === true;
+            }
+
+            debugEmu(label, payload = {}) {
+                if (!this.isEmuDebugEnabled()) return;
+                console.groupCollapsed(`[EMU] ${label}`);
+                console.log(payload);
+                console.groupEnd();
+            }
+
             normalizeEmuInputChar(e) {
                 if (!e) return null;
                 if (e.key === ' ') return ' ';
@@ -4448,6 +4808,240 @@
                 if (e.key === 'Tab') return '\t';
                 if (typeof e.key === 'string' && e.key.length === 1) return e.key.toLowerCase();
                 return null;
+            }
+
+            isEmuPhysicalLayerModeEnabled() {
+                return Object.values(this.state.emu.layerKeys || {}).some(Boolean);
+            }
+
+            getEmuLayerSlotByCode(code) {
+                const found = Object.entries(this.state.emu.layerKeys || {})
+                    .find(([, value]) => value && value === code);
+                return found ? Number(found[0]) : 0;
+            }
+
+            getEmuLayerGraceMs() {
+                return 60;
+            }
+
+            clearEmuLayerGrace(slot = 0) {
+                if (!this.state.emu.layerGraceUntil) this.state.emu.layerGraceUntil = {};
+                if (!slot) return;
+                delete this.state.emu.layerGraceUntil[slot];
+            }
+
+            clearAllEmuLayerGrace() {
+                this.state.emu.layerGraceUntil = {};
+            }
+
+            setEmuLayerGrace(slot = 0) {
+                if (!slot) return;
+                if (!this.state.emu.layerGraceUntil) this.state.emu.layerGraceUntil = {};
+                this.state.emu.layerGraceUntil[slot] = Date.now() + this.getEmuLayerGraceMs();
+            }
+
+            getEmuGraceActiveSlots() {
+                const now = Date.now();
+                const grace = this.state.emu.layerGraceUntil || {};
+
+                Object.keys(grace).forEach(slot => {
+                    if (Number(grace[slot]) <= now) {
+                        delete grace[slot];
+                    }
+                });
+
+                return Object.keys(grace).map(slot => Number(slot));
+            }
+
+            getActiveEmuLayerLevel() {
+                const active = Array.from(this.state.emu.activeLayers || []);
+                const grace = this.getEmuGraceActiveSlots();
+                const merged = [...new Set([...active, ...grace])];
+                return merged.length ? Math.max(...merged) : 0;
+            }
+
+            getEmuCodeLabel(code) {
+                if (!code) return '-';
+
+                const map = {
+                    Space: 'Space',
+                    Backquote: '`',
+                    Minus: '-',
+                    Equal: '=',
+                    BracketLeft: '[',
+                    BracketRight: ']',
+                    Backslash: '\\',
+                    Semicolon: ';',
+                    Quote: '\'',
+                    Comma: ',',
+                    Period: '.',
+                    Slash: '/',
+                    Tab: 'Tab',
+                    Enter: 'Enter',
+                    Backspace: 'Backspace'
+                };
+
+                if (map[code]) return map[code];
+                if (code.startsWith('Key')) return code.slice(3);
+                if (code.startsWith('Digit')) return code.slice(5);
+
+                return code;
+            }
+
+            formatEmuPhysicalInputEventsForLog(inputEvents) {
+                if (!inputEvents || inputEvents.length === 0) return '-';
+
+                return inputEvents
+                    .map(ev => `${this.getEmuCodeLabel(ev.code)}${ev.layerLevel > 0 ? ` [L${ev.layerLevel}]` : ''}`)
+                    .join(' ');
+            }
+
+            buildEmuSourceSequenceFromPhysicalEvents(inputEvents) {
+                const bundle = this.state.emu.source;
+                const events = [];
+                const keyMap = this.analyzer.buildLayoutMapFrom(bundle);
+
+                (inputEvents || []).forEach(ev => {
+                    let chosen = null;
+
+                    const logicalToken = String(ev.baseToken || '').toLowerCase();
+                    const logicalCandidates = logicalToken
+                        ? (keyMap[logicalToken] || []).filter(c => !c.isLayer)
+                        : [];
+                    const pos = EMU_CODE_TO_POS[ev.code] || null;
+
+                    this.debugEmu('source-resolve:entry', {
+                        ev,
+                        logicalToken,
+                        logicalCandidates,
+                        pos
+                    });
+
+                    if (logicalToken) {
+                        if (logicalCandidates.length > 0) {
+                            chosen = logicalCandidates[0];
+                        }
+                    }
+
+                    if (!chosen) {
+                        if (!pos) {
+                            this.debugEmu('source-resolve:dropped', {
+                                reason: 'no logical candidate and no EMU_CODE_TO_POS',
+                                ev
+                            });
+                            return;
+                        }
+                        chosen = pos;
+                    }
+
+                    const raw = bundle.layout[chosen.hand]?.[chosen.idx];
+
+                    this.debugEmu('source-resolve:chosen', {
+                        ev,
+                        chosen,
+                        raw
+                    });
+
+                    if (raw === null || raw === undefined || raw === '') {
+                        this.debugEmu('source-resolve:dropped', {
+                            reason: 'source raw is empty',
+                            ev,
+                            chosen
+                        });
+                        return;
+                    }
+
+                    const parts = raw.trim().split(/\s+/).filter(Boolean);
+                    if (!parts.length) {
+                        this.debugEmu('source-resolve:dropped', {
+                            reason: 'source parts is empty',
+                            ev,
+                            chosen,
+                            raw
+                        });
+                        return;
+                    }
+
+                    const wantedLayer = Math.max(0, Math.min(Number(ev.layerLevel) || 0, 3));
+                    const resolvedIndex = parts[wantedLayer] ? wantedLayer : 0;
+                    const parsed = parseKeyToken(parts[resolvedIndex]);
+
+                    let val = parsed.val.toLowerCase();
+                    if (val === 'space' || val === 'spc') val = 'space';
+                    else if (val === 'ent' || val === 'enter' || val === 'return') val = 'ent';
+                    else if (val === 'tab') val = 'tab';
+
+                    const resolved = {
+                        code: ev.code,
+                        baseToken: ev.baseToken || '',
+                        hand: chosen.hand,
+                        idx: chosen.idx,
+                        token: val,
+                        disp: parsed.disp,
+                        isLayer: wantedLayer > 0,
+                        layerLevel: wantedLayer,
+                        ts: ev.ts
+                    };
+
+                    events.push(resolved);
+
+                    this.debugEmu('source-resolve:resolved', {
+                        ev,
+                        chosen,
+                        raw,
+                        parts,
+                        wantedLayer,
+                        resolvedIndex,
+                        resolved
+                    });
+                });
+
+                return events;
+            }
+
+            buildEmuSourceSequenceFromCapturedEvents(inputEvents) {
+                const out = [];
+                let textBuffer = '';
+
+                const flushTextBuffer = () => {
+                    if (!textBuffer) return;
+                    out.push(...this.tokenizeEmuSourceText(textBuffer));
+                    textBuffer = '';
+                };
+
+                (inputEvents || []).forEach(ev => {
+                    if (!ev) return;
+
+                    const kind = ev.kind || 'physical';
+
+                    if (kind === 'text') {
+                        textBuffer += String(ev.text || '');
+                        return;
+                    }
+
+                    flushTextBuffer();
+                    out.push(...this.buildEmuSourceSequenceFromPhysicalEvents([ev]));
+                });
+
+                flushTextBuffer();
+                return out;
+            }
+
+            formatEmuCapturedInputForLog(inputEvents) {
+                if (!inputEvents || inputEvents.length === 0) return '-';
+
+                return inputEvents.map(ev => {
+                    const kind = ev.kind || 'physical';
+
+                    if (kind === 'text') {
+                        return String(ev.text || '')
+                            .replace(/ /g, '␠')
+                            .replace(/\n/g, '↵')
+                            .replace(/\t/g, '⇥');
+                    }
+
+                    return `⟦L${ev.layerLevel || 0}:${ev.baseToken || this.getEmuCodeLabel(ev.code)}⟧`;
+                }).join(' ');
             }
 
             tokenizeEmuSourceText(text) {
@@ -4509,15 +5103,18 @@
 
                         if (val === 'space' || val === 'spc') val = 'space';
                         else if (val === 'ent' || val === 'enter' || val === 'return') val = 'ent';
+                        else if (val === 'tab') val = 'tab';
 
                         return {
                             val,
                             disp: parsed.disp,
-                            isLayer: tokenIndex > 0
+                            isLayer: tokenIndex > 0,
+                            layerLevel: tokenIndex
                         };
                     });
 
-                    const hit = tokens.find(t => t.val === matchedToken) || tokens[0];
+                    const hitIndex = tokens.findIndex(t => t.val === matchedToken);
+                    const hit = hitIndex >= 0 ? tokens[hitIndex] : tokens[0];
 
                     if (hit) {
                         events.push({
@@ -4525,7 +5122,8 @@
                             idx: chosen.idx,
                             token: hit.val,
                             disp: hit.disp,
-                            isLayer: hit.isLayer
+                            isLayer: hit.isLayer,
+                            layerLevel: hit.layerLevel ?? (hitIndex >= 0 ? hitIndex : 0)
                         });
                     }
 
@@ -4578,7 +5176,19 @@
                 if (!sourceEvent) return null;
 
                 const raw = bundle.layout[sourceEvent.hand]?.[sourceEvent.idx];
-                if (raw === null || raw === undefined || raw === '') return null;
+
+                this.debugEmu('target-project:entry', {
+                    sourceEvent,
+                    targetRaw: raw
+                });
+
+                if (raw === null || raw === undefined || raw === '') {
+                    this.debugEmu('target-project:dropped', {
+                        reason: 'target raw is empty',
+                        sourceEvent
+                    });
+                    return null;
+                }
 
                 const tokens = raw.trim().split(/\s+/).map((token, tokenIndex) => {
                     const parsed = parseKeyToken(token);
@@ -4596,26 +5206,49 @@
 
                 let hit = null;
 
-                // source が layer なら target でも layer を優先
-                if (sourceEvent.isLayer) {
-                    hit = tokens.find(t => t.isLayer);
-                } else {
-                    hit = tokens.find(t => !t.isLayer);
+                const requestedLayer = Number.isInteger(sourceEvent.layerLevel)
+                    ? sourceEvent.layerLevel
+                    : (sourceEvent.isLayer ? 1 : 0);
+
+                if (requestedLayer > 0) {
+                    hit = tokens[requestedLayer] || null;
                 }
 
-                if (!hit) hit = tokens[0];
-                if (!hit) return null;
+                if (!hit) {
+                    hit = tokens[0] || null;
+                }
 
-                return {
+                if (!hit) {
+                    this.debugEmu('target-project:dropped', {
+                        reason: 'no hit token',
+                        sourceEvent,
+                        tokens,
+                        requestedLayer
+                    });
+                    return null;
+                }
+
+                const projected = {
                     code: sourceEvent.code,
                     hand: sourceEvent.hand,
                     idx: sourceEvent.idx,
                     token: hit.val,
                     disp: hit.disp,
                     isLayer: hit.isLayer,
+                    layerLevel: requestedLayer > 0 && tokens[requestedLayer] ? requestedLayer : 0,
                     rawKey: sourceEvent.rawKey,
                     ts: sourceEvent.ts
                 };
+
+                this.debugEmu('target-project:resolved', {
+                    sourceEvent,
+                    targetRaw: raw,
+                    tokens,
+                    requestedLayer,
+                    projected
+                });
+
+                return projected;
             }
 
             renderTargetOutputText(targetSequence) {
@@ -4666,11 +5299,18 @@
                 const tokenLogEl = document.getElementById('emu-token-log');
                 const targetNameEl = document.getElementById('emu-target-name-log');
 
-                const sourceSequence = this.tokenizeEmuSourceText(this.state.emu.rawText || '');
+                const hasCapturedEvents = (this.state.emu.inputEvents || []).length > 0;
+
+                const sourceSequence = hasCapturedEvents
+                    ? this.buildEmuSourceSequenceFromCapturedEvents(this.state.emu.inputEvents || [])
+                    : this.tokenizeEmuSourceText(this.state.emu.rawText || '');
+
                 this.state.emu.events = sourceSequence;
 
                 if (sourceLogEl) {
-                    sourceLogEl.textContent = this.formatEmuRawTextForLog(this.state.emu.rawText || '');
+                    sourceLogEl.textContent = hasCapturedEvents
+                        ? this.formatEmuCapturedInputForLog(this.state.emu.inputEvents || [])
+                        : this.formatEmuRawTextForLog(this.state.emu.rawText || '');
                 }
 
                 const targetSequence = sourceSequence
