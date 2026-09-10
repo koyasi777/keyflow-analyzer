@@ -1260,6 +1260,46 @@
         }
         .h-col:hover { opacity: 1; transform: scaleY(1.1); background: var(--accent); }
 
+        /* Cost Distribution: browser-native title tooltip replacement.
+           Keep the visual language aligned with the analysis-card tooltips,
+           while using one floating element so narrow bars do not clip/scale it. */
+        #cost-hist-tooltip {
+            position: fixed;
+            z-index: 3000;
+            width: max-content;
+            max-width: min(220px, calc(100vw - 16px));
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            font-size: 0.75rem;
+            line-height: 1.4;
+            font-weight: normal;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            white-space: nowrap;
+            transform: translateY(-100%);
+            transition: opacity 0.12s ease;
+        }
+        #cost-hist-tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #cost-hist-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: var(--hist-tooltip-arrow-x, 50%);
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--accent);
+        }
+
         .worst-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; margin-top: 0.5rem;
         }
@@ -6258,7 +6298,43 @@
 
                 // --- 2. Histogram (Logarithmic Scale) ---
                 const histEl = document.getElementById('cost-hist-new');
+
+                // Use one custom tooltip instead of the browser-native title tooltip.
+                // This appears immediately and matches the analysis-card tooltip styling.
+                let histTooltip = document.getElementById('cost-hist-tooltip');
+                if (!histTooltip) {
+                    histTooltip = document.createElement('div');
+                    histTooltip.id = 'cost-hist-tooltip';
+                    histTooltip.setAttribute('role', 'tooltip');
+                    document.body.appendChild(histTooltip);
+                }
+                histTooltip.classList.remove('visible');
                 histEl.innerHTML = '';
+
+                const showHistTooltip = (bar, text) => {
+                    histTooltip.textContent = text;
+                    histTooltip.classList.add('visible');
+
+                    const barRect = bar.getBoundingClientRect();
+                    const tooltipRect = histTooltip.getBoundingClientRect();
+                    const margin = 8;
+                    const desiredCenter = barRect.left + (barRect.width / 2);
+
+                    // Keep the tooltip inside the viewport while preserving an arrow
+                    // that still points to the hovered bar.
+                    let left = desiredCenter - (tooltipRect.width / 2);
+                    left = Math.max(margin, Math.min(window.innerWidth - tooltipRect.width - margin, left));
+
+                    const arrowX = Math.max(8, Math.min(tooltipRect.width - 8, desiredCenter - left));
+                    histTooltip.style.left = `${left}px`;
+                    histTooltip.style.top = `${barRect.top - 8}px`;
+                    histTooltip.style.setProperty('--hist-tooltip-arrow-x', `${arrowX}px`);
+                };
+
+                const hideHistTooltip = () => {
+                    histTooltip.classList.remove('visible');
+                };
+
                 const buckets = new Array(21).fill(0);
 
                 // バケット集計
@@ -6299,7 +6375,16 @@
                     else if (i < 12) bar.style.backgroundColor = 'var(--c-warn)';
                     else bar.style.backgroundColor = 'var(--c-dang)';
 
-                    bar.title = `Cost ${i}: ${count.toLocaleString()} hits`;
+                    const hitLabel = I18N[this.state.lang].lbl_hits;
+                    const tooltipText = `Cost ${i}: ${count.toLocaleString()} ${hitLabel}`;
+                    bar.setAttribute('aria-label', tooltipText);
+
+                    bar.addEventListener('pointerenter', () => {
+                        showHistTooltip(bar, tooltipText);
+                    });
+                    bar.addEventListener('pointerleave', hideHistTooltip);
+                    bar.addEventListener('pointercancel', hideHistTooltip);
+
                     histEl.appendChild(bar);
                 });
 
