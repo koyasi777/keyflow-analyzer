@@ -821,7 +821,7 @@
             font-weight: normal; font-family: 'Inter', sans-serif;
             transition: opacity 0.2s, transform 0.2s;
             margin-bottom: 8px;
-            white-space: normal;
+            white-space: pre-line;
         }
 
         /* 矢印 (共通設定) */
@@ -1028,7 +1028,7 @@
         /* --- ▼▼▼ DASHBOARD CSS ▼▼▼ --- */
         .res-dashboard {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 2列固定 (サイドバー内で安定) */
+            grid-template-columns: repeat(2, minmax(0, 1fr)); /* 内容に押し広げられず常に均等2列 */
             gap: 8px;
             margin-bottom: 1rem;
         }
@@ -1036,24 +1036,168 @@
         .kpi-card {
             background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px;
             padding: 10px; display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; overflow: hidden; min-height: 80px;
+            position: relative; overflow: hidden; min-height: 80px; min-width: 0;
             transition: border-color 0.2s;
         }
         /* ツールチップを持つカードはヘルプカーソルに */
         .kpi-card.tooltip { cursor: help; overflow: visible; }
 
-        /* SFB KPI: click to drill down into the counted same-finger/different-key pairs. */
-        .kpi-card.tooltip.sfb-interactive { cursor: pointer; }
-        .kpi-card.sfb-interactive:hover,
-        .kpi-card.sfb-interactive:focus-visible { border-color: var(--c-dang); }
-        .kpi-card.sfb-interactive:focus-visible {
-            outline: 2px solid rgba(248, 81, 73, 0.45);
+        /* Drill-down KPI cards: click to visualize the metric on the keyboard. */
+        .kpi-card.tooltip.metric-interactive { cursor: pointer; }
+        .kpi-card.metric-interactive:focus-visible {
             outline-offset: 2px;
         }
+
+        .kpi-card.sfb-interactive:hover,
+        .kpi-card.sfb-interactive:focus-visible { border-color: var(--c-dang); }
+        .kpi-card.sfb-interactive:focus-visible { outline: 2px solid rgba(248, 81, 73, 0.45); }
         .kpi-card.sfb-interactive.active-detail {
             border-color: var(--c-dang);
             background: rgba(248, 81, 73, 0.08);
             box-shadow: 0 0 0 1px rgba(248, 81, 73, 0.22), 0 0 18px rgba(248, 81, 73, 0.10);
+        }
+
+        .kpi-card.long-sf-interactive:hover,
+        .kpi-card.long-sf-interactive:focus-visible { border-color: #db61a2; }
+        .kpi-card.long-sf-interactive:focus-visible { outline: 2px solid rgba(219, 97, 162, 0.45); }
+        .kpi-card.long-sf-interactive.active-detail {
+            border-color: #db61a2;
+            background: rgba(219, 97, 162, 0.09);
+            box-shadow: 0 0 0 1px rgba(219, 97, 162, 0.24), 0 0 18px rgba(219, 97, 162, 0.10);
+        }
+
+
+        /* Metric cards stay compact; definitions/actions live in tooltips. */
+        .kpi-card.metric-summary-card { min-height: 96px; }
+        .kpi-card.metric-summary-card .kpi-sub { min-height: 1.25em; }
+        .kpi-detail-inline { white-space: nowrap; font-size: 0.68rem; letter-spacing: -0.02em; min-width: 0; }
+
+        /* Long SF breakdown must never widen the dashboard column. */
+        .long-sf-breakdown {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            white-space: normal;
+            width: 100%;
+        }
+        .long-sf-breakdown .breakdown-item {
+            min-width: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .long-sf-breakdown .breakdown-item + .breakdown-item {
+            border-left: 1px solid rgba(139, 148, 158, 0.22);
+            padding-left: 8px;
+        }
+        .long-sf-breakdown .breakdown-value {
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        /* Long SF only: keep numeric hierarchy, compact the verbose labels. */
+        .kpi-card.long-sf-interactive .kpi-label {
+            font-size: 0.60rem;
+            letter-spacing: 0;
+            line-height: 1.15;
+            white-space: nowrap;
+            padding-right: 62px; /* reserve room for DIRECT / SKIP / TOTAL badge */
+        }
+        .kpi-card.long-sf-interactive .long-sf-breakdown {
+            column-gap: 5px;
+        }
+        .kpi-card.long-sf-interactive .long-sf-breakdown .breakdown-item {
+            gap: 2px;
+        }
+        .kpi-card.long-sf-interactive .long-sf-breakdown .breakdown-item > span:first-child {
+            font-size: 0.56rem;
+            letter-spacing: -0.03em;
+        }
+        .kpi-card.long-sf-interactive .long-sf-breakdown .breakdown-item + .breakdown-item {
+            padding-left: 5px;
+        }
+        /* Preserve the percentage figures at the existing size. */
+        .kpi-card.long-sf-interactive .long-sf-breakdown .breakdown-value {
+            font-size: 0.68rem;
+        }
+
+        /* Reserve room for visualization mode badges on interactive metric cards. */
+        .kpi-card.sfb-interactive .kpi-label {
+            padding-right: 62px;
+        }
+
+        /* Only show visualization mode badges while the corresponding card is active. */
+        .kpi-mode-badge {
+            display: none;
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            margin: 0;
+            padding: 2px 5px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 0.50rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: 0.04em;
+            color: var(--text-dim);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .kpi-card.sfb-interactive.active-detail .kpi-mode-badge {
+            display: inline-block;
+            border-color: rgba(248, 81, 73, 0.45);
+            color: var(--text-main);
+            background: rgba(248, 81, 73, 0.10);
+        }
+        .kpi-card.sfb-interactive[data-viz-mode="skip"].active-detail {
+            border-color: #f0883e;
+            background: rgba(240, 136, 62, 0.08);
+            box-shadow: 0 0 0 1px rgba(240, 136, 62, 0.22), 0 0 18px rgba(240, 136, 62, 0.10);
+        }
+        .kpi-card.sfb-interactive[data-viz-mode="skip"].active-detail .kpi-mode-badge {
+            border-color: rgba(240, 136, 62, 0.48);
+            background: rgba(240, 136, 62, 0.10);
+        }
+        .kpi-card.sfb-interactive[data-viz-mode="all"].active-detail {
+            border-color: #a371f7;
+            background: rgba(163, 113, 247, 0.08);
+            box-shadow: 0 0 0 1px rgba(163, 113, 247, 0.22), 0 0 18px rgba(163, 113, 247, 0.10);
+        }
+        .kpi-card.sfb-interactive[data-viz-mode="all"].active-detail .kpi-mode-badge {
+            border-color: rgba(163, 113, 247, 0.48);
+            background: rgba(163, 113, 247, 0.10);
+        }
+
+        .kpi-card.long-sf-interactive.active-detail .kpi-mode-badge {
+            display: inline-block;
+            border-color: rgba(219, 97, 162, 0.45);
+            color: var(--text-main);
+            background: rgba(219, 97, 162, 0.10);
+        }
+        .kpi-card.long-sf-interactive[data-viz-mode="skip"].active-detail {
+            border-color: #f0883e;
+            background: rgba(240, 136, 62, 0.08);
+            box-shadow: 0 0 0 1px rgba(240, 136, 62, 0.22), 0 0 18px rgba(240, 136, 62, 0.10);
+        }
+        .kpi-card.long-sf-interactive[data-viz-mode="skip"].active-detail .kpi-mode-badge {
+            border-color: rgba(240, 136, 62, 0.48);
+            background: rgba(240, 136, 62, 0.10);
+        }
+        .kpi-card.long-sf-interactive[data-viz-mode="all"].active-detail {
+            border-color: #a371f7;
+            background: rgba(163, 113, 247, 0.08);
+            box-shadow: 0 0 0 1px rgba(163, 113, 247, 0.22), 0 0 18px rgba(163, 113, 247, 0.10);
+        }
+
+        .kpi-card.repeat-interactive:hover,
+        .kpi-card.repeat-interactive:focus-visible { border-color: var(--c-warn); }
+        .kpi-card.repeat-interactive:focus-visible { outline: 2px solid rgba(210, 153, 34, 0.45); }
+        .kpi-card.repeat-interactive.active-detail {
+            border-color: var(--c-warn);
+            background: rgba(210, 153, 34, 0.09);
+            box-shadow: 0 0 0 1px rgba(210, 153, 34, 0.24), 0 0 18px rgba(210, 153, 34, 0.09);
         }
 
         .kpi-label {
@@ -1141,7 +1285,7 @@
 
         /* Mobile override */
         @media (max-width: 900px) {
-            .res-dashboard { grid-template-columns: 1fr 1fr; } /* スマホでも2列維持 */
+            .res-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* スマホでも均等2列を維持 */
         }
 
         /* --- Tooltip Adjustment for Right Column (Prevent Overflow) --- */
@@ -1676,19 +1820,48 @@
                                     <div class="kpi-label" data-i18n="lbl_95">95% Tile</div>
                                     <div class="kpi-value" id="val-95">0.0</div>
                                 </div>
-                                <div class="kpi-card tooltip" data-i18n-tooltip="lbl_alt_desc">
+                                <!-- Simple frequency metrics: same row -->
+                                <div class="kpi-card tooltip metric-summary-card" data-i18n-tooltip="lbl_alt_desc">
                                     <div class="kpi-label" data-i18n="lbl_alt">Alternation</div>
                                     <div class="kpi-value" id="kpi-alt">0<span class="kpi-unit">%</span></div>
                                     <div class="kpi-sub">
                                         <span style="font-family:'JetBrains Mono'">L:<span id="kpi-bal-l">50</span> / R:<span id="kpi-bal-r">50</span></span>
                                     </div>
                                 </div>
-                                <div id="kpi-sfb-card" class="kpi-card tooltip sfb-interactive" data-i18n-tooltip="lbl_sfb_desc"
+                                <div id="kpi-repeat-card" class="kpi-card tooltip metric-interactive metric-summary-card repeat-interactive" data-i18n-tooltip="lbl_repeat_desc"
                                      role="button" tabindex="0" aria-pressed="false">
-                                    <div class="kpi-label" data-i18n="stat_sfb">SFB Rate</div>
-                                    <div class="kpi-value" id="kpi-sfb-cons">0.00<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-label" data-i18n="stat_repeat">Repeats</div>
+                                    <div class="kpi-value" id="kpi-repeat-rate">0.00<span class="kpi-unit">%</span></div>
                                     <div class="kpi-sub">
-                                        Total: <span id="kpi-sfb-total" style="font-weight:bold; margin-left:4px;">0.00%</span>
+                                        <span id="kpi-repeat-count" style="font-weight:bold;">0</span> <span data-i18n="lbl_hits">hits</span>
+                                    </div>
+                                </div>
+
+                                <!-- Same-finger metrics: same row. Keep card text terse; tooltip carries definitions. -->
+                                <div id="kpi-sfb-card" class="kpi-card tooltip metric-interactive metric-summary-card sfb-interactive" data-i18n-tooltip="lbl_sfb_desc"
+                                     role="button" tabindex="0" aria-pressed="false" data-viz-mode="off">
+                                    <div class="kpi-label" data-i18n="stat_sfb">SFB Rate</div>
+                                    <span id="kpi-sfb-mode" class="kpi-mode-badge" aria-live="polite"></span>
+                                    <div class="kpi-value" id="kpi-sfb-cons">0.00<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-sub kpi-detail-inline">
+                                        <span data-i18n="lbl_skip_sf_short">Skip SF</span>
+                                        <span id="kpi-sfb-skip" style="font-weight:bold; margin-left:3px;">0.00%</span>
+                                    </div>
+                                </div>
+                                <div id="kpi-long-sf-card" class="kpi-card tooltip metric-interactive metric-summary-card long-sf-interactive" data-i18n-tooltip="lbl_long_sf_desc"
+                                     role="button" tabindex="0" aria-pressed="false" data-viz-mode="off">
+                                    <div class="kpi-label" data-i18n="stat_long_sf">Long SF</div>
+                                    <span id="kpi-long-sf-mode" class="kpi-mode-badge" aria-live="polite"></span>
+                                    <div class="kpi-value" id="kpi-long-sf-total">0.00<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-sub kpi-detail-inline long-sf-breakdown">
+                                        <span class="breakdown-item">
+                                            <span data-i18n="lbl_direct_short">Direct</span>
+                                            <span id="kpi-long-sf-direct" class="breakdown-value">0.00%</span>
+                                        </span>
+                                        <span class="breakdown-item">
+                                            <span data-i18n="lbl_skip_short">Skip</span>
+                                            <span id="kpi-long-sf-skip" class="breakdown-value">0.00%</span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -1710,7 +1883,6 @@
 
                                 <div class="stat-item"><span data-i18n="stat_keystrokes">Keystrokes</span><span id="stat-keystrokes">0</span></div>
                                 <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
-                                <div class="stat-item"><span data-i18n="stat_repeat">Repeats</span><span id="stat-repeat">0</span></div>
 
                                 <div id="repeat-detail-wrapper" style="margin-top:10px; display:none; background:rgba(255,255,255,0.03); padding:10px; border-radius:6px;">
                                     <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:6px;" data-i18n="lbl_rep_finger">Repeats by Finger</div>
@@ -2405,7 +2577,9 @@
                 panel_results: "Analysis Results", res_total: "Efficiency Score", res_work: "Total Work (Load)",
                 res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
 
-                stat_keystrokes: "Keystrokes", stat_sfb: "SFB % (Same Finger / Different Key)", stat_repeat: "Repeats", stat_max_key: "Top Key",
+                stat_keystrokes: "Keystrokes", stat_sfb: "SFB Rate", stat_long_sf: "Long SF", stat_repeat: "Repeats", stat_max_key: "Top Key",
+                lbl_skip_sf: "Skip SF (other hand between)", lbl_direct: "Direct (consecutive)", lbl_skip: "Skip (other hand between)",
+                lbl_skip_sf_short: "Skip SF", lbl_direct_short: "Direct", lbl_skip_short: "Skip", lbl_hits: "hits",
                 res_worst: "Worst Transitions",
 
                 graph_finger: "Finger Load", graph_row: "Row Load",
@@ -2478,7 +2652,17 @@
                 lbl_95_desc: "95% of keystrokes fall below this cost. Indicates peak difficulty.",
                 lbl_alt: "Alternation",
                 lbl_alt_desc: "Frequency of hand switching and Left/Right hand usage ratio.",
-                lbl_sfb_desc: "SFB = same finger, different key (same-key repeats are excluded).\nConsecutive: no opposite-hand key in between.\nTotal: includes cases with opposite-hand keys in between.\nClick to visualize Consecutive SFBs.",
+                lbl_sfb_desc: "【SFB Rate】\nDirect SFB: two different keys assigned to the same finger are pressed consecutively. Example: Left A → Left B.\nSkip SF: that same finger is reused after one or more opposite-hand keystrokes. Example: Left A → Right X → Left B.\nSame-key repeats are counted separately.\nClick cycles the keyboard view: Direct → Skip → Total → Off. In Total, solid lines are Direct and dashed lines are Skip.",
+                lbl_sfb_cycle: "",
+                lbl_sfb_view_direct: "DIRECT",
+                lbl_sfb_view_skip: "SKIP",
+                lbl_sfb_view_all: "TOTAL",
+                lbl_long_sf_desc: "【Long SF】\nA same-finger, different-key transition whose physical row difference is 2 or more.\nDirect: no opposite-hand keystroke in between (A → B).\nSkip: one or more opposite-hand keystrokes occur before the same finger is reused (A → [opposite hand] → B).\nThe large value is Direct + Skip; the small line shows each separately.\nClick cycles the keyboard view: Direct → Skip → Total → Off. In Total, solid lines are Direct and dashed lines are Skip.",
+                lbl_long_sf_cycle: "",
+                lbl_long_sf_view_direct: "DIRECT",
+                lbl_long_sf_view_skip: "SKIP",
+                lbl_long_sf_view_all: "TOTAL",
+                lbl_repeat_desc: "Same-key consecutive repeats.\nClick to visualize which physical keys caused repeats and how many times.",
                 lbl_dist_desc: "Left: Comfortable / Right: Strenuous",
 
                 btn_copy: "Copy to Clipboard",
@@ -2533,7 +2717,9 @@
                 panel_results: "解析結果", res_total: "総合スコア (平均)", res_work: "総運動量 (Total)",
                 res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
 
-                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率 (同指・別キー)", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
+                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率", stat_long_sf: "同指ロングジャンプ", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
+                lbl_skip_sf: "Skip SF（他手を挟む）", lbl_direct: "Direct（連続）", lbl_skip: "Skip（他手を挟む）",
+                lbl_skip_sf_short: "Skip SF", lbl_direct_short: "Direct", lbl_skip_short: "Skip", lbl_hits: "回",
                 res_worst: "ワースト遷移 (負担大)",
                 graph_finger: "指の負荷", graph_row: "段の負荷",
                 header_import: "インポート", header_export: "エクスポート",
@@ -2598,12 +2784,22 @@
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
                 lbl_score_desc: "【総合スコア】\n1打鍵あたりの平均コスト。\n(Weight設定に基づく)\n※総打鍵数とセットで解釈してください。",
-                lbl_sd_desc: "【標準偏差 (SD)】\n打鍵コストのばらつき。\n値が小さいほど、一定のリズムで打鍵できます。",
+                lbl_sd_desc: "【標準偏差 (SD)】\n打鍵コストのばらつき。値が小さいほど、一定のリズムで打鍵できます。",
                 lbl_med_desc: "【中央値】\n全打鍵の中央にあるコスト値。\n外れ値（極端な難打鍵）を除いた、配列の基本性能です。",
-                lbl_95_desc: "【95%タイル値】\n全体の95%が含まれるコストライン。\n突発的な高負荷がどれくらい発生するかを示します。",
+                lbl_95_desc: "【95%タイル値】\n全体の95%が含まれるコストライン。突発的な高負荷がどれくらい発生するかを示します。",
                 lbl_alt: "交互打鍵率",
                 lbl_alt_desc: "【交互打鍵率 & L:R比】\n手が切り替わる頻度と、左右の手の使用比率です。",
-                lbl_sfb_desc: "【SFB率 (同指・別キー)】\n同じ指で別のキーへ移る打鍵を集計します（同一キー連打は除外）。\nConsecutive: 反対の手を挟まないSFB。\nTotal: 反対の手を挟んだSFBも含む合計。\nクリックするとConsecutive SFBの発生箇所を可視化します。",
+                lbl_sfb_desc: "【SFB率】\nDirect SFB：同じ指が担当する別キーを、反対の手を挟まず連続して打つものです。例：左A → 左B。\nSkip SF：反対の手を1打鍵以上挟んだあと、同じ指を別キーで再利用するものです。例：左A → 右X → 左B。\n同一キーの連打は別指標として集計します。\nカードをクリックするたび、可視化を Direct → Skip → 合計 → 通常 に切り替えます。合計表示では実線=Direct、破線=Skipです。",
+                lbl_sfb_cycle: "",
+                lbl_sfb_view_direct: "DIRECT",
+                lbl_sfb_view_skip: "SKIP",
+                lbl_sfb_view_all: "合計",
+                lbl_long_sf_desc: "【同指ロングジャンプ】\n同じ指・別キーの遷移のうち、物理的な行差が2以上あるものです。\nDirect：反対の手を挟まず直接移る型（A → B）。\nSkip：反対の手を1打鍵以上挟んでから同じ指へ戻る型（A →［反対の手］→ B）。\n大きな数値は Direct + Skip の合計、下段にそれぞれの内訳を表示します。\nカードをクリックするたび、可視化を Direct → Skip → 合計 → 通常 に切り替えます。合計表示では実線=Direct、破線=Skipです。",
+                lbl_long_sf_cycle: "",
+                lbl_long_sf_view_direct: "DIRECT",
+                lbl_long_sf_view_skip: "SKIP",
+                lbl_long_sf_view_all: "合計",
+                lbl_repeat_desc: "【同キー連打】\n同じ物理キーを連続して打った回数です。クリックすると連打が発生したキーと回数を可視化します。",
                 lbl_dist_desc: "左：快適 / 右：高負荷",
 
                 btn_copy: "クリップボードにコピー",
@@ -2742,6 +2938,12 @@
         class Analyzer {
             constructor(state) { this.state = state; }
 
+            getPhysicalRow(hand, idx) {
+                const cols = hand === 'L' ? COLS_L : COLS_R;
+                const isThumb = hand === 'R' && idx === TOTAL_KEYS_R - 1;
+                return isThumb ? 4 : Math.min(4, Math.floor(idx / cols));
+            }
+
             getActiveBundle() {
                 return {
                     layout: this.state.layout,
@@ -2818,10 +3020,15 @@
                     keystrokes: 0,
                     sfbCount: 0,
                     sfbConsCount: 0,
+                    sfbSkipCount: 0,
+                    longSfCount: 0,
+                    longSfDirectCount: 0,
+                    longSfSkipCount: 0,
                     repeatCount: 0,
                     handSwitchCount: 0,
                     repeatCostSum: 0,
                     fingerRepeats: [0,0,0,0,0],
+                    repeatKeyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
                     keyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
                     fingerCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
                     rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
@@ -2829,6 +3036,9 @@
                     bigramCounts: {},
                     sfbBigrams: {},
                     sfbConsBigrams: {},
+                    sfbSkipBigrams: {},
+                    longSfDirectBigrams: {},
+                    longSfSkipBigrams: {},
                     costSamples: []
                 };
 
@@ -2868,6 +3078,7 @@
                     if (last !== null) {
                         if (last === k.idx && history[activeH].gap === 0) {
                             stats.repeatCount++;
+                            stats.repeatKeyCounts[activeH][k.idx]++;
                             const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
                                 ? this.state.repeatCosts[f]
                                 : 1.5;
@@ -2885,11 +3096,31 @@
                                 const sfbFromId = `${activeH}:${last}`;
                                 const sfbToId = `${activeH}:${k.idx}`;
                                 const sfbFlowKey = `${sfbFromId}->${sfbToId}`;
+                                const isDirectSf = history[activeH].gap === 0;
+                                const rowDistance = Math.abs(
+                                    this.getPhysicalRow(activeH, last) - this.getPhysicalRow(activeH, k.idx)
+                                );
+                                const isLongSf = rowDistance >= 2;
+
                                 stats.sfbBigrams[sfbFlowKey] = (stats.sfbBigrams[sfbFlowKey] || 0) + 1;
 
-                                if (history[activeH].gap === 0) {
+                                if (isDirectSf) {
                                     stats.sfbConsCount++;
                                     stats.sfbConsBigrams[sfbFlowKey] = (stats.sfbConsBigrams[sfbFlowKey] || 0) + 1;
+                                } else {
+                                    stats.sfbSkipCount++;
+                                    stats.sfbSkipBigrams[sfbFlowKey] = (stats.sfbSkipBigrams[sfbFlowKey] || 0) + 1;
+                                }
+
+                                if (isLongSf) {
+                                    stats.longSfCount++;
+                                    if (isDirectSf) {
+                                        stats.longSfDirectCount++;
+                                        stats.longSfDirectBigrams[sfbFlowKey] = (stats.longSfDirectBigrams[sfbFlowKey] || 0) + 1;
+                                    } else {
+                                        stats.longSfSkipCount++;
+                                        stats.longSfSkipBigrams[sfbFlowKey] = (stats.longSfSkipBigrams[sfbFlowKey] || 0) + 1;
+                                    }
                                 }
                             }
 
@@ -2959,22 +3190,30 @@
                 const stats = {
                     totalCost: 0, transCost: 0, staticCost: 0,
                     keystrokes: 0,
-                    sfbCount: 0, // Total SFB (Skip含む)
-                    sfbConsCount: 0, // Pure SFB (連続)
+                    sfbCount: 0, // Same-finger/different-key total (Direct + Skip)
+                    sfbConsCount: 0, // Direct SFB: 反対の手を挟まない
+                    sfbSkipCount: 0, // Skip SF: 反対の手を1打鍵以上挟む
+                    longSfCount: 0, // 段差2以上の同指・別キー (Direct + Skip)
+                    longSfDirectCount: 0,
+                    longSfSkipCount: 0,
                     repeatCount: 0,
                     handSwitchCount: 0, // 交互打鍵数
 
                     // 連打詳細データ
                     repeatCostSum: 0,            // 連打によるコストの総和
                     fingerRepeats: [0,0,0,0,0],  // 指ごとの連打回数 (左右合算: 小,薬,中,人,親)
+                    repeatKeyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) }, // 物理キーごとの同キー連打回数
 
                     keyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
                     fingerCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
                     rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
                     transitions: {},
                     bigramCounts: {}, // 客観的フロー描画用の純粋な出現回数
-                    sfbBigrams: {}, // SFB (同指・別キー) の全ペア。反対の手を挟むケースも含む
-                    sfbConsBigrams: {}, // Consecutive SFB のみ
+                    sfbBigrams: {}, // 同指・別キーの全ペア (Direct + Skip)
+                    sfbConsBigrams: {}, // Direct SFB のみ
+                    sfbSkipBigrams: {}, // Skip SF のみ
+                    longSfDirectBigrams: {}, // 段差2以上のDirect SF
+                    longSfSkipBigrams: {}, // 段差2以上のSkip SF
                     costSamples: [] // 分布計算用
                 };
 
@@ -3141,6 +3380,7 @@
                         if (last === k.idx && history[activeH].gap === 0) {
                             // 同一キー連打 (Repeat)
                             stats.repeatCount++;
+                            stats.repeatKeyCounts[activeH][k.idx]++;
                             const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
                                           ? this.state.repeatCosts[f]
                                           : 1.5;
@@ -3155,19 +3395,39 @@
                             // 別のキーへの遷移
                             const lastF = this.state.fingers[activeH][last];
 
-                            // SFB判定: 同じ指 かつ 別のキー
+                            // Same-finger / different-key classification: Direct と Skip を分離
                             if (lastF === f && f !== null && last !== k.idx) {
-                                stats.sfbCount++; // Total SFB
+                                stats.sfbCount++;
 
                                 const sfbFromId = `${activeH}:${last}`;
                                 const sfbToId = `${activeH}:${k.idx}`;
                                 const sfbFlowKey = `${sfbFromId}->${sfbToId}`;
+                                const isDirectSf = history[activeH].gap === 0;
+                                const rowDistance = Math.abs(
+                                    this.getPhysicalRow(activeH, last) - this.getPhysicalRow(activeH, k.idx)
+                                );
+                                const isLongSf = rowDistance >= 2;
+
                                 stats.sfbBigrams[sfbFlowKey] = (stats.sfbBigrams[sfbFlowKey] || 0) + 1;
 
-                                // gapが0なら「反対の手」を挟んでいない＝純粋な連続SFB
-                                if (history[activeH].gap === 0) {
+                                if (isDirectSf) {
                                     stats.sfbConsCount++;
                                     stats.sfbConsBigrams[sfbFlowKey] = (stats.sfbConsBigrams[sfbFlowKey] || 0) + 1;
+                                } else {
+                                    stats.sfbSkipCount++;
+                                    stats.sfbSkipBigrams[sfbFlowKey] = (stats.sfbSkipBigrams[sfbFlowKey] || 0) + 1;
+                                }
+
+                                // 段差2以上の同指遷移は Long SF として別集計。Direct/Skipの両方を対象にする。
+                                if (isLongSf) {
+                                    stats.longSfCount++;
+                                    if (isDirectSf) {
+                                        stats.longSfDirectCount++;
+                                        stats.longSfDirectBigrams[sfbFlowKey] = (stats.longSfDirectBigrams[sfbFlowKey] || 0) + 1;
+                                    } else {
+                                        stats.longSfSkipCount++;
+                                        stats.longSfSkipBigrams[sfbFlowKey] = (stats.longSfSkipBigrams[sfbFlowKey] || 0) + 1;
+                                    }
                                 }
                             }
 
@@ -3261,8 +3521,12 @@
 
                 // ▼ フロー可視化用の状態管理とCanvas生成 ▼
                 this.hoveredKeyId = null;
-                this.sfbDetailMode = false; // SFB KPIクリック時: Consecutive SFBだけを可視化
+                this.sfbDetailMode = false; // false | 'direct' | 'skip' | 'all'：SFB可視化の循環モード
+                this.longSfDetailMode = false; // false | 'direct' | 'skip' | 'all'：Long SF可視化の循環モード
+                this.repeatDetailMode = false; // 同一キー連打の発生キーだけを可視化
                 this.sfbVizCache = null;
+                this.longSfVizCache = null;
+                this.repeatVizCache = null;
                 this.flowCanvas = document.createElement('canvas');
                 this.flowCanvas.id = 'flow-canvas';
                 this.ctx = this.flowCanvas.getContext('2d');
@@ -3318,14 +3582,22 @@
                 // 解析ボタン
                 document.getElementById('btn-analyze').onclick = () => this.runAnalysis();
 
-                // SFB KPI: Consecutive SFB の発生箇所をキーボード上でトグル表示
+                // SFB KPI: クリックごとに Direct → Skip → Total → Off を循環表示
                 const sfbCard = document.getElementById('kpi-sfb-card');
                 const toggleSfbDetail = () => {
                     if (!this.state.lastResult) return;
 
-                    this.sfbDetailMode = !this.sfbDetailMode;
+                    const cycle = [false, 'direct', 'skip', 'all'];
+                    const currentIndex = cycle.indexOf(this.sfbDetailMode);
+                    this.sfbDetailMode = cycle[(currentIndex + 1) % cycle.length];
+                    if (this.sfbDetailMode) {
+                        this.longSfDetailMode = false;
+                        this.repeatDetailMode = false;
+                    }
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
+                    this.longSfVizCache = null;
+                    this.repeatVizCache = null;
                     this.updateSfbDetailUI();
 
                     if (this.state.appView === 'emulation') {
@@ -3343,6 +3615,79 @@
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             toggleSfbDetail();
+                        }
+                    };
+                }
+
+                // Long SF: クリックごとに Direct → Skip → Total → Off を循環表示
+                const longSfCard = document.getElementById('kpi-long-sf-card');
+                const toggleLongSfDetail = () => {
+                    if (!this.state.lastResult) return;
+
+                    const cycle = [false, 'direct', 'skip', 'all'];
+                    const currentIndex = cycle.indexOf(this.longSfDetailMode);
+                    this.longSfDetailMode = cycle[(currentIndex + 1) % cycle.length];
+
+                    if (this.longSfDetailMode) {
+                        this.sfbDetailMode = false;
+                        this.repeatDetailMode = false;
+                    }
+                    this.hoveredKeyId = null;
+                    this.sfbVizCache = null;
+                    this.longSfVizCache = null;
+                    this.repeatVizCache = null;
+                    this.updateSfbDetailUI();
+
+                    if (this.state.appView === 'emulation') {
+                        this.renderEmuSide('target');
+                    } else if (this.state.mode === 'result') {
+                        this.renderGrid('L');
+                        this.renderGrid('R');
+                    }
+                    this.drawFlow();
+                };
+
+                if (longSfCard) {
+                    longSfCard.onclick = toggleLongSfDetail;
+                    longSfCard.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleLongSfDetail();
+                        }
+                    };
+                }
+
+                // Repeats: 同一キー連打が発生した物理キーをトグル表示
+                const repeatRow = document.getElementById('kpi-repeat-card');
+                const toggleRepeatDetail = () => {
+                    if (!this.state.lastResult) return;
+
+                    this.repeatDetailMode = !this.repeatDetailMode;
+                    if (this.repeatDetailMode) {
+                        this.sfbDetailMode = false;
+                        this.longSfDetailMode = false;
+                    }
+                    this.hoveredKeyId = null;
+                    this.sfbVizCache = null;
+                    this.longSfVizCache = null;
+                    this.repeatVizCache = null;
+                    this.updateSfbDetailUI();
+
+                    if (this.state.appView === 'emulation') {
+                        this.renderEmuSide('target');
+                    } else if (this.state.mode === 'result') {
+                        this.renderGrid('L');
+                        this.renderGrid('R');
+                    }
+                    this.drawFlow();
+                };
+
+                if (repeatRow) {
+                    repeatRow.onclick = toggleRepeatDetail;
+                    repeatRow.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleRepeatDetail();
                         }
                     };
                 }
@@ -3885,7 +4230,11 @@
                     this.hoveredKeyId = null;
                     if (this.state.appView === 'analyzer') {
                         this.sfbDetailMode = false;
+                        this.longSfDetailMode = false;
+                        this.repeatDetailMode = false;
                         this.sfbVizCache = null;
+                        this.longSfVizCache = null;
+                        this.repeatVizCache = null;
                         this.updateSfbDetailUI();
                     }
                     this.dom.resPanel.style.display = 'none';
@@ -4006,8 +4355,12 @@
             setAppView(view) {
                 if (this.state.appView !== view) {
                     this.sfbDetailMode = false;
+                    this.longSfDetailMode = false;
+                    this.repeatDetailMode = false;
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
+                    this.longSfVizCache = null;
+                    this.repeatVizCache = null;
                 }
 
                 this.state.appView = view;
@@ -4761,11 +5114,16 @@
                     keyDiv.appendChild(fBar);
 
                     if (side === 'target' && this.state.lastResult && this.state.appView === 'emulation') {
-                        const sfbViz = this.sfbDetailMode ? this.getSfbVisualizationData() : null;
-                        const count = sfbViz ? sfbViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
-                        const max = sfbViz ? sfbViz.max : (this.state.lastResult.maxKey || 1);
+                        const detailViz = this.sfbDetailMode
+                            ? this.getSfbVisualizationData()
+                            : (this.longSfDetailMode
+                                ? this.getLongSfVisualizationData()
+                                : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null));
+                        const count = detailViz ? detailViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
+                        const max = detailViz ? detailViz.max : (this.state.lastResult.maxKey || 1);
+                        const isDetailMode = this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
 
-                        if (this.sfbDetailMode && count === 0) {
+                        if (isDetailMode && count === 0) {
                             keyDiv.style.opacity = '0.30';
                         }
 
@@ -4775,9 +5133,15 @@
                             if (alpha > 0.9) alpha = 0.9;
                             if (alpha < 0.1) alpha = 0.1;
 
-                            const heatR = this.sfbDetailMode ? 248 : 57;
-                            const heatG = this.sfbDetailMode ? 81 : 211;
-                            const heatB = this.sfbDetailMode ? 73 : 83;
+                            const sfbHeat = this.sfbDetailMode === 'skip'
+                                ? [240, 136, 62]
+                                : (this.sfbDetailMode === 'all' ? [163, 113, 247] : [248, 81, 73]);
+                            const longSfHeat = this.longSfDetailMode === 'skip'
+                                ? [240, 136, 62]
+                                : (this.longSfDetailMode === 'all' ? [163, 113, 247] : [219, 97, 162]);
+                            const heatR = this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57));
+                            const heatG = this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211));
+                            const heatB = this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83));
                             const r = Math.round(heatR * alpha + 33 * (1 - alpha));
                             const g = Math.round(heatG * alpha + 38 * (1 - alpha));
                             const b = Math.round(heatB * alpha + 45 * (1 - alpha));
@@ -5607,11 +5971,16 @@
                         }
                     }
                     else if (this.state.appView === 'analyzer' && this.state.mode === 'result' && this.state.lastResult) {
-                        const sfbViz = this.sfbDetailMode ? this.getSfbVisualizationData() : null;
-                        const count = sfbViz ? sfbViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
-                        const max = sfbViz ? sfbViz.max : (this.state.lastResult.maxKey || 1);
+                        const detailViz = this.sfbDetailMode
+                            ? this.getSfbVisualizationData()
+                            : (this.longSfDetailMode
+                                ? this.getLongSfVisualizationData()
+                                : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null));
+                        const count = detailViz ? detailViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
+                        const max = detailViz ? detailViz.max : (this.state.lastResult.maxKey || 1);
+                        const isDetailMode = this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
 
-                        if (this.sfbDetailMode && count === 0) {
+                        if (isDetailMode && count === 0) {
                             keyDiv.style.opacity = '0.30';
                         }
 
@@ -5622,10 +5991,16 @@
                             if (alpha > 0.9) alpha = 0.9;
                             if (alpha < 0.1) alpha = 0.1;
 
-                            // 2. 厳密な背景色ブレンド計算 (Base: #21262d, Heat: rgb(57, 211, 83))
-                            const heatR = this.sfbDetailMode ? 248 : 57;
-                            const heatG = this.sfbDetailMode ? 81 : 211;
-                            const heatB = this.sfbDetailMode ? 73 : 83;
+                            // 2. 詳細モードでは指標ごとの色、通常は打鍵ヒートマップの緑
+                            const sfbHeat = this.sfbDetailMode === 'skip'
+                                ? [240, 136, 62]
+                                : (this.sfbDetailMode === 'all' ? [163, 113, 247] : [248, 81, 73]);
+                            const longSfHeat = this.longSfDetailMode === 'skip'
+                                ? [240, 136, 62]
+                                : (this.longSfDetailMode === 'all' ? [163, 113, 247] : [219, 97, 162]);
+                            const heatR = this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57));
+                            const heatG = this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211));
+                            const heatB = this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83));
                             const r = Math.round(heatR * alpha + 33 * (1 - alpha));
                             const g = Math.round(heatG * alpha + 38 * (1 - alpha));
                             const b = Math.round(heatB * alpha + 45 * (1 - alpha));
@@ -5863,13 +6238,22 @@
                 document.getElementById('kpi-bal-l').textContent = Math.round(totalL / grandTotal * 100);
                 document.getElementById('kpi-bal-r').textContent = Math.round(totalR / grandTotal * 100);
 
-                // [4] SFB Rate (Dual: Consecutive & Total)
-                const sfbTotalRate = stats.keystrokes > 0 ? (stats.sfbCount / stats.keystrokes * 100) : 0;
-                const sfbConsRate  = stats.keystrokes > 0 ? (stats.sfbConsCount / stats.keystrokes * 100) : 0;
+                // [4] Same-finger metrics: Direct SFB / Skip SF / Long SF
+                const denom = stats.keystrokes > 0 ? stats.keystrokes : 1;
+                const sfbConsRate = stats.keystrokes > 0 ? (stats.sfbConsCount / denom * 100) : 0;
+                const sfbSkipCount = Number.isFinite(stats.sfbSkipCount)
+                    ? stats.sfbSkipCount
+                    : Math.max(0, (stats.sfbCount || 0) - (stats.sfbConsCount || 0));
+                const sfbSkipRate = stats.keystrokes > 0 ? (sfbSkipCount / denom * 100) : 0;
+                const longSfDirectRate = stats.keystrokes > 0 ? ((stats.longSfDirectCount || 0) / denom * 100) : 0;
+                const longSfSkipRate = stats.keystrokes > 0 ? ((stats.longSfSkipCount || 0) / denom * 100) : 0;
+                const longSfTotalRate = stats.keystrokes > 0 ? ((stats.longSfCount || 0) / denom * 100) : 0;
 
-                // 色付けロジックは削除し、数値のみ表示
                 document.getElementById('kpi-sfb-cons').innerHTML = `${sfbConsRate.toFixed(2)}<span class="kpi-unit">%</span>`;
-                document.getElementById('kpi-sfb-total').textContent = `${sfbTotalRate.toFixed(2)}%`;
+                document.getElementById('kpi-sfb-skip').textContent = `${sfbSkipRate.toFixed(2)}%`;
+                document.getElementById('kpi-long-sf-total').innerHTML = `${longSfTotalRate.toFixed(2)}<span class="kpi-unit">%</span>`;
+                document.getElementById('kpi-long-sf-direct').textContent = `${longSfDirectRate.toFixed(2)}%`;
+                document.getElementById('kpi-long-sf-skip').textContent = `${longSfSkipRate.toFixed(2)}%`;
                 this.updateSfbDetailUI();
 
                 // --- 2. Histogram (Logarithmic Scale) ---
@@ -5954,8 +6338,9 @@
                 document.getElementById('stat-max-key').textContent = stats.maxKeyChar || "-";
 
                 // --- Repeats Detail (Visualization) ---
-                const repPct = stats.repeatRate.toFixed(1);
-                document.getElementById('stat-repeat').textContent = `${f(stats.repeatCount)} (${repPct}%)`;
+                const repPct = stats.repeatRate.toFixed(2);
+                document.getElementById('kpi-repeat-rate').innerHTML = `${repPct}<span class="kpi-unit">%</span>`;
+                document.getElementById('kpi-repeat-count').textContent = f(stats.repeatCount);
 
                 const repWrapper = document.getElementById('repeat-detail-wrapper');
                 if (stats.repeatCount > 0) {
@@ -6013,12 +6398,46 @@
             updateSfbDetailUI() {
                 const card = document.getElementById('kpi-sfb-card');
                 if (card) {
-                    card.classList.toggle('active-detail', !!this.sfbDetailMode);
-                    card.setAttribute('aria-pressed', this.sfbDetailMode ? 'true' : 'false');
+                    const sfbMode = this.sfbDetailMode || false;
+                    card.classList.toggle('active-detail', !!sfbMode);
+                    card.setAttribute('aria-pressed', sfbMode ? 'true' : 'false');
+                    card.dataset.vizMode = sfbMode || 'off';
+
+                    const modeEl = document.getElementById('kpi-sfb-mode');
+                    if (modeEl) {
+                        const dict = I18N[this.state.lang];
+                        if (sfbMode === 'direct') modeEl.textContent = dict.lbl_sfb_view_direct;
+                        else if (sfbMode === 'skip') modeEl.textContent = dict.lbl_sfb_view_skip;
+                        else if (sfbMode === 'all') modeEl.textContent = dict.lbl_sfb_view_all;
+                        else modeEl.textContent = dict.lbl_sfb_cycle;
+                    }
+                }
+
+                const longSfCard = document.getElementById('kpi-long-sf-card');
+                if (longSfCard) {
+                    const longMode = this.longSfDetailMode || false;
+                    longSfCard.classList.toggle('active-detail', !!longMode);
+                    longSfCard.setAttribute('aria-pressed', longMode ? 'true' : 'false');
+                    longSfCard.dataset.vizMode = longMode || 'off';
+
+                    const modeEl = document.getElementById('kpi-long-sf-mode');
+                    if (modeEl) {
+                        const dict = I18N[this.state.lang];
+                        if (longMode === 'direct') modeEl.textContent = dict.lbl_long_sf_view_direct;
+                        else if (longMode === 'skip') modeEl.textContent = dict.lbl_long_sf_view_skip;
+                        else if (longMode === 'all') modeEl.textContent = dict.lbl_long_sf_view_all;
+                        else modeEl.textContent = dict.lbl_long_sf_cycle;
+                    }
+                }
+
+                const repeatRow = document.getElementById('kpi-repeat-card');
+                if (repeatRow) {
+                    repeatRow.classList.toggle('active-detail', !!this.repeatDetailMode);
+                    repeatRow.setAttribute('aria-pressed', this.repeatDetailMode ? 'true' : 'false');
                 }
             }
 
-            getSfbVisualizationData() {
+            getSfbVisualizationData(mode = this.sfbDetailMode || 'all') {
                 const result = this.state.lastResult;
                 if (!result) {
                     return {
@@ -6027,7 +6446,7 @@
                     };
                 }
 
-                if (this.sfbVizCache && this.sfbVizCache.result === result) {
+                if (this.sfbVizCache && this.sfbVizCache.result === result && this.sfbVizCache.mode === mode) {
                     return this.sfbVizCache.data;
                 }
 
@@ -6035,34 +6454,145 @@
                     L: Array(TOTAL_KEYS_L).fill(0),
                     R: Array(TOTAL_KEYS_R).fill(0)
                 };
-                const bigrams = result.sfbConsBigrams || {};
+                const groups = mode === 'direct'
+                    ? [result.sfbConsBigrams || {}]
+                    : (mode === 'skip'
+                        ? [result.sfbSkipBigrams || {}]
+                        : [result.sfbConsBigrams || {}, result.sfbSkipBigrams || {}]);
 
-                Object.entries(bigrams).forEach(([flowKey, count]) => {
-                    const [fromId, toId] = flowKey.split('->');
+                groups.forEach(bigrams => {
+                    Object.entries(bigrams).forEach(([flowKey, count]) => {
+                        const [fromId, toId] = flowKey.split('->');
 
-                    [fromId, toId].forEach(keyId => {
-                        const [hand, idxStr] = String(keyId || '').split(':');
-                        const idx = Number(idxStr);
-                        if ((hand === 'L' || hand === 'R') &&
-                            Number.isInteger(idx) &&
-                            idx >= 0 &&
-                            idx < keyCounts[hand].length) {
-                            keyCounts[hand][idx] += count;
-                        }
+                        [fromId, toId].forEach(keyId => {
+                            const [hand, idxStr] = String(keyId || '').split(':');
+                            const idx = Number(idxStr);
+                            if ((hand === 'L' || hand === 'R') &&
+                                Number.isInteger(idx) &&
+                                idx >= 0 &&
+                                idx < keyCounts[hand].length) {
+                                keyCounts[hand][idx] += count;
+                            }
+                        });
                     });
                 });
 
                 const max = Math.max(1, ...keyCounts.L, ...keyCounts.R);
                 const data = { keyCounts, max };
-                this.sfbVizCache = { result, data };
+                this.sfbVizCache = { result, mode, data };
                 return data;
             }
 
+            getLongSfVisualizationData(mode = this.longSfDetailMode || 'all') {
+                const result = this.state.lastResult;
+                if (!result) {
+                    return {
+                        keyCounts: { L: Array(TOTAL_KEYS_L).fill(0), R: Array(TOTAL_KEYS_R).fill(0) },
+                        max: 1
+                    };
+                }
+
+                if (this.longSfVizCache && this.longSfVizCache.result === result && this.longSfVizCache.mode === mode) {
+                    return this.longSfVizCache.data;
+                }
+
+                const keyCounts = {
+                    L: Array(TOTAL_KEYS_L).fill(0),
+                    R: Array(TOTAL_KEYS_R).fill(0)
+                };
+                const groups = mode === 'direct'
+                    ? [result.longSfDirectBigrams || {}]
+                    : (mode === 'skip'
+                        ? [result.longSfSkipBigrams || {}]
+                        : [result.longSfDirectBigrams || {}, result.longSfSkipBigrams || {}]);
+
+                groups.forEach(bigrams => {
+                    Object.entries(bigrams).forEach(([flowKey, count]) => {
+                        const [fromId, toId] = flowKey.split('->');
+                        [fromId, toId].forEach(keyId => {
+                            const [hand, idxStr] = String(keyId || '').split(':');
+                            const idx = Number(idxStr);
+                            if ((hand === 'L' || hand === 'R') &&
+                                Number.isInteger(idx) &&
+                                idx >= 0 &&
+                                idx < keyCounts[hand].length) {
+                                keyCounts[hand][idx] += count;
+                            }
+                        });
+                    });
+                });
+
+                const max = Math.max(1, ...keyCounts.L, ...keyCounts.R);
+                const data = { keyCounts, max };
+                this.longSfVizCache = { result, mode, data };
+                return data;
+            }
+
+            getRepeatVisualizationData() {
+                const result = this.state.lastResult;
+                if (!result) {
+                    return {
+                        keyCounts: { L: Array(TOTAL_KEYS_L).fill(0), R: Array(TOTAL_KEYS_R).fill(0) },
+                        max: 1
+                    };
+                }
+
+                if (this.repeatVizCache && this.repeatVizCache.result === result) {
+                    return this.repeatVizCache.data;
+                }
+
+                const src = result.repeatKeyCounts || {};
+                const keyCounts = {
+                    L: Array.from(src.L || Array(TOTAL_KEYS_L).fill(0)),
+                    R: Array.from(src.R || Array(TOTAL_KEYS_R).fill(0))
+                };
+                const max = Math.max(1, ...keyCounts.L, ...keyCounts.R);
+                const data = { keyCounts, max };
+                this.repeatVizCache = { result, data };
+                return data;
+            }
+
+            getActiveFlowGroups() {
+                const result = this.state.lastResult;
+                if (!result || this.repeatDetailMode) return [];
+
+                if (this.longSfDetailMode) {
+                    if (this.longSfDetailMode === 'direct') {
+                        return [{ kind: 'long-direct', bigrams: result.longSfDirectBigrams || {} }];
+                    }
+                    if (this.longSfDetailMode === 'skip') {
+                        return [{ kind: 'long-skip', bigrams: result.longSfSkipBigrams || {} }];
+                    }
+                    return [
+                        { kind: 'long-direct', bigrams: result.longSfDirectBigrams || {} },
+                        { kind: 'long-skip', bigrams: result.longSfSkipBigrams || {} }
+                    ];
+                }
+
+                if (this.sfbDetailMode) {
+                    if (this.sfbDetailMode === 'direct') {
+                        return [{ kind: 'sfb-direct', bigrams: result.sfbConsBigrams || {} }];
+                    }
+                    if (this.sfbDetailMode === 'skip') {
+                        return [{ kind: 'sfb-skip', bigrams: result.sfbSkipBigrams || {} }];
+                    }
+                    return [
+                        { kind: 'sfb-direct', bigrams: result.sfbConsBigrams || {} },
+                        { kind: 'sfb-skip', bigrams: result.sfbSkipBigrams || {} }
+                    ];
+                }
+
+                return [{ kind: 'normal', bigrams: result.bigramCounts || {} }];
+            }
+
             getActiveFlowBigrams() {
-                if (!this.state.lastResult) return {};
-                return this.sfbDetailMode
-                    ? (this.state.lastResult.sfbConsBigrams || {})
-                    : (this.state.lastResult.bigramCounts || {});
+                const merged = {};
+                this.getActiveFlowGroups().forEach(({ bigrams }) => {
+                    Object.entries(bigrams).forEach(([flowKey, count]) => {
+                        merged[flowKey] = (merged[flowKey] || 0) + count;
+                    });
+                });
+                return merged;
             }
 
             getKeyInfoById(keyId) {
@@ -6161,7 +6691,7 @@
 
                 if (!container) return;
 
-                const isHoverFlow = !!this.hoveredKeyId;
+                const isHoverFlow = !!this.hoveredKeyId && !this.repeatDetailMode;
                 const { flowCounts, totalOutgoing } = this.getHoveredFlowCounts();
 
                 container.querySelectorAll('.key[data-key-id]').forEach(el => {
@@ -6216,10 +6746,13 @@
                 canvas.height = rect.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                const bigrams = this.getActiveFlowBigrams();
-                if (!bigrams || Object.keys(bigrams).length === 0) return;
+                const flowGroups = this.getActiveFlowGroups();
+                const entries = flowGroups
+                    .flatMap(({ kind, bigrams }) => Object.entries(bigrams).map(([flowKey, count]) => ({ flowKey, count, kind })))
+                    .sort((a, b) => a.count - b.count);
+                if (entries.length === 0) return;
 
-                const maxCount = Math.max(...Object.values(bigrams));
+                const maxCount = Math.max(...entries.map(entry => entry.count));
 
                 const keyCoords = {};
                 container.querySelectorAll('.key[data-key-id]').forEach(el => {
@@ -6234,9 +6767,7 @@
                     };
                 });
 
-                const entries = Object.entries(bigrams).sort((a, b) => a[1] - b[1]);
-
-                entries.forEach(([flowKey, count]) => {
+                entries.forEach(({ flowKey, count, kind }) => {
                     const [fromId, toId] = flowKey.split('->');
                     if (!fromId || !toId || fromId === toId || !keyCoords[fromId] || !keyCoords[toId]) return;
 
@@ -6252,29 +6783,56 @@
                     const dy = end.y - start.y;
                     const dist = Math.hypot(dx, dy);
 
-                    const { x: cpX, y: cpY } = this.getFlowControlPoint(start, end, fromInfo);
+                    let { x: cpX, y: cpY } = this.getFlowControlPoint(start, end, fromInfo);
+                    // 同一ペアにDirect/Skipが共存しても判別できるよう、Skipは少し外側へ逃がす。
+                    if (kind === 'sfb-skip' || kind === 'long-skip') {
+                        cpX += this.getArcSideForSource(fromInfo) * 9;
+                        cpY -= 7;
+                    }
                     const thickness = Math.max(0.5, (count / maxCount) * 20);
 
                     const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
-                    if (this.sfbDetailMode) {
+                    if (kind === 'sfb-direct') {
                         gradient.addColorStop(0, 'rgba(248, 81, 73, 0.12)');
                         gradient.addColorStop(1, 'rgba(248, 81, 73, 0.96)');
+                    } else if (kind === 'sfb-skip') {
+                        gradient.addColorStop(0, 'rgba(240, 136, 62, 0.12)');
+                        gradient.addColorStop(1, 'rgba(240, 136, 62, 0.94)');
+                    } else if (kind === 'long-direct') {
+                        gradient.addColorStop(0, 'rgba(219, 97, 162, 0.15)');
+                        gradient.addColorStop(1, 'rgba(219, 97, 162, 0.98)');
+                    } else if (kind === 'long-skip') {
+                        gradient.addColorStop(0, 'rgba(240, 136, 62, 0.12)');
+                        gradient.addColorStop(1, 'rgba(240, 136, 62, 0.94)');
                     } else {
                         gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
                         gradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)');
                     }
 
+                    ctx.save();
                     ctx.beginPath();
                     ctx.moveTo(start.x, start.y);
                     ctx.quadraticCurveTo(cpX, cpY, end.x, end.y);
                     ctx.strokeStyle = gradient;
                     ctx.lineWidth = thickness;
                     ctx.lineCap = 'round';
-                    ctx.shadowColor = this.sfbDetailMode
+                    if (kind === 'sfb-skip' || kind === 'long-skip') {
+                        ctx.setLineDash([7, 6]);
+                    } else {
+                        ctx.setLineDash([]);
+                    }
+                    ctx.shadowColor = kind === 'sfb-direct'
                         ? 'rgba(248, 81, 73, 0.55)'
-                        : 'rgba(255, 255, 255, 0.4)';
+                        : (kind === 'sfb-skip'
+                            ? 'rgba(240, 136, 62, 0.48)'
+                            : (kind === 'long-direct'
+                                ? 'rgba(219, 97, 162, 0.58)'
+                                : (kind === 'long-skip'
+                                    ? 'rgba(240, 136, 62, 0.48)'
+                                    : 'rgba(255, 255, 255, 0.4)')));
                     ctx.shadowBlur = 4;
                     ctx.stroke();
+                    ctx.restore();
                 });
             }
         }
@@ -6300,4 +6858,3 @@
     </script>
 </body>
 </html>
-
