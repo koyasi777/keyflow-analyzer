@@ -1042,6 +1042,20 @@
         /* ツールチップを持つカードはヘルプカーソルに */
         .kpi-card.tooltip { cursor: help; overflow: visible; }
 
+        /* SFB KPI: click to drill down into the counted same-finger/different-key pairs. */
+        .kpi-card.tooltip.sfb-interactive { cursor: pointer; }
+        .kpi-card.sfb-interactive:hover,
+        .kpi-card.sfb-interactive:focus-visible { border-color: var(--c-dang); }
+        .kpi-card.sfb-interactive:focus-visible {
+            outline: 2px solid rgba(248, 81, 73, 0.45);
+            outline-offset: 2px;
+        }
+        .kpi-card.sfb-interactive.active-detail {
+            border-color: var(--c-dang);
+            background: rgba(248, 81, 73, 0.08);
+            box-shadow: 0 0 0 1px rgba(248, 81, 73, 0.22), 0 0 18px rgba(248, 81, 73, 0.10);
+        }
+
         .kpi-label {
             font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
             margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;
@@ -1669,7 +1683,8 @@
                                         <span style="font-family:'JetBrains Mono'">L:<span id="kpi-bal-l">50</span> / R:<span id="kpi-bal-r">50</span></span>
                                     </div>
                                 </div>
-                                <div class="kpi-card tooltip" data-i18n-tooltip="lbl_sfb_desc">
+                                <div id="kpi-sfb-card" class="kpi-card tooltip sfb-interactive" data-i18n-tooltip="lbl_sfb_desc"
+                                     role="button" tabindex="0" aria-pressed="false">
                                     <div class="kpi-label" data-i18n="stat_sfb">SFB Rate</div>
                                     <div class="kpi-value" id="kpi-sfb-cons">0.00<span class="kpi-unit">%</span></div>
                                     <div class="kpi-sub">
@@ -2390,7 +2405,7 @@
                 panel_results: "Analysis Results", res_total: "Efficiency Score", res_work: "Total Work (Load)",
                 res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
 
-                stat_keystrokes: "Keystrokes", stat_sfb: "SFB %", stat_repeat: "Repeats", stat_max_key: "Top Key",
+                stat_keystrokes: "Keystrokes", stat_sfb: "SFB % (Same Finger / Different Key)", stat_repeat: "Repeats", stat_max_key: "Top Key",
                 res_worst: "Worst Transitions",
 
                 graph_finger: "Finger Load", graph_row: "Row Load",
@@ -2463,7 +2478,7 @@
                 lbl_95_desc: "95% of keystrokes fall below this cost. Indicates peak difficulty.",
                 lbl_alt: "Alternation",
                 lbl_alt_desc: "Frequency of hand switching and Left/Right hand usage ratio.",
-                lbl_sfb_desc: "Consecutive: Pure same-finger sequence.\nTotal: Includes sequences with hand-switch.",
+                lbl_sfb_desc: "SFB = same finger, different key (same-key repeats are excluded).\nConsecutive: no opposite-hand key in between.\nTotal: includes cases with opposite-hand keys in between.\nClick to visualize Consecutive SFBs.",
                 lbl_dist_desc: "Left: Comfortable / Right: Strenuous",
 
                 btn_copy: "Copy to Clipboard",
@@ -2518,7 +2533,7 @@
                 panel_results: "解析結果", res_total: "総合スコア (平均)", res_work: "総運動量 (Total)",
                 res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
 
-                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率 (同指)", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
+                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率 (同指・別キー)", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
                 res_worst: "ワースト遷移 (負担大)",
                 graph_finger: "指の負荷", graph_row: "段の負荷",
                 header_import: "インポート", header_export: "エクスポート",
@@ -2588,7 +2603,7 @@
                 lbl_95_desc: "【95%タイル値】\n全体の95%が含まれるコストライン。\n突発的な高負荷がどれくらい発生するかを示します。",
                 lbl_alt: "交互打鍵率",
                 lbl_alt_desc: "【交互打鍵率 & L:R比】\n手が切り替わる頻度と、左右の手の使用比率です。",
-                lbl_sfb_desc: "【SFB率 (同指打鍵)】\nConsecutive: 純粋な連続打鍵\nTotal: 反対の手を挟んだ場合も含む合計",
+                lbl_sfb_desc: "【SFB率 (同指・別キー)】\n同じ指で別のキーへ移る打鍵を集計します（同一キー連打は除外）。\nConsecutive: 反対の手を挟まないSFB。\nTotal: 反対の手を挟んだSFBも含む合計。\nクリックするとConsecutive SFBの発生箇所を可視化します。",
                 lbl_dist_desc: "左：快適 / 右：高負荷",
 
                 btn_copy: "クリップボードにコピー",
@@ -2812,6 +2827,8 @@
                     rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
                     transitions: {},
                     bigramCounts: {},
+                    sfbBigrams: {},
+                    sfbConsBigrams: {},
                     costSamples: []
                 };
 
@@ -2864,8 +2881,15 @@
 
                             if (lastF === f && f !== null && last !== k.idx) {
                                 stats.sfbCount++;
+
+                                const sfbFromId = `${activeH}:${last}`;
+                                const sfbToId = `${activeH}:${k.idx}`;
+                                const sfbFlowKey = `${sfbFromId}->${sfbToId}`;
+                                stats.sfbBigrams[sfbFlowKey] = (stats.sfbBigrams[sfbFlowKey] || 0) + 1;
+
                                 if (history[activeH].gap === 0) {
                                     stats.sfbConsCount++;
+                                    stats.sfbConsBigrams[sfbFlowKey] = (stats.sfbConsBigrams[sfbFlowKey] || 0) + 1;
                                 }
                             }
 
@@ -2949,6 +2973,8 @@
                     rowCounts: { L:[0,0,0,0,0], R:[0,0,0,0,0] },
                     transitions: {},
                     bigramCounts: {}, // 客観的フロー描画用の純粋な出現回数
+                    sfbBigrams: {}, // SFB (同指・別キー) の全ペア。反対の手を挟むケースも含む
+                    sfbConsBigrams: {}, // Consecutive SFB のみ
                     costSamples: [] // 分布計算用
                 };
 
@@ -3131,11 +3157,17 @@
 
                             // SFB判定: 同じ指 かつ 別のキー
                             if (lastF === f && f !== null && last !== k.idx) {
-                                stats.sfbCount++; // Total SFB (従来通り)
+                                stats.sfbCount++; // Total SFB
+
+                                const sfbFromId = `${activeH}:${last}`;
+                                const sfbToId = `${activeH}:${k.idx}`;
+                                const sfbFlowKey = `${sfbFromId}->${sfbToId}`;
+                                stats.sfbBigrams[sfbFlowKey] = (stats.sfbBigrams[sfbFlowKey] || 0) + 1;
 
                                 // gapが0なら「反対の手」を挟んでいない＝純粋な連続SFB
                                 if (history[activeH].gap === 0) {
                                     stats.sfbConsCount++;
+                                    stats.sfbConsBigrams[sfbFlowKey] = (stats.sfbConsBigrams[sfbFlowKey] || 0) + 1;
                                 }
                             }
 
@@ -3229,6 +3261,8 @@
 
                 // ▼ フロー可視化用の状態管理とCanvas生成 ▼
                 this.hoveredKeyId = null;
+                this.sfbDetailMode = false; // SFB KPIクリック時: Consecutive SFBだけを可視化
+                this.sfbVizCache = null;
                 this.flowCanvas = document.createElement('canvas');
                 this.flowCanvas.id = 'flow-canvas';
                 this.ctx = this.flowCanvas.getContext('2d');
@@ -3283,6 +3317,35 @@
 
                 // 解析ボタン
                 document.getElementById('btn-analyze').onclick = () => this.runAnalysis();
+
+                // SFB KPI: Consecutive SFB の発生箇所をキーボード上でトグル表示
+                const sfbCard = document.getElementById('kpi-sfb-card');
+                const toggleSfbDetail = () => {
+                    if (!this.state.lastResult) return;
+
+                    this.sfbDetailMode = !this.sfbDetailMode;
+                    this.hoveredKeyId = null;
+                    this.sfbVizCache = null;
+                    this.updateSfbDetailUI();
+
+                    if (this.state.appView === 'emulation') {
+                        this.renderEmuSide('target');
+                    } else if (this.state.mode === 'result') {
+                        this.renderGrid('L');
+                        this.renderGrid('R');
+                    }
+                    this.drawFlow();
+                };
+
+                if (sfbCard) {
+                    sfbCard.onclick = toggleSfbDetail;
+                    sfbCard.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSfbDetail();
+                        }
+                    };
+                }
 
                 // 言語切替
                 document.getElementById('btn-lang').onclick = () => {
@@ -3820,6 +3883,11 @@
 
                 if (mode !== 'result') {
                     this.hoveredKeyId = null;
+                    if (this.state.appView === 'analyzer') {
+                        this.sfbDetailMode = false;
+                        this.sfbVizCache = null;
+                        this.updateSfbDetailUI();
+                    }
                     this.dom.resPanel.style.display = 'none';
                     if (this.ctx) this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
                 }
@@ -3936,7 +4004,14 @@
             }
 
             setAppView(view) {
+                if (this.state.appView !== view) {
+                    this.sfbDetailMode = false;
+                    this.hoveredKeyId = null;
+                    this.sfbVizCache = null;
+                }
+
                 this.state.appView = view;
+                this.updateSfbDetailUI();
 
                 this.dom.btnViewAnalyzer.classList.toggle('active', view === 'analyzer');
                 this.dom.btnViewEmu.classList.toggle('active', view === 'emulation');
@@ -4686,8 +4761,13 @@
                     keyDiv.appendChild(fBar);
 
                     if (side === 'target' && this.state.lastResult && this.state.appView === 'emulation') {
-                        const count = this.state.lastResult.keyCounts[hand][idx];
-                        const max = this.state.lastResult.maxKey || 1;
+                        const sfbViz = this.sfbDetailMode ? this.getSfbVisualizationData() : null;
+                        const count = sfbViz ? sfbViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
+                        const max = sfbViz ? sfbViz.max : (this.state.lastResult.maxKey || 1);
+
+                        if (this.sfbDetailMode && count === 0) {
+                            keyDiv.style.opacity = '0.30';
+                        }
 
                         if (count > 0) {
                             const rawRatio = count / max;
@@ -4695,9 +4775,12 @@
                             if (alpha > 0.9) alpha = 0.9;
                             if (alpha < 0.1) alpha = 0.1;
 
-                            const r = Math.round(57 * alpha + 33 * (1 - alpha));
-                            const g = Math.round(211 * alpha + 38 * (1 - alpha));
-                            const b = Math.round(83 * alpha + 45 * (1 - alpha));
+                            const heatR = this.sfbDetailMode ? 248 : 57;
+                            const heatG = this.sfbDetailMode ? 81 : 211;
+                            const heatB = this.sfbDetailMode ? 73 : 83;
+                            const r = Math.round(heatR * alpha + 33 * (1 - alpha));
+                            const g = Math.round(heatG * alpha + 38 * (1 - alpha));
+                            const b = Math.round(heatB * alpha + 45 * (1 - alpha));
                             const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
                             const isLightBg = luminance > 140;
 
@@ -4705,8 +4788,8 @@
                             const layerTextColor = isLightBg ? '#4A148C' : '#EAD6FF';
                             const dimTextColor = isLightBg ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.65)';
 
-                            keyDiv.style.backgroundColor = `rgba(57, 211, 83, ${alpha})`;
-                            keyDiv.style.borderColor = `rgba(57, 211, 83, ${Math.min(1, alpha + 0.4)})`;
+                            keyDiv.style.backgroundColor = `rgba(${heatR}, ${heatG}, ${heatB}, ${alpha})`;
+                            keyDiv.style.borderColor = `rgba(${heatR}, ${heatG}, ${heatB}, ${Math.min(1, alpha + 0.4)})`;
 
                             cSpan.style.color = cSpan.classList.contains('ctrl-key') ? dimTextColor : mainTextColor;
                             sSpan.style.color = dimTextColor;
@@ -5524,8 +5607,13 @@
                         }
                     }
                     else if (this.state.appView === 'analyzer' && this.state.mode === 'result' && this.state.lastResult) {
-                        const count = this.state.lastResult.keyCounts[hand][idx];
-                        const max = this.state.lastResult.maxKey || 1;
+                        const sfbViz = this.sfbDetailMode ? this.getSfbVisualizationData() : null;
+                        const count = sfbViz ? sfbViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
+                        const max = sfbViz ? sfbViz.max : (this.state.lastResult.maxKey || 1);
+
+                        if (this.sfbDetailMode && count === 0) {
+                            keyDiv.style.opacity = '0.30';
+                        }
 
                         if (count > 0) {
                             // 1. 基本の割合とアルファ値の計算
@@ -5535,9 +5623,12 @@
                             if (alpha < 0.1) alpha = 0.1;
 
                             // 2. 厳密な背景色ブレンド計算 (Base: #21262d, Heat: rgb(57, 211, 83))
-                            const r = Math.round(57 * alpha + 33 * (1 - alpha));
-                            const g = Math.round(211 * alpha + 38 * (1 - alpha));
-                            const b = Math.round(83 * alpha + 45 * (1 - alpha));
+                            const heatR = this.sfbDetailMode ? 248 : 57;
+                            const heatG = this.sfbDetailMode ? 81 : 211;
+                            const heatB = this.sfbDetailMode ? 73 : 83;
+                            const r = Math.round(heatR * alpha + 33 * (1 - alpha));
+                            const g = Math.round(heatG * alpha + 38 * (1 - alpha));
+                            const b = Math.round(heatB * alpha + 45 * (1 - alpha));
 
                             // 3. WCAG相対輝度 (Relative Luminance) に基づく知覚的明るさの算出
                             // RGBそれぞれの視覚的重み付けを適用
@@ -5556,8 +5647,8 @@
                             const dimTextColor = isLightBg ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.65)';
 
                             // --- スタイルの直接適用 (カスケーディング負けの防止) ---
-                            keyDiv.style.backgroundColor = `rgba(57, 211, 83, ${alpha})`;
-                            keyDiv.style.borderColor = `rgba(57, 211, 83, ${Math.min(1, alpha + 0.4)})`;
+                            keyDiv.style.backgroundColor = `rgba(${heatR}, ${heatG}, ${heatB}, ${alpha})`;
+                            keyDiv.style.borderColor = `rgba(${heatR}, ${heatG}, ${heatB}, ${Math.min(1, alpha + 0.4)})`;
 
                             // 主文字 (.key-char) を直接上書き
                             const charEl = keyDiv.querySelector('.key-char');
@@ -5779,6 +5870,7 @@
                 // 色付けロジックは削除し、数値のみ表示
                 document.getElementById('kpi-sfb-cons').innerHTML = `${sfbConsRate.toFixed(2)}<span class="kpi-unit">%</span>`;
                 document.getElementById('kpi-sfb-total').textContent = `${sfbTotalRate.toFixed(2)}%`;
+                this.updateSfbDetailUI();
 
                 // --- 2. Histogram (Logarithmic Scale) ---
                 const histEl = document.getElementById('cost-hist-new');
@@ -5918,6 +6010,61 @@
                 this.drawFlow();
             }
 
+            updateSfbDetailUI() {
+                const card = document.getElementById('kpi-sfb-card');
+                if (card) {
+                    card.classList.toggle('active-detail', !!this.sfbDetailMode);
+                    card.setAttribute('aria-pressed', this.sfbDetailMode ? 'true' : 'false');
+                }
+            }
+
+            getSfbVisualizationData() {
+                const result = this.state.lastResult;
+                if (!result) {
+                    return {
+                        keyCounts: { L: Array(TOTAL_KEYS_L).fill(0), R: Array(TOTAL_KEYS_R).fill(0) },
+                        max: 1
+                    };
+                }
+
+                if (this.sfbVizCache && this.sfbVizCache.result === result) {
+                    return this.sfbVizCache.data;
+                }
+
+                const keyCounts = {
+                    L: Array(TOTAL_KEYS_L).fill(0),
+                    R: Array(TOTAL_KEYS_R).fill(0)
+                };
+                const bigrams = result.sfbConsBigrams || {};
+
+                Object.entries(bigrams).forEach(([flowKey, count]) => {
+                    const [fromId, toId] = flowKey.split('->');
+
+                    [fromId, toId].forEach(keyId => {
+                        const [hand, idxStr] = String(keyId || '').split(':');
+                        const idx = Number(idxStr);
+                        if ((hand === 'L' || hand === 'R') &&
+                            Number.isInteger(idx) &&
+                            idx >= 0 &&
+                            idx < keyCounts[hand].length) {
+                            keyCounts[hand][idx] += count;
+                        }
+                    });
+                });
+
+                const max = Math.max(1, ...keyCounts.L, ...keyCounts.R);
+                const data = { keyCounts, max };
+                this.sfbVizCache = { result, data };
+                return data;
+            }
+
+            getActiveFlowBigrams() {
+                if (!this.state.lastResult) return {};
+                return this.sfbDetailMode
+                    ? (this.state.lastResult.sfbConsBigrams || {})
+                    : (this.state.lastResult.bigramCounts || {});
+            }
+
             getKeyInfoById(keyId) {
                 const bundle = (this.state.appView === 'emulation') ? this.state.emu.target : this.getDisplayBundle();
                 const [hand, idxStr] = String(keyId).split(':');
@@ -5988,11 +6135,12 @@
                 const flowCounts = {};
                 let totalOutgoing = 0;
 
-                if (!this.hoveredKeyId || !this.state.lastResult?.bigramCounts) {
+                const activeBigrams = this.getActiveFlowBigrams();
+                if (!this.hoveredKeyId || Object.keys(activeBigrams).length === 0) {
                     return { flowCounts, totalOutgoing };
                 }
 
-                Object.entries(this.state.lastResult.bigramCounts).forEach(([flowKey, count]) => {
+                Object.entries(activeBigrams).forEach(([flowKey, count]) => {
                     const [fromId, toId] = flowKey.split('->');
                     if (fromId !== this.hoveredKeyId) return;
 
@@ -6068,7 +6216,7 @@
                 canvas.height = rect.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                const bigrams = this.state.lastResult.bigramCounts;
+                const bigrams = this.getActiveFlowBigrams();
                 if (!bigrams || Object.keys(bigrams).length === 0) return;
 
                 const maxCount = Math.max(...Object.values(bigrams));
@@ -6108,8 +6256,13 @@
                     const thickness = Math.max(0.5, (count / maxCount) * 20);
 
                     const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
-                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)');
+                    if (this.sfbDetailMode) {
+                        gradient.addColorStop(0, 'rgba(248, 81, 73, 0.12)');
+                        gradient.addColorStop(1, 'rgba(248, 81, 73, 0.96)');
+                    } else {
+                        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+                        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)');
+                    }
 
                     ctx.beginPath();
                     ctx.moveTo(start.x, start.y);
@@ -6117,7 +6270,9 @@
                     ctx.strokeStyle = gradient;
                     ctx.lineWidth = thickness;
                     ctx.lineCap = 'round';
-                    ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+                    ctx.shadowColor = this.sfbDetailMode
+                        ? 'rgba(248, 81, 73, 0.55)'
+                        : 'rgba(255, 255, 255, 0.4)';
                     ctx.shadowBlur = 4;
                     ctx.stroke();
                 });
@@ -6145,3 +6300,4 @@
     </script>
 </body>
 </html>
+
