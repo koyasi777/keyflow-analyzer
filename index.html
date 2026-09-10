@@ -1259,6 +1259,20 @@
             transition: height 0.3s ease;
         }
         .h-col:hover { opacity: 1; transform: scaleY(1.1); background: var(--accent); }
+        .h-col.cost-interactive { cursor: pointer; }
+        .h-col.cost-interactive:focus-visible {
+            outline: 2px solid var(--text-main);
+            outline-offset: 2px;
+            opacity: 1;
+        }
+        .h-col.cost-interactive.active-detail {
+            opacity: 1;
+            transform: scaleY(1.12);
+            outline: 1px solid rgba(255,255,255,0.9);
+            outline-offset: 1px;
+            filter: brightness(1.18);
+            z-index: 2;
+        }
 
         /* Cost Distribution: browser-native title tooltip replacement.
            Keep the visual language aligned with the analysis-card tooltips,
@@ -3093,7 +3107,8 @@
                     sfbSkipBigrams: {},
                     longSfDirectBigrams: {},
                     longSfSkipBigrams: {},
-                    costSamples: []
+                    costSamples: [],
+                    costEvents: []
                 };
 
                 let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
@@ -3202,8 +3217,16 @@
 
                     stats.staticCost += sCost;
                     stats.transCost += tCost;
-                    stats.totalCost += (sCost + tCost);
-                    stats.costSamples.push(sCost + tCost);
+                    const stepCost = sCost + tCost;
+                    stats.totalCost += stepCost;
+                    stats.costSamples.push(stepCost);
+                    stats.costEvents.push({
+                        cost: stepCost,
+                        staticCost: sCost,
+                        transitionCost: tCost,
+                        from: last !== null ? `${activeH}:${last}` : null,
+                        to: `${activeH}:${k.idx}`
+                    });
 
                     history[activeH].idx = k.idx;
                     history[activeH].gap = 0;
@@ -3268,7 +3291,8 @@
                     sfbSkipBigrams: {}, // Skip SF のみ
                     longSfDirectBigrams: {}, // 段差2以上のDirect SF
                     longSfSkipBigrams: {}, // 段差2以上のSkip SF
-                    costSamples: [] // 分布計算用
+                    costSamples: [], // 分布計算用
+                    costEvents: [] // コスト帯から物理キー/遷移へドリルダウンするための1打鍵イベント
                 };
 
                 let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
@@ -3516,10 +3540,18 @@
                     // 記録
                     stats.staticCost += sCost;
                     stats.transCost += tCost;
-                    stats.totalCost += (sCost + tCost);
+                    const stepCost = sCost + tCost;
+                    stats.totalCost += stepCost;
 
-                    // 1打鍵の合計負荷をサンプルとして保存
-                    stats.costSamples.push(sCost + tCost);
+                    // 1打鍵の合計負荷と、ドリルダウン用の物理キー/遷移情報を保存
+                    stats.costSamples.push(stepCost);
+                    stats.costEvents.push({
+                        cost: stepCost,
+                        staticCost: sCost,
+                        transitionCost: tCost,
+                        from: last !== null ? `${activeH}:${last}` : null,
+                        to: `${activeH}:${k.idx}`
+                    });
 
                     history[activeH].idx = k.idx;
                     history[activeH].gap = 0;
@@ -3578,9 +3610,11 @@
                 this.sfbDetailMode = false; // false | 'direct' | 'skip' | 'all'：SFB可視化の循環モード
                 this.longSfDetailMode = false; // false | 'direct' | 'skip' | 'all'：Long SF可視化の循環モード
                 this.repeatDetailMode = false; // 同一キー連打の発生キーだけを可視化
+                this.costBucketDetailMode = null; // null | 0..20：コスト分布の選択バケット（20は20以上）
                 this.sfbVizCache = null;
                 this.longSfVizCache = null;
                 this.repeatVizCache = null;
+                this.costBucketVizCache = null;
                 this.flowCanvas = document.createElement('canvas');
                 this.flowCanvas.id = 'flow-canvas';
                 this.ctx = this.flowCanvas.getContext('2d');
@@ -3647,12 +3681,15 @@
                     if (this.sfbDetailMode) {
                         this.longSfDetailMode = false;
                         this.repeatDetailMode = false;
+                        this.costBucketDetailMode = null;
                     }
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
                     this.longSfVizCache = null;
                     this.repeatVizCache = null;
+                    this.costBucketVizCache = null;
                     this.updateSfbDetailUI();
+                    this.updateCostBucketDetailUI();
 
                     if (this.state.appView === 'emulation') {
                         this.renderEmuSide('target');
@@ -3685,12 +3722,15 @@
                     if (this.longSfDetailMode) {
                         this.sfbDetailMode = false;
                         this.repeatDetailMode = false;
+                        this.costBucketDetailMode = null;
                     }
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
                     this.longSfVizCache = null;
                     this.repeatVizCache = null;
+                    this.costBucketVizCache = null;
                     this.updateSfbDetailUI();
+                    this.updateCostBucketDetailUI();
 
                     if (this.state.appView === 'emulation') {
                         this.renderEmuSide('target');
@@ -3720,12 +3760,15 @@
                     if (this.repeatDetailMode) {
                         this.sfbDetailMode = false;
                         this.longSfDetailMode = false;
+                        this.costBucketDetailMode = null;
                     }
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
                     this.longSfVizCache = null;
                     this.repeatVizCache = null;
+                    this.costBucketVizCache = null;
                     this.updateSfbDetailUI();
+                    this.updateCostBucketDetailUI();
 
                     if (this.state.appView === 'emulation') {
                         this.renderEmuSide('target');
@@ -4287,10 +4330,13 @@
                         this.sfbDetailMode = false;
                         this.longSfDetailMode = false;
                         this.repeatDetailMode = false;
+                        this.costBucketDetailMode = null;
                         this.sfbVizCache = null;
                         this.longSfVizCache = null;
                         this.repeatVizCache = null;
+                        this.costBucketVizCache = null;
                         this.updateSfbDetailUI();
+                        this.updateCostBucketDetailUI();
                     }
                     this.dom.resPanel.style.display = 'none';
                     if (this.ctx) this.ctx.clearRect(0, 0, this.flowCanvas.width, this.flowCanvas.height);
@@ -4412,14 +4458,17 @@
                     this.sfbDetailMode = false;
                     this.longSfDetailMode = false;
                     this.repeatDetailMode = false;
+                    this.costBucketDetailMode = null;
                     this.hoveredKeyId = null;
                     this.sfbVizCache = null;
                     this.longSfVizCache = null;
                     this.repeatVizCache = null;
+                    this.costBucketVizCache = null;
                 }
 
                 this.state.appView = view;
                 this.updateSfbDetailUI();
+                this.updateCostBucketDetailUI();
 
                 this.dom.btnViewAnalyzer.classList.toggle('active', view === 'analyzer');
                 this.dom.btnViewEmu.classList.toggle('active', view === 'emulation');
@@ -5169,14 +5218,16 @@
                     keyDiv.appendChild(fBar);
 
                     if (side === 'target' && this.state.lastResult && this.state.appView === 'emulation') {
-                        const detailViz = this.sfbDetailMode
-                            ? this.getSfbVisualizationData()
-                            : (this.longSfDetailMode
-                                ? this.getLongSfVisualizationData()
-                                : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null));
+                        const detailViz = this.costBucketDetailMode !== null
+                            ? this.getCostBucketVisualizationData()
+                            : (this.sfbDetailMode
+                                ? this.getSfbVisualizationData()
+                                : (this.longSfDetailMode
+                                    ? this.getLongSfVisualizationData()
+                                    : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null)));
                         const count = detailViz ? detailViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
                         const max = detailViz ? detailViz.max : (this.state.lastResult.maxKey || 1);
-                        const isDetailMode = this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
+                        const isDetailMode = this.costBucketDetailMode !== null || this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
 
                         if (isDetailMode && count === 0) {
                             keyDiv.style.opacity = '0.30';
@@ -5194,9 +5245,10 @@
                             const longSfHeat = this.longSfDetailMode === 'skip'
                                 ? [240, 136, 62]
                                 : (this.longSfDetailMode === 'all' ? [163, 113, 247] : [219, 97, 162]);
-                            const heatR = this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57));
-                            const heatG = this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211));
-                            const heatB = this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83));
+                            const costHeat = this.getCostBucketHeatColor();
+                            const heatR = this.costBucketDetailMode !== null ? costHeat[0] : (this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57)));
+                            const heatG = this.costBucketDetailMode !== null ? costHeat[1] : (this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211)));
+                            const heatB = this.costBucketDetailMode !== null ? costHeat[2] : (this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83)));
                             const r = Math.round(heatR * alpha + 33 * (1 - alpha));
                             const g = Math.round(heatG * alpha + 38 * (1 - alpha));
                             const b = Math.round(heatB * alpha + 45 * (1 - alpha));
@@ -5842,6 +5894,9 @@
 
                 if (targetSequence.length === 0) {
                     this.state.lastResult = null;
+                    this.costBucketDetailMode = null;
+                    this.costBucketVizCache = null;
+                    this.updateCostBucketDetailUI();
                     if (this.state.appView === 'emulation') {
                         this.renderEmuWorkspace();
                     }
@@ -6026,14 +6081,16 @@
                         }
                     }
                     else if (this.state.appView === 'analyzer' && this.state.mode === 'result' && this.state.lastResult) {
-                        const detailViz = this.sfbDetailMode
-                            ? this.getSfbVisualizationData()
-                            : (this.longSfDetailMode
-                                ? this.getLongSfVisualizationData()
-                                : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null));
+                        const detailViz = this.costBucketDetailMode !== null
+                            ? this.getCostBucketVisualizationData()
+                            : (this.sfbDetailMode
+                                ? this.getSfbVisualizationData()
+                                : (this.longSfDetailMode
+                                    ? this.getLongSfVisualizationData()
+                                    : (this.repeatDetailMode ? this.getRepeatVisualizationData() : null)));
                         const count = detailViz ? detailViz.keyCounts[hand][idx] : this.state.lastResult.keyCounts[hand][idx];
                         const max = detailViz ? detailViz.max : (this.state.lastResult.maxKey || 1);
-                        const isDetailMode = this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
+                        const isDetailMode = this.costBucketDetailMode !== null || this.sfbDetailMode || this.longSfDetailMode || this.repeatDetailMode;
 
                         if (isDetailMode && count === 0) {
                             keyDiv.style.opacity = '0.30';
@@ -6053,9 +6110,10 @@
                             const longSfHeat = this.longSfDetailMode === 'skip'
                                 ? [240, 136, 62]
                                 : (this.longSfDetailMode === 'all' ? [163, 113, 247] : [219, 97, 162]);
-                            const heatR = this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57));
-                            const heatG = this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211));
-                            const heatB = this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83));
+                            const costHeat = this.getCostBucketHeatColor();
+                            const heatR = this.costBucketDetailMode !== null ? costHeat[0] : (this.sfbDetailMode ? sfbHeat[0] : (this.longSfDetailMode ? longSfHeat[0] : (this.repeatDetailMode ? 210 : 57)));
+                            const heatG = this.costBucketDetailMode !== null ? costHeat[1] : (this.sfbDetailMode ? sfbHeat[1] : (this.longSfDetailMode ? longSfHeat[1] : (this.repeatDetailMode ? 153 : 211)));
+                            const heatB = this.costBucketDetailMode !== null ? costHeat[2] : (this.sfbDetailMode ? sfbHeat[2] : (this.longSfDetailMode ? longSfHeat[2] : (this.repeatDetailMode ? 34 : 83)));
                             const r = Math.round(heatR * alpha + 33 * (1 - alpha));
                             const g = Math.round(heatG * alpha + 38 * (1 - alpha));
                             const b = Math.round(heatB * alpha + 45 * (1 - alpha));
@@ -6367,6 +6425,7 @@
                 buckets.forEach((count, i) => {
                     const bar = document.createElement('div');
                     bar.className = 'h-col';
+                    bar.dataset.costBucket = String(i);
 
                     if (count === 0) {
                         // 0件は高さ0、min-heightも打ち消して完全非表示
@@ -6391,7 +6450,8 @@
                     else bar.style.backgroundColor = 'var(--c-dang)';
 
                     const hitLabel = I18N[this.state.lang].lbl_hits;
-                    const tooltipText = `Cost ${i}: ${count.toLocaleString()} ${hitLabel}`;
+                    const costLabel = i === 20 ? 'Cost 20+' : `Cost ${i}`;
+                    const tooltipText = `${costLabel}: ${count.toLocaleString()} ${hitLabel}`;
                     bar.setAttribute('aria-label', tooltipText);
 
                     bar.addEventListener('pointerenter', () => {
@@ -6400,8 +6460,25 @@
                     bar.addEventListener('pointerleave', hideHistTooltip);
                     bar.addEventListener('pointercancel', hideHistTooltip);
 
+                    if (count > 0) {
+                        bar.classList.add('cost-interactive');
+                        bar.setAttribute('role', 'button');
+                        bar.setAttribute('tabindex', '0');
+                        bar.setAttribute('aria-pressed', 'false');
+
+                        const toggleBucket = () => this.toggleCostBucketDetail(i);
+                        bar.addEventListener('click', toggleBucket);
+                        bar.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleBucket();
+                            }
+                        });
+                    }
+
                     histEl.appendChild(bar);
                 });
+                this.updateCostBucketDetailUI();
 
                 // --- 3. Worst Transitions (With Rank Badge) ---
                 const wGrid = document.getElementById('worst-grid');
@@ -6493,6 +6570,111 @@
 
                 // ▼ 解析完了後にフローを描画 ▼
                 this.drawFlow();
+            }
+
+            getCostBucketIndex(cost) {
+                const value = Number(cost);
+                if (!Number.isFinite(value)) return -1;
+                return Math.max(0, Math.min(20, Math.floor(value)));
+            }
+
+            getCostBucketHeatColor(bucket = this.costBucketDetailMode) {
+                const i = Number(bucket);
+                if (i < 3) return [88, 166, 255];      // --c-best
+                if (i < 7) return [63, 185, 80];       // --c-good
+                if (i < 12) return [210, 153, 34];     // --c-warn
+                return [248, 81, 73];                  // --c-dang
+            }
+
+            toggleCostBucketDetail(bucket) {
+                if (!this.state.lastResult) return;
+
+                const normalized = Math.max(0, Math.min(20, Number(bucket)));
+                this.costBucketDetailMode = this.costBucketDetailMode === normalized ? null : normalized;
+
+                if (this.costBucketDetailMode !== null) {
+                    this.sfbDetailMode = false;
+                    this.longSfDetailMode = false;
+                    this.repeatDetailMode = false;
+                }
+
+                this.hoveredKeyId = null;
+                this.sfbVizCache = null;
+                this.longSfVizCache = null;
+                this.repeatVizCache = null;
+                this.costBucketVizCache = null;
+
+                this.updateSfbDetailUI();
+                this.updateCostBucketDetailUI();
+
+                if (this.state.appView === 'emulation') {
+                    this.renderEmuSide('target');
+                } else if (this.state.mode === 'result') {
+                    this.renderGrid('L');
+                    this.renderGrid('R');
+                }
+                this.drawFlow();
+            }
+
+            updateCostBucketDetailUI() {
+                const selected = this.costBucketDetailMode;
+                document.querySelectorAll('#cost-hist-new .h-col[data-cost-bucket]').forEach(bar => {
+                    const isSelected = selected !== null && Number(bar.dataset.costBucket) === selected;
+                    bar.classList.toggle('active-detail', isSelected);
+                    if (bar.hasAttribute('aria-pressed')) {
+                        bar.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+                    }
+                });
+            }
+
+            getCostBucketVisualizationData(bucket = this.costBucketDetailMode) {
+                const result = this.state.lastResult;
+                const normalized = bucket === null ? null : Math.max(0, Math.min(20, Number(bucket)));
+                if (!result || normalized === null || !Number.isFinite(normalized)) {
+                    return {
+                        keyCounts: { L: Array(TOTAL_KEYS_L).fill(0), R: Array(TOTAL_KEYS_R).fill(0) },
+                        bigrams: {},
+                        max: 1,
+                        hits: 0
+                    };
+                }
+
+                if (this.costBucketVizCache &&
+                    this.costBucketVizCache.result === result &&
+                    this.costBucketVizCache.bucket === normalized) {
+                    return this.costBucketVizCache.data;
+                }
+
+                const keyCounts = {
+                    L: Array(TOTAL_KEYS_L).fill(0),
+                    R: Array(TOTAL_KEYS_R).fill(0)
+                };
+                const bigrams = {};
+                let hits = 0;
+
+                (result.costEvents || []).forEach(event => {
+                    if (this.getCostBucketIndex(event.cost) !== normalized) return;
+                    hits++;
+
+                    const [toHand, toIdxStr] = String(event.to || '').split(':');
+                    const toIdx = Number(toIdxStr);
+                    if ((toHand === 'L' || toHand === 'R') &&
+                        Number.isInteger(toIdx) &&
+                        toIdx >= 0 &&
+                        toIdx < keyCounts[toHand].length) {
+                        keyCounts[toHand][toIdx]++;
+                    }
+
+                    if (event.from && event.to && event.from !== event.to) {
+                        const flowKey = `${event.from}->${event.to}`;
+                        bigrams[flowKey] = (bigrams[flowKey] || 0) + 1;
+                    }
+                });
+
+                const max = Math.max(1, ...keyCounts.L, ...keyCounts.R);
+                const data = { keyCounts, bigrams, max, hits };
+                this.costBucketVizCache = { result, bucket: normalized, data };
+                return data;
             }
 
             updateSfbDetailUI() {
@@ -6656,6 +6838,11 @@
                 const result = this.state.lastResult;
                 if (!result || this.repeatDetailMode) return [];
 
+                if (this.costBucketDetailMode !== null) {
+                    const detail = this.getCostBucketVisualizationData();
+                    return [{ kind: 'cost-bucket', bigrams: detail.bigrams || {} }];
+                }
+
                 if (this.longSfDetailMode) {
                     if (this.longSfDetailMode === 'direct') {
                         return [{ kind: 'long-direct', bigrams: result.longSfDirectBigrams || {} }];
@@ -6772,8 +6959,16 @@
 
                 Object.entries(activeBigrams).forEach(([flowKey, count]) => {
                     const [fromId, toId] = flowKey.split('->');
-                    if (fromId !== this.hoveredKeyId) return;
 
+                    if (this.costBucketDetailMode !== null) {
+                        if (fromId !== this.hoveredKeyId && toId !== this.hoveredKeyId) return;
+                        const otherId = fromId === this.hoveredKeyId ? toId : fromId;
+                        flowCounts[otherId] = (flowCounts[otherId] || 0) + count;
+                        totalOutgoing += count;
+                        return;
+                    }
+
+                    if (fromId !== this.hoveredKeyId) return;
                     flowCounts[toId] = (flowCounts[toId] || 0) + count;
                     totalOutgoing += count;
                 });
@@ -6875,7 +7070,12 @@
                     const toInfo = this.getKeyInfoById(toId);
 
                     if (fromInfo.val === 'space' || fromInfo.val === 'spc' || toInfo.val === 'space' || toInfo.val === 'spc') return;
-                    if (this.hoveredKeyId && fromId !== this.hoveredKeyId) return;
+                    if (this.hoveredKeyId) {
+                        const matchesHover = this.costBucketDetailMode !== null
+                            ? (fromId === this.hoveredKeyId || toId === this.hoveredKeyId)
+                            : fromId === this.hoveredKeyId;
+                        if (!matchesHover) return;
+                    }
 
                     const start = keyCoords[fromId];
                     const end = keyCoords[toId];
@@ -6892,7 +7092,11 @@
                     const thickness = Math.max(0.5, (count / maxCount) * 20);
 
                     const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
-                    if (kind === 'sfb-direct') {
+                    if (kind === 'cost-bucket') {
+                        const [r, g, b] = this.getCostBucketHeatColor();
+                        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.12)`);
+                        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.96)`);
+                    } else if (kind === 'sfb-direct') {
                         gradient.addColorStop(0, 'rgba(248, 81, 73, 0.12)');
                         gradient.addColorStop(1, 'rgba(248, 81, 73, 0.96)');
                     } else if (kind === 'sfb-skip') {
@@ -6921,15 +7125,20 @@
                     } else {
                         ctx.setLineDash([]);
                     }
-                    ctx.shadowColor = kind === 'sfb-direct'
-                        ? 'rgba(248, 81, 73, 0.55)'
-                        : (kind === 'sfb-skip'
-                            ? 'rgba(240, 136, 62, 0.48)'
-                            : (kind === 'long-direct'
-                                ? 'rgba(219, 97, 162, 0.58)'
-                                : (kind === 'long-skip'
-                                    ? 'rgba(240, 136, 62, 0.48)'
-                                    : 'rgba(255, 255, 255, 0.4)')));
+                    if (kind === 'cost-bucket') {
+                        const [r, g, b] = this.getCostBucketHeatColor();
+                        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.55)`;
+                    } else {
+                        ctx.shadowColor = kind === 'sfb-direct'
+                            ? 'rgba(248, 81, 73, 0.55)'
+                            : (kind === 'sfb-skip'
+                                ? 'rgba(240, 136, 62, 0.48)'
+                                : (kind === 'long-direct'
+                                    ? 'rgba(219, 97, 162, 0.58)'
+                                    : (kind === 'long-skip'
+                                        ? 'rgba(240, 136, 62, 0.48)'
+                                        : 'rgba(255, 255, 255, 0.4)')));
+                    }
                     ctx.shadowBlur = 4;
                     ctx.stroke();
                     ctx.restore();
