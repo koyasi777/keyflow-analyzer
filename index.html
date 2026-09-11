@@ -485,6 +485,39 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; user-select: none; position: relative; transition: all 0.1s ease;
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            /* Visual-only keyboard geometry. Kept separate from transform so hover/animation still works. */
+            translate: var(--visual-x, 0px) var(--visual-y, 0px);
+        }
+
+        /* --- Visual keyboard geometry (UI only; never used by Analyzer) --- */
+        .visual-layout-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .visual-layout-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-dim);
+            cursor: help;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .visual-layout-control .kb-select {
+            min-width: 190px;
+        }
+
+        /* Column stagger can push the lowest keys downward. Reserve extra visual space
+           so the thumb/space key remains clearly separated from the bottom row. */
+        .keyboard-container.visual-layout-column-staggered {
+            padding-bottom: 76px;
+        }
+        .emu-kb-container.visual-layout-column-staggered {
+            min-height: 286px;
         }
 
         .key.emu-hit {
@@ -1119,6 +1152,16 @@
             .meta-input {
                 width: 100% !important; max-width: none !important; margin: 0 !important; text-align: center;
             }
+            .visual-layout-control {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .visual-layout-control .kb-select {
+                width: min(100%, 280px) !important;
+            }
+            /* Column stagger: keep a visible gap before the thumb key on narrow screens. */
+            #kb-container.visual-layout-column-staggered { padding-bottom: 0; }
+            #kb-container.visual-layout-column-staggered #thumb-area { margin-top: 18px; }
 
             /* --- 5. 設定画面 & 解析結果 (Panels) --- */
             /* グリッドを1列にして縦に並べる */
@@ -3661,6 +3704,11 @@
                 lbl_custom_replace: "Custom Rules",
                 desc_custom_replace: "Map input text to physical keys (e.g., ltu=l, nn=q). Handled as a logical layout property.",
                 lbl_show_flow: "Show Flow",
+                lbl_visual_layout: "Display Geometry",
+                visual_row_staggered: "Row Staggered",
+                visual_column_staggered: "Column Staggered",
+                visual_ortholinear: "Ortholinear",
+                visual_ui_only_note: "Display only — this changes key positions on screen. It does not affect analysis results, scores, fingering/cost data, or logical/physical Import/Export data.",
                 lbl_layer_keys: "Layer Keys",
                 lbl_layer1: "Layer 1",
                 lbl_layer2: "Layer 2",
@@ -3823,6 +3871,11 @@
                 desc_input_extensions: "配列固有の入力方式を定義します。Aliases は標準ローマ字列→論理キー、Shorthands は「ました→mst」のような語句短縮です。再帰置換せず、元入力に対する最長一致で解決します。",
                 btn_edit_extensions: "拡張を編集",
                 lbl_show_flow: "フロー表示",
+                lbl_visual_layout: "表示レイアウト",
+                visual_row_staggered: "ロウスタッガード",
+                visual_column_staggered: "カラムスタッガード",
+                visual_ortholinear: "オーソリニア",
+                visual_ui_only_note: "表示専用 — 画面上のキー位置だけを変更します。解析結果・スコア・運指/コストデータ・論理/物理設定のImport/Exportデータには一切影響しません。",
                 lbl_layer_keys: "レイヤーキー",
                 lbl_layer1: "レイヤー1",
                 lbl_layer2: "レイヤー2",
@@ -4573,6 +4626,10 @@
             constructor() {
                 this.state = new AppState();
                 this.analyzer = new Analyzer(this.state);
+
+                // UI-only keyboard geometry. Intentionally NOT stored in AppState so Analyzer/export cannot consume it.
+                this.visualLayout = this.loadVisualLayoutPreferences();
+
                 this.isDragging = false;
                 this.dragSource = null;
                 this.activeTool = 3;
@@ -5102,6 +5159,7 @@
                 });
 
                 this.initEmulation();
+                this.syncVisualLayoutContainerState();
                 this.setDomain('logic');
                 this.setAppView('analyzer');
                 document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\nInput text matching your layout's logical key definitions (e.g., Alphanumeric, Romaji, or direct Kana strings).\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
@@ -5247,7 +5305,21 @@
                     this.renderGrid('L');
                     this.renderGrid('R');
 
-                    let html = `<div class="instruction">${dict['instr_' + mode]}</div>`;
+                    let html = '';
+                    if (mode === 'layout') {
+                        html += `
+                            <div class="visual-layout-control">
+                                <label class="tooltip visual-layout-label" data-tooltip="${dict.visual_ui_only_note || 'Display only; analysis results are not affected.'}">
+                                    ${dict.lbl_visual_layout || 'Display Geometry'}
+                                </label>
+                                <select id="visual-layout-type" class="meta-input kb-select" style="border:none;">
+                                    <option value="row-staggered">${dict.visual_row_staggered || 'Row Staggered'}</option>
+                                    <option value="column-staggered">${dict.visual_column_staggered || 'Column Staggered'}</option>
+                                    <option value="ortholinear">${dict.visual_ortholinear || 'Ortholinear'}</option>
+                                </select>
+                            </div>`;
+                    }
+                    html += `<div class="instruction">${dict['instr_' + mode]}</div>`;
 
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
                     const descDisplay = document.getElementById('kb-desc');
@@ -5314,6 +5386,9 @@
                         const descIn = document.getElementById('layout-desc-in');
                         const extensionToggle = document.getElementById('toggle-input-extensions');
                         const extensionBtn = document.getElementById('btn-input-extensions');
+
+                        // Display geometry is deliberately bound separately from logical layout state.
+                        this.bindVisualLayoutControls();
 
                         if (presetIn) {
                             presetIn.value = presetValue;
@@ -6365,6 +6440,9 @@
                     keyDiv.dataset.idx = idx;
                     if (isSpace) keyDiv.classList.add('space-key');
 
+                    // UI-only geometry: visual translation does not change key indices or Analyzer input.
+                    this.applyVisualKeyOffset(keyDiv, hand, idx, isSpace);
+
                     if (char === null) {
                         keyDiv.classList.add('is-disabled');
                         keyDiv.oncontextmenu = (e) => {
@@ -7188,6 +7266,103 @@
                 this.renderStats(stats);
             }
 
+            getDefaultVisualLayoutPreferences() {
+                return { type: 'ortholinear' };
+            }
+
+            loadVisualLayoutPreferences() {
+                const defaults = this.getDefaultVisualLayoutPreferences();
+                try {
+                    const saved = JSON.parse(localStorage.getItem('keyflow.visualLayout') || 'null');
+                    const allowed = new Set(['row-staggered', 'column-staggered', 'ortholinear']);
+                    if (!saved || typeof saved !== 'object') return defaults;
+                    return { type: allowed.has(saved.type) ? saved.type : defaults.type };
+                } catch (_) {
+                    return defaults;
+                }
+            }
+
+            saveVisualLayoutPreferences() {
+                try {
+                    localStorage.setItem('keyflow.visualLayout', JSON.stringify(this.visualLayout));
+                } catch (_) {
+                    // Storage is optional; geometry remains valid for this session.
+                }
+            }
+
+            getVisualKeyOffset(hand, idx, isSpace = false) {
+                if (isSpace) return { x: 0, y: 0 };
+
+                const cols = hand === 'L' ? 6 : 7;
+                const row = Math.floor(idx / cols);
+                const col = idx % cols;
+                const type = this.visualLayout?.type || 'ortholinear';
+
+                const presets = {
+                    'row-staggered': {
+                        rowX: [0, 8, 16, 24],
+                        colYL: [0, 0, 0, 0, 0, 0],
+                        colYR: [0, 0, 0, 0, 0, 0, 0]
+                    },
+                    'column-staggered': {
+                        rowX: [0, 0, 0, 0],
+                        // UI-only ergonomic column stagger. The middle-finger column is highest,
+                        // ring/index sit slightly lower, and the pinky column is intentionally
+                        // lower than the inner index/stretch column, which is common on split ergo boards.
+                        // Source grids contain masked outer columns, so L/R arrays are not mirror-indexed.
+                        colYL: [18, 14, 6, 0, 5, 10],
+                        colYR: [10, 5, 0, 6, 14, 18, 22]
+                    },
+                    'ortholinear': {
+                        rowX: [0, 0, 0, 0],
+                        colYL: [0, 0, 0, 0, 0, 0],
+                        colYR: [0, 0, 0, 0, 0, 0, 0]
+                    }
+                };
+
+                const geometry = presets[type] || presets['ortholinear'];
+
+                const rowX = geometry.rowX?.[row] || 0;
+                const colY = (hand === 'L' ? geometry.colYL : geometry.colYR)?.[col] || 0;
+                return { x: rowX, y: colY };
+            }
+
+            applyVisualKeyOffset(keyDiv, hand, idx, isSpace = false) {
+                const offset = this.getVisualKeyOffset(hand, idx, isSpace);
+                keyDiv.style.setProperty('--visual-x', `${offset.x}px`);
+                keyDiv.style.setProperty('--visual-y', `${offset.y}px`);
+            }
+
+            syncVisualLayoutContainerState() {
+                const isColumnStaggered = this.visualLayout?.type === 'column-staggered';
+                ['kb-container', 'emu-source-kb', 'emu-target-kb'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.toggle('visual-layout-column-staggered', isColumnStaggered);
+                });
+            }
+
+            bindVisualLayoutControls() {
+                const typeEl = document.getElementById('visual-layout-type');
+                if (!typeEl) return;
+
+                const rerender = () => {
+                    this.syncVisualLayoutContainerState();
+                    this.renderGrid('L');
+                    this.renderGrid('R');
+                    if (this.state.appView === 'emulation') this.renderEmuWorkspace();
+                    requestAnimationFrame(() => this.drawFlow());
+                };
+
+                typeEl.value = this.visualLayout.type;
+                this.syncVisualLayoutContainerState();
+
+                typeEl.onchange = (e) => {
+                    this.visualLayout.type = e.target.value;
+                    this.saveVisualLayoutPreferences();
+                    rerender();
+                };
+            }
+
             // ヒートマップ表示ロジックを含む renderGrid
             renderGrid(hand, bundle = null) {
                 const renderBundle = bundle || this.getDisplayBundle();
@@ -7206,6 +7381,9 @@
                     keyDiv.dataset.hand = hand;
                     keyDiv.dataset.idx = idx;
                     if (isSpace) keyDiv.classList.add('space-key');
+
+                    // UI-only geometry: visual translation does not change key indices or Analyzer input.
+                    this.applyVisualKeyOffset(keyDiv, hand, idx, isSpace);
 
                     if (char === null) {
                         keyDiv.classList.add('is-disabled');
