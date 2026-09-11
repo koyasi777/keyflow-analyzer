@@ -1239,6 +1239,79 @@
             white-space: nowrap;
         }
 
+        /* Standard deviation card: when neighboring cards grow taller,
+           keep the main number visually centered rather than pinned high. */
+        .sd-centered-card {
+            justify-content: flex-start;
+        }
+        .sd-centered-card .sd-card-body {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 0;
+        }
+        .sd-centered-card .kpi-value {
+            margin-top: 0;
+        }
+        .sd-centered-card .kpi-unit {
+            margin-top: 4px;
+        }
+
+        .score-weight-line {
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+            white-space: nowrap;
+            font-size: 0.61rem;
+            letter-spacing: -0.025em;
+        }
+        .score-weight-value { color: var(--text-main); font-weight: 800; }
+        .score-weight-sep { opacity: 0.55; margin: 0 1px; }
+
+        .core-metric-card { min-height: 96px; }
+        .core-metric-card .kpi-sub { line-height: 1.35; }
+
+        /* Required Strokes: keep the main count visually dominant and place
+           supporting metrics on separate stable lines so large values do not collide. */
+        .stroke-value-row {
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+        .stroke-primary-value {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            min-width: 0;
+        }
+        .stroke-per-char-summary,
+        .stroke-layer-summary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px;
+            font-size: 0.61rem;
+            letter-spacing: -0.02em;
+        }
+        .stroke-per-char-summary {
+            margin-top: 6px;
+        }
+        .stroke-layer-summary {
+            margin-top: 4px;
+        }
+        .stroke-per-char-summary strong,
+        .stroke-layer-summary strong {
+            color: var(--text-main);
+            font-weight: 800;
+        }
+        .stroke-summary-rate { white-space: nowrap; }
+
+        @container sb (max-width: 430px) {
+            .stroke-per-char-summary,
+            .stroke-layer-summary { font-size: 0.56rem; }
+        }
+
+
         /* Histogram & Worst Grid (Keep structure but tweak size) */
         .hist-container {
             background: var(--bg-main); border: 1px solid var(--border);
@@ -1352,6 +1425,54 @@
             left: auto; right: 20px; /* 矢印の位置も右端へ */
             transform: none;
         }
+        /* --- Viewport-safe tooltip for the long Overall Cost explanation --- */
+        /* The generic pseudo-element tooltip is intentionally disabled for this card.
+           A floating element is positioned by JS so the long explanation never leaves
+           the visible viewport, even when the results panel is scrolled/resized. */
+        #kpi-overall-card.tooltip::after,
+        #kpi-overall-card.tooltip::before,
+        #kpi-cost-stroke-card.tooltip::after,
+        #kpi-cost-stroke-card.tooltip::before {
+            display: none !important;
+        }
+
+        #metric-viewport-tooltip {
+            position: fixed;
+            z-index: 5000;
+            width: min(380px, calc(100vw - 16px));
+            max-height: calc(100vh - 16px);
+            padding: 11px 13px;
+            border-radius: 8px;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.75);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.76rem;
+            font-weight: 400;
+            line-height: 1.52;
+            text-align: left;
+            white-space: pre-line;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overflow-wrap: anywhere;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.12s ease;
+        }
+        #metric-viewport-tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Make keyboard focus behave like hover for the explanatory metric. */
+        #kpi-overall-card:focus-visible,
+        #kpi-cost-stroke-card:focus-visible {
+            outline: 2px solid rgba(47,129,247,0.6);
+            outline-offset: 2px;
+        }
+
         /* --- ▲▲▲ DASHBOARD CSS END ▲▲▲ --- */
     </style>
 </head>
@@ -1852,21 +1973,60 @@
                         <div class="res-col-main">
 
                             <div class="res-dashboard">
-                                <div class="kpi-card tooltip" data-i18n-tooltip="lbl_score_desc">
-                                    <div class="kpi-label" data-i18n="res_total">Efficiency Score</div>
+                                <div id="kpi-overall-card" class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_score_desc" tabindex="0">
+                                    <div class="kpi-label" data-i18n="res_total">Cost per Input Character</div>
                                     <div class="kpi-value-row">
                                         <div class="kpi-value" id="kpi-score" style="color:var(--accent)">0.00</div>
-                                        <div class="kpi-unit kpi-unit-inline">Cost / Key</div>
+                                        <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_cost_per_input">Cost / Char</div>
                                     </div>
                                     <div class="kpi-sub">
-                                        <span data-i18n="stat_keystrokes">Keystrokes</span>:
-                                        <span id="kpi-score-keys" style="font-weight:bold; margin-left:4px;">0</span>
+                                        <span data-i18n="lbl_cost_input_hint">Lower is better</span>
+                                        <span style="display:none" id="kpi-source-units">0</span>
                                     </div>
                                 </div>
-                                <div class="kpi-card tooltip" data-i18n-tooltip="lbl_sd_desc">
+
+                                <div id="kpi-cost-stroke-card" class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_cost_stroke_desc" tabindex="0">
+                                    <div class="kpi-label" data-i18n="lbl_weighted_cost_stroke">Cost per Stroke</div>
+                                    <div class="kpi-value-row">
+                                        <div class="kpi-value" id="kpi-cost-stroke">0.00</div>
+                                        <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_weighted_per_stroke">Cost / Stroke</div>
+                                    </div>
+                                    <div class="kpi-sub score-weight-line">
+                                        <span data-i18n="lbl_position_short">Position</span>
+                                        <span id="kpi-score-static-weight" class="score-weight-value">35%</span>
+                                        <span class="score-weight-sep">·</span>
+                                        <span data-i18n="lbl_transition_short">Transition</span>
+                                        <span id="kpi-score-trans-weight" class="score-weight-value">65%</span>
+                                    </div>
+                                </div>
+
+                                <div class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_strokes_desc">
+                                    <div class="kpi-label" data-i18n="stat_keystrokes">Required Strokes</div>
+                                    <div class="kpi-value-row stroke-value-row">
+                                        <div class="stroke-primary-value">
+                                            <div class="kpi-value" id="kpi-strokes">0</div>
+                                            <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_strokes_unit">strokes</div>
+                                        </div>
+                                    </div>
+                                    <div class="kpi-sub stroke-per-char-summary">
+                                        <span data-i18n="lbl_strokes_per_char_card">Per input character</span>
+                                        <strong id="kpi-strokes-per-char">0.00</strong>
+                                        <span data-i18n="lbl_strokes_unit">strokes</span>
+                                    </div>
+                                    <div class="kpi-sub stroke-layer-summary">
+                                        <span data-i18n="lbl_layered_of_total">Of these, layered</span>
+                                        <strong id="kpi-layered-strokes">0</strong>
+                                        <span data-i18n="lbl_strokes_unit">strokes</span>
+                                        <span class="stroke-summary-rate">(<strong id="kpi-layered-rate">0.0%</strong>)</span>
+                                    </div>
+                                </div>
+
+                                <div class="kpi-card tooltip sd-centered-card" data-i18n-tooltip="lbl_sd_desc">
                                     <div class="kpi-label" data-i18n="lbl_sd">SD (Consistency)</div>
-                                    <div class="kpi-value" id="kpi-sd">0.00</div>
-                                    <div class="kpi-unit" style="margin:0;">Lower is steadier</div>
+                                    <div class="sd-card-body">
+                                        <div class="kpi-value" id="kpi-sd">0.00</div>
+                                        <div class="kpi-unit" style="margin:0;">Lower is steadier</div>
+                                    </div>
                                 </div>
                                 <div class="kpi-card tooltip" data-i18n-tooltip="lbl_med_desc">
                                     <div class="kpi-label" data-i18n="lbl_median">Median</div>
@@ -1876,34 +2036,7 @@
                                     <div class="kpi-label" data-i18n="lbl_95">95% Tile</div>
                                     <div class="kpi-value" id="val-95">0.0</div>
                                 </div>
-                                <!-- Simple frequency metrics: same row -->
-                                <div class="kpi-card tooltip metric-summary-card" data-i18n-tooltip="lbl_alt_desc">
-                                    <div class="kpi-label" data-i18n="lbl_alt">Alternation</div>
-                                    <div class="kpi-value" id="kpi-alt">0<span class="kpi-unit">%</span></div>
-                                    <div class="kpi-sub">
-                                        <span style="font-family:'JetBrains Mono'">L:<span id="kpi-bal-l">50</span> / R:<span id="kpi-bal-r">50</span></span>
-                                    </div>
-                                </div>
-                                <div id="kpi-repeat-card" class="kpi-card tooltip metric-interactive metric-summary-card repeat-interactive" data-i18n-tooltip="lbl_repeat_desc"
-                                     role="button" tabindex="0" aria-pressed="false">
-                                    <div class="kpi-label" data-i18n="stat_repeat">Repeats</div>
-                                    <div class="kpi-value" id="kpi-repeat-rate">0.00<span class="kpi-unit">%</span></div>
-                                    <div class="kpi-sub">
-                                        <span id="kpi-repeat-count" style="font-weight:bold;">0</span> <span data-i18n="lbl_hits">hits</span>
-                                    </div>
-                                </div>
-
                                 <!-- Same-finger metrics: same row. Keep card text terse; tooltip carries definitions. -->
-                                <div id="kpi-sfb-card" class="kpi-card tooltip metric-interactive metric-summary-card sfb-interactive" data-i18n-tooltip="lbl_sfb_desc"
-                                     role="button" tabindex="0" aria-pressed="false" data-viz-mode="off">
-                                    <div class="kpi-label" data-i18n="stat_sfb">SFB Rate</div>
-                                    <span id="kpi-sfb-mode" class="kpi-mode-badge" aria-live="polite"></span>
-                                    <div class="kpi-value" id="kpi-sfb-cons">0.00<span class="kpi-unit">%</span></div>
-                                    <div class="kpi-sub kpi-detail-inline">
-                                        <span data-i18n="lbl_skip_sf_short">Skip SF</span>
-                                        <span id="kpi-sfb-skip" style="font-weight:bold; margin-left:3px;">0.00%</span>
-                                    </div>
-                                </div>
                                 <div id="kpi-long-sf-card" class="kpi-card tooltip metric-interactive metric-summary-card long-sf-interactive" data-i18n-tooltip="lbl_long_sf_desc"
                                      role="button" tabindex="0" aria-pressed="false" data-viz-mode="off">
                                     <div class="kpi-label" data-i18n="stat_long_sf">Long SF</div>
@@ -1920,24 +2053,57 @@
                                         </span>
                                     </div>
                                 </div>
+                                <div id="kpi-sfb-card" class="kpi-card tooltip metric-interactive metric-summary-card sfb-interactive" data-i18n-tooltip="lbl_sfb_desc"
+                                     role="button" tabindex="0" aria-pressed="false" data-viz-mode="off">
+                                    <div class="kpi-label" data-i18n="stat_sfb">SFB Rate</div>
+                                    <span id="kpi-sfb-mode" class="kpi-mode-badge" aria-live="polite"></span>
+                                    <div class="kpi-value" id="kpi-sfb-cons">0.00<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-sub kpi-detail-inline">
+                                        <span data-i18n="lbl_skip_sf_short">Skip SF</span>
+                                        <span id="kpi-sfb-skip" style="font-weight:bold; margin-left:3px;">0.00%</span>
+                                    </div>
+                                </div>
+                                <!-- Simple frequency metrics: bottom row -->
+                                <div class="kpi-card tooltip metric-summary-card" data-i18n-tooltip="lbl_alt_desc">
+                                    <div class="kpi-label" data-i18n="lbl_alt">Alternation</div>
+                                    <div class="kpi-value" id="kpi-alt">0<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-sub">
+                                        <span style="font-family:'JetBrains Mono'">L:<span id="kpi-bal-l">50</span> / R:<span id="kpi-bal-r">50</span></span>
+                                    </div>
+                                </div>
+                                <div id="kpi-repeat-card" class="kpi-card tooltip metric-interactive metric-summary-card repeat-interactive" data-i18n-tooltip="lbl_repeat_desc"
+                                     role="button" tabindex="0" aria-pressed="false">
+                                    <div class="kpi-label" data-i18n="stat_repeat">Repeats</div>
+                                    <div class="kpi-value" id="kpi-repeat-rate">0.00<span class="kpi-unit">%</span></div>
+                                    <div class="kpi-sub">
+                                        <span id="kpi-repeat-count" style="font-weight:bold;">0</span> <span data-i18n="lbl_hits">hits</span>
+                                    </div>
+                                </div>
+                                </div>
                             </div>
 
                             <div class="hist-container">
                                 <div class="hist-header">
-                                    <span data-i18n="lbl_dist">Cost Distribution</span>
-                                    <span style="opacity:0.7; font-size:0.7rem;" data-i18n="lbl_dist_desc">Low Cost ← → High Cost</span>
+                                    <span data-i18n="lbl_dist">Raw Cost Distribution</span>
+                                    <span style="opacity:0.7; font-size:0.7rem;" data-i18n="lbl_dist_desc">Position + Transition / Stroke</span>
                                 </div>
                                 <div class="hist-body" id="cost-hist-new"></div>
                             </div>
 
                             <div style="margin-bottom: 1rem;">
-                                <div class="stat-item"><span data-i18n="res_work">Total Work</span><span id="res-total-load">0</span></div>
-                                <div class="stat-item"><span data-i18n="res_trans">Avg. Transition</span><span id="res-trans-val">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_weighted_work">Weighted Work</span><span id="res-weighted-work">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_weighted_per_stroke">Weighted Cost / Stroke</span><span id="res-weighted-per-stroke">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_raw_per_stroke">Raw Cost / Stroke</span><span id="res-raw-per-key">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_static">Avg. Position</span><span id="res-static-val">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_trans">Avg. Transition</span><span id="res-trans-val">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_work">Total Raw Cost</span><span id="res-total-load">0</span></div>
 
                                 <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:5px;"></div>
 
-                                <div class="stat-item"><span data-i18n="stat_keystrokes">Keystrokes</span><span id="stat-keystrokes">0</span></div>
+                                <div class="stat-item"><span data-i18n="lbl_input_chars">Input Characters</span><span id="stat-source-units">0</span></div>
+                                <div class="stat-item"><span data-i18n="stat_keystrokes">Strokes</span><span id="stat-keystrokes">0</span></div>
+                                <div class="stat-item"><span data-i18n="lbl_strokes_per_char">Strokes / Input Char</span><span id="stat-strokes-per-char">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="lbl_layered_strokes">Layered Strokes</span><span id="stat-layered-strokes">0 (0.0%)</span></div>
                                 <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
 
                                 <div id="repeat-detail-wrapper" style="margin-top:10px; display:none; background:rgba(255,255,255,0.03); padding:10px; border-radius:6px;">
@@ -2642,10 +2808,20 @@
                 hand_left: "LEFT HAND", hand_right: "RIGHT HAND",
                 panel_corpus: "Corpus Text", btn_analyze: "RUN ANALYSIS",
 
-                panel_results: "Analysis Results", res_total: "Efficiency Score", res_work: "Total Work (Load)",
+                panel_results: "Analysis Results", res_total: "Cost per Input Character", res_work: "Total Raw Cost",
+                res_weighted_work: "Weighted Total Cost", res_weighted_per_stroke: "Cost per Stroke", res_raw_per_stroke: "Raw Cost / Stroke (no weights)",
                 res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
+                lbl_cost_per_input: "Cost / Char", lbl_weighted_per_stroke: "Cost / Stroke",
+                lbl_weighted_cost_stroke: "Cost per Stroke", lbl_weighted_work_short: "Weighted Total",
+                lbl_cost_input_hint: "Lower is better",
+                lbl_position_short: "Position", lbl_transition_short: "Transition",
+                lbl_position_total_short: "Position Total", lbl_transition_total_short: "Transition Total",
+                lbl_input_chars: "Input Characters", lbl_input_chars_short: "chars", lbl_strokes_unit: "strokes",
+                lbl_per_char: "/ char", lbl_strokes_per_char: "Strokes / Input Char",
+                lbl_strokes_per_char_card: "Per input character", lbl_layered_of_total: "Of these, layered", lbl_of_all_strokes: "of all strokes",
+                lbl_layered_short: "Layered", lbl_layered_strokes: "Layered Strokes",
 
-                stat_keystrokes: "Keystrokes", stat_sfb: "SFB Rate", stat_long_sf: "Long SF", stat_repeat: "Repeats", stat_max_key: "Top Key",
+                stat_keystrokes: "Required Strokes", stat_sfb: "SFB Rate", stat_long_sf: "Long SF", stat_repeat: "Repeats", stat_max_key: "Top Key",
                 lbl_skip_sf: "Skip SF (other hand between)", lbl_direct: "Direct (consecutive)", lbl_skip: "Skip (other hand between)",
                 lbl_skip_sf_short: "Skip SF", lbl_direct_short: "Direct", lbl_skip_short: "Skip", lbl_hits: "hits",
                 res_worst: "Worst Transitions",
@@ -2675,7 +2851,7 @@
                 imp_phys: "Import", exp_phys: "Export",
                 alert_load_layout: "Layout data loaded.", alert_load_phys: "Physical config loaded.",
 
-                lbl_dist: "Cost Distribution",
+                lbl_dist: "Raw Stroke Cost Distribution",
                 lbl_stability: "Stability Metrics",
 
                 // 指標ラベル
@@ -2688,8 +2864,8 @@
                 desc_sd: "Standard Deviation. Represents inconsistency (Mura). Lower means a steadier typing rhythm.",
                 desc_95: "95% of keystrokes fall below this cost. Lower means fewer sudden, difficult reaches.",
 
-                set_weight_title: "Score Weighting Strategy",
-                set_weight_desc: "Customize the calculation balance for the 'Efficiency Score'. Define your priority between Position (Stamina) and Transition (Flow). *Note: This does not affect physical metrics like SD or Distribution.",
+                set_weight_title: "Position / Transition Weighting",
+                set_weight_desc: "Choose how strongly Position Cost and Transition Cost contribute to the evaluation. The same weights are used for Cost per Input Character and Cost per Stroke. They do not change Raw Cost / Stroke, SD, median, 95% tile, or the raw stroke-cost distribution.",
                 lbl_static_w: "Position (Static)",
                 lbl_trans_w: "Flow (Dynamic)",
                 desc_static_w: "Prioritize Reach/Strength",
@@ -2701,7 +2877,7 @@
 
                 // Layer Penalty & Prompt
                 set_layer_title: "Layer Switch Penalty",
-                set_layer_desc: "Penalty cost applied when accessing secondary characters on the same key (e.g. Shift or Fn layer).",
+                set_layer_desc: "Additional cost for accessing a secondary layer (e.g. Shift or Fn). For a layered stroke, this value is added to that stroke\'s Position Cost: Position Cost = Base Position Cost + Layer Cost. It is therefore included in Position Cost Total and affected by Position Weight in the final evaluation.",
                 msg_key_prompt: "Key Char (Space to add layer. Use 'val:disp' for display name. e.g. 'wa:わ'):",
 
                 lbl_rep_cost: "Avg. Repeat Cost",
@@ -2714,10 +2890,12 @@
                 modal_desc_imp: "Paste the JSON text below.",
                 modal_desc_exp: "Copy and save the JSON text below.",
 
-                lbl_score_desc: "Average cost per keystroke based on your weight settings. Interpret it together with total keystrokes.",
-                lbl_sd_desc: "Standard Deviation of cost. Lower means steadier typing rhythm.",
-                lbl_med_desc: "The median cost value. Represents the baseline performance excluding outliers.",
-                lbl_95_desc: "95% of keystrokes fall below this cost. Indicates peak difficulty.",
+                lbl_score_desc: "【Cost per Input Character】\nThe average evaluated cost required to produce one character of the input text. Lower is better.\n\nFormula:\n(Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Input Characters\n\nThe Position / Transition weights are the ratios configured in Analysis Logic. Because the denominator is input characters rather than strokes, layouts that produce the same text with fewer strokes are naturally rewarded.\n\nLayered output counts as one analyzed stroke. For that stroke, Layer Cost is added to its Position Cost (Position Cost = Base Position Cost + Layer Cost). It is therefore included in Position Cost Total and then weighted by Position Weight in the formula above. Unsupported input produces no stroke cost, so compare layouts using the same corpus and make sure it is sufficiently representable.",
+                lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluated cost of one analyzed stroke. Lower means each individual stroke is lighter.\n\nFormula:\n(Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Required Strokes\n\nThe Position / Transition weights are the ratios configured in Analysis Logic. This metric evaluates the burden of each stroke itself; it does not reward a layout simply for needing fewer strokes. Compare it together with Cost per Input Character and Required Strokes.",
+                lbl_strokes_desc: "【Required Strokes】\nThe number of key outputs the analyzer needs to produce the input text with this layout. Lower means fewer key outputs are needed for the same corpus.\n\nIf one key outputs multiple characters, that output counts as one stroke. A layered character also counts as one stroke; the layer action itself is not counted as an additional stroke. Instead, Layer Cost is added to that stroke\'s Position Cost and is evaluated through Position Weight.\n\nStrokes / Input Char = Required Strokes ÷ Input Characters.",
+                lbl_sd_desc: "Standard deviation of raw stroke cost (Position + Transition). Lower means steadier typing rhythm.",
+                lbl_med_desc: "Median raw stroke cost (Position + Transition). It represents a typical stroke while reducing the influence of outliers.",
+                lbl_95_desc: "95% of raw stroke costs fall at or below this value. Lower values mean fewer extreme high-load strokes.",
                 lbl_alt: "Alternation",
                 lbl_alt_desc: "Frequency of hand switching and Left/Right hand usage ratio.",
                 lbl_sfb_desc: "【SFB Rate】\nDirect SFB: two different keys assigned to the same finger are pressed consecutively. Example: Left A → Left B.\nSkip SF: that same finger is reused after one or more opposite-hand keystrokes. Example: Left A → Right X → Left B.\nSame-key repeats are counted separately.\nClick cycles the keyboard view: Direct → Skip → Total → Off. In Total, solid lines are Direct and dashed lines are Skip.",
@@ -2731,7 +2909,7 @@
                 lbl_long_sf_view_skip: "SKIP",
                 lbl_long_sf_view_all: "TOTAL",
                 lbl_repeat_desc: "Same-key consecutive repeats.\nClick to visualize which physical keys caused repeats and how many times.",
-                lbl_dist_desc: "Left: Comfortable / Right: Strenuous",
+                lbl_dist_desc: "Position + Transition / Stroke",
 
                 btn_copy: "Copy to Clipboard",
                 btn_imp_exec: "Import",
@@ -2782,10 +2960,20 @@
                 panel_corpus: "評価用コーパス (配列定義に合わせて入力)", btn_analyze: "解析実行 (RUN)",
 
                 // 結果パネル:
-                panel_results: "解析結果", res_total: "総合スコア (平均)", res_work: "総運動量 (Total)",
+                panel_results: "解析結果", res_total: "入力1文字あたりのコスト", res_work: "総実コスト",
+                res_weighted_work: "Weight適用後の総コスト", res_weighted_per_stroke: "1打鍵あたりのコスト", res_raw_per_stroke: "Rawコスト / 打鍵（Weightなし）",
                 res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
+                lbl_cost_per_input: "コスト / 文字", lbl_weighted_per_stroke: "コスト / 打鍵",
+                lbl_weighted_cost_stroke: "1打鍵あたりのコスト", lbl_weighted_work_short: "Weight適用後",
+                lbl_cost_input_hint: "低いほど効率的",
+                lbl_position_short: "位置", lbl_transition_short: "遷移",
+                lbl_position_total_short: "位置コスト合計", lbl_transition_total_short: "遷移コスト合計",
+                lbl_input_chars: "入力文字数", lbl_input_chars_short: "文字", lbl_strokes_unit: "打鍵",
+                lbl_per_char: "/ 文字", lbl_strokes_per_char: "打鍵数 / 入力1文字",
+                lbl_strokes_per_char_card: "1文字あたり", lbl_layered_of_total: "うち裏レイヤー", lbl_of_all_strokes: "全打鍵の",
+                lbl_layered_short: "裏レイヤー", lbl_layered_strokes: "裏レイヤー打鍵",
 
-                stat_keystrokes: "総打鍵数", stat_sfb: "SFB率", stat_long_sf: "同指ロングジャンプ", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
+                stat_keystrokes: "必要打鍵数", stat_sfb: "SFB率", stat_long_sf: "同指ロングジャンプ", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
                 lbl_skip_sf: "Skip SF（他手を挟む）", lbl_direct: "Direct（連続）", lbl_skip: "Skip（他手を挟む）",
                 lbl_skip_sf_short: "Skip SF", lbl_direct_short: "Direct", lbl_skip_short: "Skip", lbl_hits: "回",
                 res_worst: "ワースト遷移 (負担大)",
@@ -2812,7 +3000,7 @@
                 imp_phys: "インポート", exp_phys: "エクスポート",
                 alert_load_layout: "配列データを読み込みました", alert_load_phys: "物理設定データを読み込みました",
 
-                lbl_dist: "コスト分布 (負荷の山)",
+                lbl_dist: "打鍵コスト分布 (Raw / 1打鍵)",
                 lbl_stability: "安定性指標 (詳細)",
 
                 // 指標ラベル
@@ -2825,8 +3013,8 @@
                 desc_sd: "打鍵心地の「ムラ」。数値が小さいほど、常に一定のリズムで快適に打てます。",
                 desc_95: "「95%の打鍵はこのコスト以下に収まる」ライン。低いほど、突発的な高負荷(無理な運指)が少ないことを意味します。",
 
-                set_weight_title: "総合スコアの重み付け",
-                set_weight_desc: "「総合スコア」の算出比重を設定します。位置（スタミナ）と遷移（フロー）、どちらを重視して評価するか定義してください。※SDや分布などの物理指標には影響しません。",
+                set_weight_title: "位置コスト / 遷移コストのWeight",
+                set_weight_desc: "位置コストと遷移コストを、評価時にどの比重で扱うかを設定します。同じWeightを「入力1文字あたりのコスト」と「1打鍵あたりのコスト」に使用します。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
                 lbl_static_w: "位置コスト (スタミナ)",
                 lbl_trans_w: "遷移コスト (フロー)",
                 desc_static_w: "距離や指の強さを重視",
@@ -2838,7 +3026,7 @@
 
                 // Layer Penalty & Prompt
                 set_layer_title: "レイヤー切替ペナルティ",
-                set_layer_desc: "ShiftやFnなど、同じキーの裏レイヤーにアクセスする際の追加コストです。",
+                set_layer_desc: "ShiftやFnなど、裏レイヤーにアクセスする打鍵へ追加するコストです。裏レイヤー打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」として位置コスト側へ加算します。そのため位置コスト合計に含まれ、最終評価では位置Weightの影響を受けます。",
                 msg_key_prompt: "キー文字 (裏レイヤーは半角スペース区切り。「入力:表示」の形式で表示名を変えられます。 例: wa:わ):",
 
                 lbl_rep_cost: "平均連打コスト",
@@ -2851,10 +3039,12 @@
                 modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
-                lbl_score_desc: "【総合スコア】\n1打鍵あたりの平均コスト。\n(Weight設定に基づく)\n※総打鍵数とセットで解釈してください。",
-                lbl_sd_desc: "【標準偏差 (SD)】\n打鍵コストのばらつき。値が小さいほど、一定のリズムで打鍵できます。",
-                lbl_med_desc: "【中央値】\n全打鍵の中央にあるコスト値。\n外れ値（極端な難打鍵）を除いた、配列の基本性能です。",
-                lbl_95_desc: "【95%タイル値】\n全体の95%が含まれるコストライン。突発的な高負荷がどれくらい発生するかを示します。",
+                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 入力文字数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。分母を打鍵数ではなく入力文字数にするため、同じ文章をより少ない打鍵で入力できる配列は、その利点もこの値に反映されます。\n\n裏レイヤーの出力は1打鍵として数えます。その打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」としてLayer Costを位置コスト側へ加算します。したがってLayer Costは上式の「位置コスト合計」に含まれ、位置Weightを通して最終コストへ反映されます。解析できない文字には打鍵コストが発生しないため、比較時は同じコーパスを十分に表現できていることを確認してください。",
+                lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 必要打鍵数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。この値は1打鍵そのものの重さを見る指標なので、文章を少ない打鍵で入力できること自体は評価しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると、配列の特徴が分かります。",
+                lbl_strokes_desc: "【必要打鍵数】\nこの配列で入力テキストを生成するために、アナライザーが必要と判断したキー出力の回数です。同じコーパスなら、少ないほど少ないキー出力で入力できます。\n\n複数文字を1つのキーで出力する場合でも、その出力は1打鍵として数えます。裏レイヤーの文字も1打鍵として数え、レイヤーキー操作そのものは追加の1打鍵として数えません。その代わり、Layer Costをその打鍵の位置コストへ加算し、位置Weightを通して評価します。\n\n「打鍵数 / 入力1文字」= 必要打鍵数 ÷ 入力文字数 です。",
+                lbl_sd_desc: "【標準偏差 (SD)】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）のばらつきです。値が小さいほど、打鍵ごとの負荷が安定しています。",
+                lbl_med_desc: "【中央値】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）の中央値です。極端な高負荷打鍵の影響を受けにくく、典型的な1打鍵の重さを示します。",
+                lbl_95_desc: "【95%タイル値】\n1打鍵ごとのRawコストの95%が、この値以下に収まるラインです。低いほど、突発的な高負荷打鍵が少ないことを示します。",
                 lbl_alt: "交互打鍵率",
                 lbl_alt_desc: "【交互打鍵率 & L:R比】\n手が切り替わる頻度と、左右の手の使用比率です。",
                 lbl_sfb_desc: "【SFB率】\nDirect SFB：同じ指が担当する別キーを、反対の手を挟まず連続して打つものです。例：左A → 左B。\nSkip SF：反対の手を1打鍵以上挟んだあと、同じ指を別キーで再利用するものです。例：左A → 右X → 左B。\n同一キーの連打は別指標として集計します。\nカードをクリックするたび、可視化を Direct → Skip → 合計 → 通常 に切り替えます。合計表示では実線=Direct、破線=Skipです。",
@@ -2868,7 +3058,7 @@
                 lbl_long_sf_view_skip: "SKIP",
                 lbl_long_sf_view_all: "合計",
                 lbl_repeat_desc: "【同キー連打】\n同じ物理キーを連続して打った回数です。クリックすると連打が発生したキーと回数を可視化します。",
-                lbl_dist_desc: "左：快適 / 右：高負荷",
+                lbl_dist_desc: "位置 + 遷移 / 1打鍵",
 
                 btn_copy: "クリップボードにコピー",
                 btn_imp_exec: "インポート実行",
@@ -3085,7 +3275,7 @@
             runResolvedSequence(sequence, bundle) {
                 const stats = {
                     totalCost: 0, transCost: 0, staticCost: 0,
-                    keystrokes: 0,
+                    keystrokes: 0, sourceUnits: 0, layeredStrokes: 0,
                     sfbCount: 0,
                     sfbConsCount: 0,
                     sfbSkipCount: 0,
@@ -3112,12 +3302,15 @@
                 };
 
                 let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
+                // Emulation/resolved sequences already consist of one resolved source event per item.
+                stats.sourceUnits = Array.isArray(sequence) ? sequence.filter(Boolean).length : 0;
 
                 for (const item of sequence) {
                     if (!item) continue;
                     const k = item;
 
                     stats.keystrokes++;
+                    if (k.isLayer) stats.layeredStrokes++;
                     stats.keyCounts[k.hand][k.idx]++;
 
                     const cols = k.hand === 'L' ? COLS_L : COLS_R;
@@ -3225,7 +3418,8 @@
                         staticCost: sCost,
                         transitionCost: tCost,
                         from: last !== null ? `${activeH}:${last}` : null,
-                        to: `${activeH}:${k.idx}`
+                        to: `${activeH}:${k.idx}`,
+                        isLayer: !!k.isLayer
                     });
 
                     history[activeH].idx = k.idx;
@@ -3248,8 +3442,21 @@
                 const wTrans = transRatio / 100.0;
                 const wStatic = 1.0 - wTrans;
 
-                stats.efficiencyScore = (stats.avgStatic * wStatic) + (stats.avgTrans * wTrans);
-                stats.avgTotal = stats.efficiencyScore;
+                // Core score model:
+                //   Weighted Work = weighted totals over the whole sequence
+                //   Weighted Cost / Stroke = Weighted Work / strokes
+                //   Overall Cost = Weighted Work / source units
+                stats.weightedWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.weightedCostPerStroke = stats.keystrokes > 0 ? (stats.weightedWork / stats.keystrokes) : 0;
+                const sourceDenom = stats.sourceUnits > 0 ? stats.sourceUnits : (stats.keystrokes || 1);
+                stats.overallCost = stats.weightedWork / sourceDenom;
+                stats.rawCostPerStroke = stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0;
+                stats.strokesPerSourceUnit = stats.sourceUnits > 0 ? (stats.keystrokes / stats.sourceUnits) : 0;
+                stats.layeredStrokeRate = stats.keystrokes > 0 ? (stats.layeredStrokes / stats.keystrokes * 100) : 0;
+
+                // Backward-compatible fields used by the UI/state.
+                stats.efficiencyScore = stats.overallCost;
+                stats.avgTotal = stats.overallCost;
 
                 stats.repeatRate = stats.keystrokes > 0
                     ? (stats.repeatCount / stats.keystrokes * 100)
@@ -3266,7 +3473,7 @@
                 const keyMap = this.getLayoutMap();
                 const stats = {
                     totalCost: 0, transCost: 0, staticCost: 0,
-                    keystrokes: 0,
+                    keystrokes: 0, sourceUnits: 0, layeredStrokes: 0,
                     sfbCount: 0, // Same-finger/different-key total (Direct + Skip)
                     sfbConsCount: 0, // Direct SFB: 反対の手を挟まない
                     sfbSkipCount: 0, // Skip SF: 反対の手を1打鍵以上挟む
@@ -3294,6 +3501,12 @@
                     costSamples: [], // 分布計算用
                     costEvents: [] // コスト帯から物理キー/遷移へドリルダウンするための1打鍵イベント
                 };
+
+                // Overall Cost uses the original corpus size as its denominator so that
+                // multi-character keys / custom shorthand rules can reduce strokes naturally.
+                // Count Unicode code points, and treat CRLF as one newline character.
+                const sourceTextForCount = String(text ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                stats.sourceUnits = Array.from(sourceTextForCount).length;
 
                 let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
 
@@ -3426,6 +3639,7 @@
                     }
 
                     stats.keystrokes++;
+                    if (k.isLayer) stats.layeredStrokes++;
                     stats.keyCounts[k.hand][k.idx]++;
 
                     const cols = k.hand === 'L' ? COLS_L : COLS_R;
@@ -3550,7 +3764,8 @@
                         staticCost: sCost,
                         transitionCost: tCost,
                         from: last !== null ? `${activeH}:${last}` : null,
-                        to: `${activeH}:${k.idx}`
+                        to: `${activeH}:${k.idx}`,
+                        isLayer: !!k.isLayer
                     });
 
                     history[activeH].idx = k.idx;
@@ -3577,10 +3792,22 @@
                 const wTrans = transRatio / 100.0;
                 const wStatic = 1.0 - wTrans;
 
-                // 加重平均スコア
-                stats.efficiencyScore = (stats.avgStatic * wStatic) + (stats.avgTrans * wTrans);
+                // Core score model:
+                //   Weighted Work = Position Total × Position Weight + Transition Total × Transition Weight
+                //   Weighted Cost / Stroke = Weighted Work / resolved strokes
+                //   Overall Cost = Weighted Work / original input characters
+                // This makes stroke count matter naturally when comparing the same corpus.
+                stats.weightedWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.weightedCostPerStroke = stats.keystrokes > 0 ? (stats.weightedWork / stats.keystrokes) : 0;
+                const sourceDenom = stats.sourceUnits > 0 ? stats.sourceUnits : 1;
+                stats.overallCost = stats.weightedWork / sourceDenom;
+                stats.rawCostPerStroke = stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0;
+                stats.strokesPerSourceUnit = stats.sourceUnits > 0 ? (stats.keystrokes / stats.sourceUnits) : 0;
+                stats.layeredStrokeRate = stats.keystrokes > 0 ? (stats.layeredStrokes / stats.keystrokes * 100) : 0;
 
-                stats.avgTotal = stats.efficiencyScore;
+                // Backward-compatible fields used by existing rendering/state code.
+                stats.efficiencyScore = stats.overallCost;
+                stats.avgTotal = stats.overallCost;
 
                 // 連打に関する詳細指標
                 // 連打率 (Repeat Rate)
@@ -6312,9 +6539,27 @@
 
                 // --- 1. KPI Cards (Ordered as requested) ---
 
-                // [1] Efficiency Score
-                document.getElementById('kpi-score').textContent = stats.avgTotal.toFixed(2);
-                document.getElementById('kpi-score-keys').textContent = f(stats.keystrokes);
+                // [1] Core comparison metrics
+                const overallCost = Number.isFinite(stats.overallCost) ? stats.overallCost : (stats.avgTotal || 0);
+                const weightedCostPerStroke = Number.isFinite(stats.weightedCostPerStroke) ? stats.weightedCostPerStroke : 0;
+                const strokesPerSourceUnit = Number.isFinite(stats.strokesPerSourceUnit) ? stats.strokesPerSourceUnit : 0;
+                const layeredStrokes = Number.isFinite(stats.layeredStrokes) ? stats.layeredStrokes : 0;
+                const layeredRate = Number.isFinite(stats.layeredStrokeRate) ? stats.layeredStrokeRate : 0;
+
+                document.getElementById('kpi-score').textContent = overallCost.toFixed(2);
+                document.getElementById('kpi-cost-stroke').textContent = weightedCostPerStroke.toFixed(2);
+                document.getElementById('kpi-strokes').textContent = f(stats.keystrokes);
+                document.getElementById('kpi-source-units').textContent = f(stats.sourceUnits || 0);
+                document.getElementById('kpi-strokes-per-char').textContent = strokesPerSourceUnit.toFixed(2);
+                document.getElementById('kpi-layered-strokes').textContent = f(layeredStrokes);
+                document.getElementById('kpi-layered-rate').textContent = `${layeredRate.toFixed(1)}%`;
+
+                const scoreTransWeight = (this.state.weights && this.state.weights.trans !== undefined)
+                    ? this.state.weights.trans
+                    : 65;
+                const scoreStaticWeight = 100 - scoreTransWeight;
+                document.getElementById('kpi-score-static-weight').textContent = `${scoreStaticWeight}%`;
+                document.getElementById('kpi-score-trans-weight').textContent = `${scoreTransWeight}%`;
 
                 // [2] SD & Median & 95% (Calc)
                 const samples = stats.costSamples.sort((a, b) => a - b);
@@ -6508,10 +6753,25 @@
                 });
 
                 // --- 4. Misc & Charts ---
+                const rawCostPerStroke = Number.isFinite(stats.rawCostPerStroke)
+                    ? stats.rawCostPerStroke
+                    : (stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0);
+                const weightedWork = Number.isFinite(stats.weightedWork) ? stats.weightedWork : 0;
+                const weightedPerStroke = Number.isFinite(stats.weightedCostPerStroke) ? stats.weightedCostPerStroke : 0;
+                const strokeRatio = Number.isFinite(stats.strokesPerSourceUnit) ? stats.strokesPerSourceUnit : 0;
+                const layeredCount = Number.isFinite(stats.layeredStrokes) ? stats.layeredStrokes : 0;
+                const layeredPct = Number.isFinite(stats.layeredStrokeRate) ? stats.layeredStrokeRate : 0;
+
+                document.getElementById('res-weighted-work').textContent = weightedWork.toFixed(2);
+                document.getElementById('res-weighted-per-stroke').textContent = weightedPerStroke.toFixed(2);
+                document.getElementById('res-raw-per-key').textContent = rawCostPerStroke.toFixed(2);
                 document.getElementById('res-total-load').textContent = f(stats.totalCost);
                 document.getElementById('res-trans-val').textContent = stats.avgTrans.toFixed(2);
                 document.getElementById('res-static-val').textContent = stats.avgStatic.toFixed(2);
+                document.getElementById('stat-source-units').textContent = f(stats.sourceUnits || 0);
                 document.getElementById('stat-keystrokes').textContent = f(stats.keystrokes);
+                document.getElementById('stat-strokes-per-char').textContent = strokeRatio.toFixed(2);
+                document.getElementById('stat-layered-strokes').textContent = `${f(layeredCount)} (${layeredPct.toFixed(1)}%)`;
                 document.getElementById('stat-max-key').textContent = stats.maxKeyChar || "-";
 
                 // --- Repeats Detail (Visualization) ---
@@ -7162,7 +7422,111 @@
             setTimeout(() => input.parentElement.style.borderColor = '', 200);
         };
 
+        // --- Viewport-safe long metric tooltips ---
+        // Pseudo-element tooltips cannot know how much room exists above/below the card.
+        // Use one floating element for the long metric explanations so they always stay
+        // inside the visible viewport and outside the hovered card.
+        function setupMetricViewportTooltips() {
+            const cards = [
+                document.getElementById('kpi-overall-card'),
+                document.getElementById('kpi-cost-stroke-card')
+            ].filter(Boolean);
+            if (cards.length === 0) return;
+
+            let tip = document.getElementById('metric-viewport-tooltip');
+            if (!tip) {
+                tip = document.createElement('div');
+                tip.id = 'metric-viewport-tooltip';
+                tip.setAttribute('role', 'tooltip');
+                document.body.appendChild(tip);
+            }
+
+            const margin = 8;
+            const gap = 10;
+            let activeCard = null;
+
+            const positionTip = () => {
+                if (!activeCard || !tip.classList.contains('visible')) return;
+
+                const rect = activeCard.getBoundingClientRect();
+                const vw = document.documentElement.clientWidth;
+                const vh = document.documentElement.clientHeight;
+
+                tip.style.width = `${Math.min(380, Math.max(240, vw - margin * 2))}px`;
+                tip.style.maxHeight = `${Math.max(120, vh - margin * 2)}px`;
+                tip.style.left = '0px';
+                tip.style.top = '0px';
+
+                let tipRect = tip.getBoundingClientRect();
+                const tipW = tipRect.width;
+                let tipH = tipRect.height;
+
+                const spaceAbove = Math.max(0, rect.top - gap - margin);
+                const spaceBelow = Math.max(0, vh - rect.bottom - gap - margin);
+                const spaceLeft = Math.max(0, rect.left - gap - margin);
+                const spaceRight = Math.max(0, vw - rect.right - gap - margin);
+
+                let left;
+                let top;
+
+                if (spaceAbove >= tipH) {
+                    left = rect.left;
+                    top = rect.top - tipH - gap;
+                } else if (spaceBelow >= tipH) {
+                    left = rect.left;
+                    top = rect.bottom + gap;
+                } else if (spaceLeft >= tipW) {
+                    left = rect.left - tipW - gap;
+                    top = rect.top + rect.height / 2 - tipH / 2;
+                } else if (spaceRight >= tipW) {
+                    left = rect.right + gap;
+                    top = rect.top + rect.height / 2 - tipH / 2;
+                } else {
+                    const useBelow = spaceBelow >= spaceAbove;
+                    const available = Math.max(96, useBelow ? spaceBelow : spaceAbove);
+                    tip.style.maxHeight = `${available}px`;
+                    tipRect = tip.getBoundingClientRect();
+                    tipH = tipRect.height;
+                    left = rect.left;
+                    top = useBelow ? rect.bottom + gap : rect.top - tipH - gap;
+                }
+
+                left = Math.max(margin, Math.min(left, vw - tipW - margin));
+                top = Math.max(margin, Math.min(top, vh - tipH - margin));
+
+                tip.style.left = `${Math.round(left)}px`;
+                tip.style.top = `${Math.round(top)}px`;
+            };
+
+            const show = (card) => {
+                const text = card.getAttribute('data-tooltip') || '';
+                if (!text) return;
+                activeCard = card;
+                tip.textContent = text;
+                tip.classList.add('visible');
+                requestAnimationFrame(positionTip);
+            };
+
+            const hide = (card) => {
+                if (card && activeCard !== card) return;
+                activeCard = null;
+                tip.classList.remove('visible');
+            };
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => show(card));
+                card.addEventListener('mouseleave', () => hide(card));
+                card.addEventListener('focus', () => show(card));
+                card.addEventListener('blur', () => hide(card));
+            });
+            window.addEventListener('resize', positionTip);
+            window.addEventListener('scroll', positionTip, true);
+        }
+
+
         const app = new UI();
+
+        setupMetricViewportTooltips();
 
     </script>
 </body>
