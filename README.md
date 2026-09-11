@@ -1,6 +1,6 @@
 # KEYFLOW ANALYZER
 
-<img width="3454" height="2019" alt="image" src="https://koyasi777.github.io/keyflow-analyzer/assets/ogp/keyflow-analyzer_full.png" />
+<img width="3454" height="2019" alt="image" src="https://keyflow.koyasi777.com/assets/ogp/keyflow-analyzer_full.png" />
 
 A keyboard layout analyzer with editable cost models (transition/static), fatigue recovery, and statistical efficiency metrics.
 
@@ -9,7 +9,7 @@ A keyboard layout analyzer with editable cost models (transition/static), fatigu
 ## Quick Start
 Open the app in your browser:
 
-- https://koyasi777.github.io/keyflow-analyzer/
+- https://keyflow.koyasi777.com/
 
 ## Features
 - **Logical domain**
@@ -59,7 +59,7 @@ MIT
 ## クイックスタート
 ブラウザで以下にアクセスするだけで起動します：
 
-- https://koyasi777.github.io/keyflow-analyzer/
+- https://keyflow.koyasi777.com/
 
 ## 主な機能
 - **Logical (配列設計)**
