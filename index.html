@@ -906,6 +906,114 @@
         .btn-copy { background: var(--bg-key); border: 1px solid var(--border); color: var(--text-main); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
 
+
+        /* --- Input Extensions Editor --- */
+        .extension-modal-content {
+            width: min(980px, 94vw);
+            max-width: 94vw;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+        .extension-editor-body {
+            display: grid;
+            grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.4fr);
+            gap: 14px;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .extension-section {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 10px;
+        }
+        .extension-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .extension-section-title { font-weight: 800; font-size: 0.86rem; }
+        .extension-section-note { color: var(--text-dim); font-size: 0.72rem; line-height: 1.45; }
+        .extension-section-actions { display: flex; align-items: center; gap: 8px; }
+        .extension-group-toggle {
+            display: flex; align-items: center; gap: 5px;
+            color: var(--text-dim); font-size: 0.72rem; font-weight: 700; cursor: pointer;
+            user-select: none; white-space: nowrap;
+        }
+        .extension-group-toggle input { cursor: pointer; }
+        .extension-section.group-disabled { opacity: 0.62; }
+        .extension-section.group-disabled .extension-section-title { color: var(--text-dim); }
+        .extension-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: auto;
+            min-height: 90px;
+            max-height: 48vh;
+            padding-right: 2px;
+        }
+        .extension-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) auto;
+            gap: 6px;
+            align-items: center;
+        }
+        .extension-row.shorthand {
+            grid-template-columns: 26px minmax(140px, 1.4fr) minmax(100px, 0.8fr) auto;
+        }
+        .extension-row .meta-input { width: 100%; min-width: 0; }
+        .extension-row-arrow { text-align: center; color: var(--text-dim); font-weight: bold; }
+        .extension-row-actions { display: flex; gap: 3px; }
+        .extension-mini-btn {
+            padding: 5px 7px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 0.72rem;
+            line-height: 1;
+        }
+        .extension-mini-btn:hover { color: var(--text-main); border-color: var(--text-dim); }
+        .extension-mini-btn.danger:hover { color: var(--c-dang); border-color: var(--c-dang); }
+        .extension-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .extension-toolbar .meta-input { flex: 1; min-width: 140px; }
+        .extension-summary-btn { min-width: 190px; text-align: left; }
+        .extension-bulk {
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+        .extension-bulk summary { cursor: pointer; color: var(--text-dim); font-size: 0.78rem; font-weight: 700; }
+        .extension-bulk textarea { height: 100px; margin-top: 8px; }
+        .extension-count { color: var(--text-dim); font-size: 0.72rem; white-space: nowrap; }
+        .extension-col-head {
+            display: grid;
+            grid-template-columns: 26px minmax(140px, 1.4fr) minmax(100px, 0.8fr) auto;
+            gap: 6px;
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            padding: 0 2px;
+        }
+        .extension-alias-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) auto;
+            gap: 6px;
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            padding: 0 2px;
+        }
+        @media (max-width: 780px) {
+            .extension-editor-body { grid-template-columns: 1fr; overflow: auto; }
+            .extension-list { max-height: 38vh; }
+            .extension-row.shorthand, .extension-col-head {
+                grid-template-columns: 24px minmax(90px, 1fr) minmax(74px, 0.7fr) auto;
+            }
+        }
+
         /* ▼▼▼ MOBILE RESPONSIVE OVERRIDES ▼▼▼ */
         @media (max-width: 900px) {
             /* --- 1. 全体レイアウト --- */
@@ -1261,13 +1369,16 @@
         .score-weight-line {
             display: flex;
             align-items: baseline;
-            gap: 3px;
+            gap: 2px;
+            width: 100%;
+            min-width: 0;
             white-space: nowrap;
-            font-size: 0.61rem;
-            letter-spacing: -0.025em;
+            font-size: 0.55rem;
+            letter-spacing: -0.04em;
         }
+        .score-weight-line > span { flex: 0 0 auto; }
         .score-weight-value { color: var(--text-main); font-weight: 800; }
-        .score-weight-sep { opacity: 0.55; margin: 0 1px; }
+        .score-weight-sep { opacity: 0.55; margin: 0; }
 
         .core-metric-card { min-height: 96px; }
         .core-metric-card .kpi-sub { line-height: 1.35; }
@@ -1596,11 +1707,11 @@
                                     <input type="text" id="emu-source-desc" class="meta-input" style="flex:1; min-width:0;">
                                 </div>
                                 <div class="meta-row">
-                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_custom_replace" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px; opacity:0.55;">
+                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_input_extensions" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px; opacity:0.55;">
                                         <input type="checkbox" id="emu-source-toggle-rules" disabled style="cursor:not-allowed;">
-                                        <span data-i18n="lbl_custom_replace">Custom Rules</span>
+                                        <span data-i18n="lbl_input_extensions">Input Extensions</span>
                                     </label>
-                                    <input type="text" id="emu-source-rules" class="meta-input" style="flex:1; min-width:0; font-family:'JetBrains Mono', monospace; opacity:0.55;" placeholder="source側では無効" disabled readonly>
+                                    <button type="button" id="emu-source-extension-btn" class="secondary extension-summary-btn" disabled style="opacity:0.55; cursor:not-allowed;">Disabled on source</button>
                                 </div>
 
                                 <div class="meta-row">
@@ -1701,11 +1812,11 @@
                                     <input type="text" id="emu-target-desc" class="meta-input" style="flex:1; min-width:0;">
                                 </div>
                                 <div class="meta-row">
-                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_custom_replace" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                                    <label class="tooltip tooltip-down" data-i18n-tooltip="desc_input_extensions" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
                                         <input type="checkbox" id="emu-target-toggle-rules" checked style="cursor:pointer;">
-                                        <span data-i18n="lbl_custom_replace">Custom Rules</span>
+                                        <span data-i18n="lbl_input_extensions">Input Extensions</span>
                                     </label>
-                                    <input type="text" id="emu-target-rules" class="meta-input" style="flex:1; min-width:0; font-family:'JetBrains Mono', monospace;" placeholder="ex: ltu=l, nn=q">
+                                    <button type="button" id="emu-target-extension-btn" class="secondary extension-summary-btn">Edit extensions</button>
                                 </div>
                             </div>
 
@@ -1796,6 +1907,24 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_base_stroke_title">基本打鍵コスト</div>
+                            <p class="logic-desc" data-i18n="set_base_stroke_desc">Base effort charged once for every resolved stroke.</p>
+                        </div>
+                        <div style="display:flex; justify-content:center; margin-top:1rem;">
+                            <div class="input-group">
+                                <span data-i18n="lbl_cost_per_stroke_base">Cost / stroke</span>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('base-stroke-cost-in', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="base-stroke-cost-in" value="1.0" min="0" step="0.1" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('base-stroke-cost-in', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="logic-card">
                         <div class="logic-header">
                             <div class="logic-title" data-i18n="set_gap_title">Finger Fatigue & Recovery Simulation</div>
@@ -1927,7 +2056,22 @@
                 <div class="panel" id="corpus-panel">
                     <h3 data-i18n="panel_corpus">Corpus Text</h3>
 
-                    <div style="margin-bottom:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; padding:10px;">
+                    <div id="corpus-interpretation-box" style="margin-bottom:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; padding:10px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
+                            <span style="font-size:0.75rem; font-weight:bold; color:var(--text-main); text-transform:uppercase; letter-spacing:0.5px;" data-i18n="lbl_corpus_interpretation">Corpus Interpretation</span>
+                            <span class="tooltip tooltip-down" style="color:var(--text-dim); cursor:help;" data-i18n-tooltip="desc_corpus_interpretation">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                            </span>
+                        </div>
+                        <select id="corpus-interpretation" class="kb-select" style="padding:6px 8px; font-size:0.72rem; width:100%;">
+                            <option value="auto" data-i18n="opt_corpus_auto">Auto</option>
+                            <option value="romaji" data-i18n="opt_corpus_romaji">Romaji</option>
+                            <option value="kana" data-i18n="opt_corpus_kana">Kana → Standard Romaji</option>
+                            <option value="direct" data-i18n="opt_corpus_direct">Direct Logical Tokens</option>
+                        </select>
+                    </div>
+
+                    <div id="romaji-preprocessor-box" style="margin-bottom:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; padding:10px;">
 
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                             <span style="font-size:0.75rem; font-weight:bold; color:var(--text-main); text-transform:uppercase; letter-spacing:0.5px;" data-i18n="lbl_romaji_macro">Auto-Replace Corpus</span>
@@ -1992,6 +2136,9 @@
                                         <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_weighted_per_stroke">Cost / Stroke</div>
                                     </div>
                                     <div class="kpi-sub score-weight-line">
+                                        <span data-i18n="lbl_base_short">Base</span>
+                                        <span id="kpi-score-base-cost" class="score-weight-value">1.0</span>
+                                        <span class="score-weight-sep">+</span>
                                         <span data-i18n="lbl_position_short">Position</span>
                                         <span id="kpi-score-static-weight" class="score-weight-value">35%</span>
                                         <span class="score-weight-sep">·</span>
@@ -2091,8 +2238,11 @@
                             </div>
 
                             <div style="margin-bottom: 1rem;">
-                                <div class="stat-item"><span data-i18n="res_weighted_work">Weighted Work</span><span id="res-weighted-work">0.00</span></div>
-                                <div class="stat-item"><span data-i18n="res_weighted_per_stroke">Weighted Cost / Stroke</span><span id="res-weighted-per-stroke">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_effective_work">総コスト</span><span id="res-effective-work">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_base_stroke_work">Base Stroke Work</span><span id="res-base-stroke-work">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_weighted_work">Ergonomic Penalty Total</span><span id="res-weighted-work">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_effective_per_stroke">1打鍵あたりのコスト</span><span id="res-effective-per-stroke">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_weighted_per_stroke">Ergonomic Penalty / Stroke</span><span id="res-weighted-per-stroke">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_raw_per_stroke">Raw Cost / Stroke</span><span id="res-raw-per-key">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_static">Avg. Position</span><span id="res-static-val">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_trans">Avg. Transition</span><span id="res-trans-val">0.00</span></div>
@@ -2151,6 +2301,74 @@
             <div class="modal-actions">
                 <button id="btn-modal-copy" class="btn-copy">Copy to Clipboard</button>
                 <button id="btn-modal-import" class="primary" style="width: auto; padding: 8px 24px;">Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="input-extension-modal" class="modal-overlay">
+        <div class="modal-content extension-modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="extension-modal-title">Input Extensions</div>
+                <button class="modal-close" id="extension-modal-close">&times;</button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;">
+                <span class="extension-count" id="extension-total-count"></span>
+            </div>
+            <p id="extension-modal-desc" style="font-size:0.76rem; color:var(--text-dim); line-height:1.5; margin:0;"></p>
+
+            <div class="extension-editor-body">
+                <section class="extension-section">
+                    <div class="extension-section-header">
+                        <div>
+                            <div class="extension-section-title" id="extension-alias-title">Aliases</div>
+                            <div class="extension-section-note" id="extension-alias-note"></div>
+                        </div>
+                        <div class="extension-section-actions">
+                            <label class="extension-group-toggle">
+                                <input type="checkbox" id="extension-alias-enabled">
+                                <span id="extension-alias-enabled-label">有効</span>
+                            </label>
+                            <button id="extension-add-alias" class="secondary" type="button">＋</button>
+                        </div>
+                    </div>
+                    <div class="extension-alias-head"><span>Source</span><span></span><span>Keys</span><span></span></div>
+                    <div id="extension-alias-list" class="extension-list"></div>
+                </section>
+
+                <section class="extension-section">
+                    <div class="extension-section-header">
+                        <div>
+                            <div class="extension-section-title" id="extension-shorthand-title">Shorthands</div>
+                            <div class="extension-section-note" id="extension-shorthand-note"></div>
+                        </div>
+                        <div class="extension-section-actions">
+                            <label class="extension-group-toggle">
+                                <input type="checkbox" id="extension-shorthand-enabled">
+                                <span id="extension-shorthand-enabled-label">有効</span>
+                            </label>
+                            <button id="extension-add-shorthand" class="secondary" type="button">＋</button>
+                        </div>
+                    </div>
+                    <div class="extension-toolbar">
+                        <input id="extension-search" class="meta-input" type="search" placeholder="Search">
+                        <span class="extension-count" id="extension-visible-count"></span>
+                    </div>
+                    <div class="extension-col-head"><span></span><span>Text</span><span>Keys</span><span></span></div>
+                    <div id="extension-shorthand-list" class="extension-list"></div>
+                    <details class="extension-bulk">
+                        <summary id="extension-bulk-summary">TSV Import / Export</summary>
+                        <textarea id="extension-bulk-text" class="modal-textarea" spellcheck="false" placeholder="keys<TAB>text<TAB>optional flag"></textarea>
+                        <div class="extension-toolbar" style="justify-content:flex-end; margin-top:8px;">
+                            <button id="extension-bulk-import" class="secondary" type="button">Import TSV</button>
+                            <button id="extension-bulk-export" class="secondary" type="button">Export TSV</button>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <div class="modal-actions">
+                <button id="extension-cancel" class="secondary" type="button">Cancel</button>
+                <button id="extension-apply" class="primary" style="width:auto; padding:8px 24px;" type="button">Apply</button>
             </div>
         </div>
     </div>
@@ -2269,6 +2487,499 @@
             3: 'var(--f-index)', 4: 'var(--f-thumb)'
         };
 
+
+        const emptyInputExtensions = () => ({
+            aliasesEnabled: true,
+            shorthandsEnabled: true,
+            aliases: [],
+            shorthands: []
+        });
+
+        const parseLegacyCustomRules = (rulesText = '') => String(rulesText || '')
+            .split(',')
+            .map(rule => rule.split('='))
+            .map(([source, keys]) => ({
+                source: String(source || '').trim().toLowerCase(),
+                keys: String(keys || '').trim().toLowerCase()
+            }))
+            .filter(rule => rule.source && rule.keys);
+
+        const normalizeInputExtensions = (extensions, legacyRules = '') => {
+            const src = extensions && typeof extensions === 'object' ? extensions : {};
+            const aliasesRaw = Array.isArray(src.aliases) ? src.aliases : parseLegacyCustomRules(legacyRules);
+            const shorthandRaw = Array.isArray(src.shorthands) ? src.shorthands : [];
+
+            return {
+                aliasesEnabled: src.aliasesEnabled !== false,
+                shorthandsEnabled: src.shorthandsEnabled !== false,
+                aliases: aliasesRaw.map(rule => ({
+                    source: String(rule?.source || '').trim().toLowerCase(),
+                    keys: String(rule?.keys || '').trim().toLowerCase(),
+                    enabled: rule?.enabled !== false
+                })).filter(rule => rule.source && rule.keys),
+                shorthands: shorthandRaw.map(rule => ({
+                    keys: String(rule?.keys || '').trim().toLowerCase(),
+                    text: String(rule?.text || '').trim(),
+                    enabled: rule?.enabled !== false,
+                    flag: String(rule?.flag || '')
+                })).filter(rule => rule.keys && rule.text)
+            };
+        };
+
+        const cloneInputExtensions = (extensions, legacyRules = '') =>
+            JSON.parse(JSON.stringify(normalizeInputExtensions(extensions, legacyRules)));
+
+        const inputExtensionsToLegacyRules = (extensions) => {
+            const ext = normalizeInputExtensions(extensions);
+            if (!ext.aliasesEnabled) return '';
+            return ext.aliases
+                .filter(rule => rule.enabled !== false)
+                .map(rule => `${rule.source}=${rule.keys}`)
+                .join(', ');
+        };
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const KANA_ROMAJI_SINGLE = {
+            'あ':'a','い':'i','う':'u','え':'e','お':'o',
+            'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+            'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
+            'さ':'sa','し':'si','す':'su','せ':'se','そ':'so',
+            'ざ':'za','じ':'zi','ず':'zu','ぜ':'ze','ぞ':'zo',
+            'た':'ta','ち':'ti','つ':'tu','て':'te','と':'to',
+            'だ':'da','ぢ':'di','づ':'du','で':'de','ど':'do',
+            'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+            'は':'ha','ひ':'hi','ふ':'hu','へ':'he','ほ':'ho',
+            'ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+            'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+            'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+            'や':'ya','ゆ':'yu','よ':'yo',
+            'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
+            'わ':'wa','ゐ':'wi','ゑ':'we','を':'wo','ん':'n','ゔ':'vu',
+            'ぁ':'la','ぃ':'li','ぅ':'lu','ぇ':'le','ぉ':'lo',
+            'ゃ':'lya','ゅ':'lyu','ょ':'lyo','ゎ':'lwa','ゕ':'lka','ゖ':'lke',
+            '。':'.','、':',','「':'[','」':']','〜':'~','～':'~','ー':'-'
+        };
+
+        const KANA_ROMAJI_PAIR = {
+            'きゃ':'kya','きぃ':'kyi','きゅ':'kyu','きぇ':'kye','きょ':'kyo',
+            'ぎゃ':'gya','ぎぃ':'gyi','ぎゅ':'gyu','ぎぇ':'gye','ぎょ':'gyo',
+            'しゃ':'sya','しぃ':'syi','しゅ':'syu','しぇ':'sye','しょ':'syo',
+            'じゃ':'zya','じぃ':'zyi','じゅ':'zyu','じぇ':'zye','じょ':'zyo',
+            'ちゃ':'tya','ちぃ':'tyi','ちゅ':'tyu','ちぇ':'tye','ちょ':'tyo',
+            'ぢゃ':'dya','ぢぃ':'dyi','ぢゅ':'dyu','ぢぇ':'dye','ぢょ':'dyo',
+            'にゃ':'nya','にぃ':'nyi','にゅ':'nyu','にぇ':'nye','にょ':'nyo',
+            'ひゃ':'hya','ひぃ':'hyi','ひゅ':'hyu','ひぇ':'hye','ひょ':'hyo',
+            'びゃ':'bya','びぃ':'byi','びゅ':'byu','びぇ':'bye','びょ':'byo',
+            'ぴゃ':'pya','ぴぃ':'pyi','ぴゅ':'pyu','ぴぇ':'pye','ぴょ':'pyo',
+            'みゃ':'mya','みぃ':'myi','みゅ':'myu','みぇ':'mye','みょ':'myo',
+            'りゃ':'rya','りぃ':'ryi','りゅ':'ryu','りぇ':'rye','りょ':'ryo',
+            'ふぁ':'fa','ふぃ':'fi','ふぇ':'fe','ふぉ':'fo','ふゅ':'fyu',
+            'ゔぁ':'va','ゔぃ':'vi','ゔぇ':'ve','ゔぉ':'vo','ゔゅ':'vyu',
+            'てぃ':'ti','てゅ':'tyu','でぃ':'di','でゅ':'dyu',
+            'とぅ':'tu','どぅ':'du','うぃ':'wi','うぇ':'we','うぉ':'wo',
+            'くぁ':'kwa','くぃ':'kwi','くぅ':'kwu','くぇ':'kwe','くぉ':'kwo',
+            'ぐぁ':'gwa','ぐぃ':'gwi','ぐぅ':'gwu','ぐぇ':'gwe','ぐぉ':'gwo',
+            'すぁ':'swa','すぃ':'swi','すぅ':'swu','すぇ':'swe','すぉ':'swo',
+            'ずぁ':'zwa','ずぃ':'zwi','ずぅ':'zwu','ずぇ':'zwe','ずぉ':'zwo',
+            'つぁ':'tsa','つぃ':'tsi','つぇ':'tse','つぉ':'tso'
+        };
+
+        const toHiraganaChar = (ch) => {
+            const code = ch.charCodeAt(0);
+            return (code >= 0x30A1 && code <= 0x30F6) ? String.fromCharCode(code - 0x60) : ch;
+        };
+
+        const kanaToRomaji = (input = '') => {
+            const chars = Array.from(String(input || '')).map(toHiraganaChar);
+            let out = '';
+            for (let i = 0; i < chars.length; i++) {
+                const ch = chars[i];
+                if (ch === 'っ') {
+                    const pair = chars.slice(i + 1, i + 3).join('');
+                    const nextRoman = KANA_ROMAJI_PAIR[pair] || KANA_ROMAJI_SINGLE[chars[i + 1]] || '';
+                    const first = nextRoman.charAt(0);
+                    out += (first && /[bcdfghjklmpqrstvwxyz]/.test(first)) ? first : 'ltu';
+                    continue;
+                }
+                const pair = chars.slice(i, i + 2).join('');
+                if (KANA_ROMAJI_PAIR[pair]) {
+                    out += KANA_ROMAJI_PAIR[pair];
+                    i++;
+                    continue;
+                }
+                out += KANA_ROMAJI_SINGLE[ch] ?? ch;
+            }
+            return out;
+        };
+
+        // Romaji corpus normalization: accept common spelling variants, normalize to Kana,
+        // then emit one canonical KEYFLOW Romaji spelling via kanaToRomaji().
+        // This deliberately separates "what spellings we accept" from "what key spelling we analyze".
+        const ROMAJI_KANA_VARIANTS = {
+            // Hepburn/common alternatives for canonical si/ti/tu/hu/zi spellings.
+            'shi':'し', 'chi':'ち', 'tsu':'つ', 'fu':'ふ', 'ji':'じ',
+            'sha':'しゃ', 'shu':'しゅ', 'sho':'しょ', 'she':'しぇ',
+            'ja':'じゃ', 'ju':'じゅ', 'jo':'じょ', 'je':'じぇ',
+            'jya':'じゃ', 'jyu':'じゅ', 'jyo':'じょ', 'jye':'じぇ',
+            'cha':'ちゃ', 'chu':'ちゅ', 'cho':'ちょ', 'che':'ちぇ',
+            'cya':'ちゃ', 'cyu':'ちゅ', 'cyo':'ちょ', 'cye':'ちぇ',
+            // Common small-kana spellings accepted by Japanese IMEs.
+            'xa':'ぁ', 'xi':'ぃ', 'xu':'ぅ', 'xe':'ぇ', 'xo':'ぉ',
+            'xya':'ゃ', 'xyu':'ゅ', 'xyo':'ょ', 'xwa':'ゎ',
+            'la':'ぁ', 'li':'ぃ', 'lu':'ぅ', 'le':'ぇ', 'lo':'ぉ',
+            'lya':'ゃ', 'lyu':'ゅ', 'lyo':'ょ', 'lwa':'ゎ',
+            'xtu':'っ', 'xtsu':'っ', 'ltu':'っ', 'ltsu':'っ'
+        };
+
+        const buildRomajiKanaMap = () => {
+            const map = new Map();
+            const add = (roman, kana, overwrite = false) => {
+                const key = String(roman || '').toLowerCase();
+                if (!key || !kana) return;
+                if (overwrite || !map.has(key)) map.set(key, kana);
+            };
+            Object.entries(KANA_ROMAJI_SINGLE).forEach(([kana, roman]) => add(roman, kana));
+            Object.entries(KANA_ROMAJI_PAIR).forEach(([kana, roman]) => add(roman, kana));
+            Object.entries(ROMAJI_KANA_VARIANTS).forEach(([roman, kana]) => add(roman, kana, true));
+            return map;
+        };
+
+        const ROMAJI_KANA_MAP = buildRomajiKanaMap();
+        const ROMAJI_KANA_RULES = Array.from(ROMAJI_KANA_MAP.entries())
+            .map(([roman, kana], priority) => ({ roman, kana, priority }))
+            .sort((a, b) => (b.roman.length - a.roman.length) || (a.priority - b.priority));
+
+        const ROMAJI_KANA_TRIE = (() => {
+            const root = { next: new Map(), rule: null };
+            for (const rule of ROMAJI_KANA_RULES) {
+                let node = root;
+                for (const ch of rule.roman) {
+                    let child = node.next.get(ch);
+                    if (!child) {
+                        child = { next: new Map(), rule: null };
+                        node.next.set(ch, child);
+                    }
+                    node = child;
+                }
+                if (!node.rule) node.rule = rule;
+            }
+            return root;
+        })();
+
+        const romajiToKanaTrace = (input = '') => {
+            const original = String(input || '');
+            const text = original.toLowerCase();
+            let kana = '';
+            let i = 0;
+            // Only these Kana boundaries are valid Shorthand boundaries. This prevents a rule for
+            // "し" from matching halfway through one Roman unit such as "sha" -> "しゃ".
+            const boundaryToSource = new Map([[0, 0]]);
+            const isConsonant = ch => /[bcdfghjklmpqrstvwxyz]/.test(ch || '');
+            const isVowelOrY = ch => /[aiueoy]/.test(ch || '');
+            const appendUnit = (value, sourceStart, sourceEnd) => {
+                const startKana = kana.length;
+                boundaryToSource.set(startKana, sourceStart);
+                kana += value;
+                boundaryToSource.set(kana.length, sourceEnd);
+            };
+
+            while (i < text.length) {
+                const ch = text[i];
+                const next = text[i + 1] || '';
+                const next2 = text[i + 2] || '';
+
+                if (ch === 'n' && next === "'") {
+                    appendUnit('ん', i, i + 2);
+                    i += 2;
+                    continue;
+                }
+
+                if (ch === next && ch !== 'n' && isConsonant(ch)) {
+                    appendUnit('っ', i, i + 1);
+                    i += 1;
+                    continue;
+                }
+
+                if (ch === 'n') {
+                    if (!next) {
+                        appendUnit('ん', i, i + 1);
+                        i += 1;
+                        continue;
+                    }
+                    if (next === 'n') {
+                        if (isVowelOrY(next2)) {
+                            appendUnit('ん', i, i + 1);
+                            i += 1;
+                        } else {
+                            appendUnit('ん', i, i + 2);
+                            i += 2;
+                        }
+                        continue;
+                    }
+                    if (!isVowelOrY(next)) {
+                        appendUnit('ん', i, i + 1);
+                        i += 1;
+                        continue;
+                    }
+                }
+
+                let node = ROMAJI_KANA_TRIE;
+                let best = null;
+                let bestEnd = i;
+                for (let j = i; j < text.length; j++) {
+                    node = node.next.get(text[j]);
+                    if (!node) break;
+                    if (node.rule) {
+                        best = node.rule;
+                        bestEnd = j + 1;
+                    }
+                }
+                if (best) {
+                    appendUnit(best.kana, i, bestEnd);
+                    i = bestEnd;
+                    continue;
+                }
+
+                // Unknown/non-Romaji content is preserved 1:1, including punctuation and Kanji.
+                appendUnit(original[i] ?? ch, i, i + 1);
+                i += 1;
+            }
+            return { kana, boundaryToSource, original };
+        };
+
+        const romajiToKana = (input = '') => romajiToKanaTrace(input).kana;
+
+        const buildExtensionSourceRules = (extensions) => {
+            const ext = normalizeInputExtensions(extensions);
+            if (!ext.aliasesEnabled) return [];
+            return ext.aliases
+                .map((rule, index) => ({ ...rule, priority: index, kind: 'alias' }))
+                .filter(rule => rule.enabled !== false && rule.source && rule.keys)
+                .sort((a, b) => (b.source.length - a.source.length) || (a.priority - b.priority));
+        };
+
+        // Longest-match trie. Building it is O(number of rules); matching is O(text length × max rule length),
+        // instead of scanning every rule at every character position.
+        const createRuleTrie = (rules, sourceField) => {
+            const root = { next: new Map(), rule: null };
+            for (const rule of rules) {
+                const source = String(rule?.[sourceField] || '');
+                if (!source) continue;
+                let node = root;
+                for (const ch of source) {
+                    let child = node.next.get(ch);
+                    if (!child) {
+                        child = { next: new Map(), rule: null };
+                        node.next.set(ch, child);
+                    }
+                    node = child;
+                }
+                // Rules are inserted in priority order; preserve the first rule for exact duplicates.
+                if (!node.rule) node.rule = rule;
+            }
+            return root;
+        };
+
+        const matchRuleTrie = (trie, text, start) => {
+            let node = trie;
+            let bestRule = null;
+            let bestEnd = start;
+            for (let i = start; i < text.length; i++) {
+                node = node.next.get(text[i]);
+                if (!node) break;
+                if (node.rule) {
+                    bestRule = node.rule;
+                    bestEnd = i + 1;
+                }
+            }
+            return bestRule ? { rule: bestRule, end: bestEnd } : null;
+        };
+
+
+        const matchRuleTrieOnBoundaries = (trie, text, start, validBoundaries) => {
+            if (!validBoundaries.has(start)) return null;
+            let node = trie;
+            let bestRule = null;
+            let bestEnd = start;
+            for (let i = start; i < text.length; i++) {
+                node = node.next.get(text[i]);
+                if (!node) break;
+                const end = i + 1;
+                if (node.rule && validBoundaries.has(end)) {
+                    bestRule = node.rule;
+                    bestEnd = end;
+                }
+            }
+            return bestRule ? { rule: bestRule, end: bestEnd } : null;
+        };
+
+        const compileInputExtensions = (extensions, legacyRules = '') => {
+            const ext = normalizeInputExtensions(extensions, legacyRules);
+
+            const directRules = ext.shorthandsEnabled
+                ? ext.shorthands
+                    .map((rule, index) => ({ ...rule, index }))
+                    .filter(rule => rule.enabled !== false && rule.text && rule.keys)
+                    .sort((a, b) => (b.text.length - a.text.length) || (a.index - b.index))
+                : [];
+
+            const sourceRules = buildExtensionSourceRules(ext);
+
+            return {
+                ext,
+                directTrie: createRuleTrie(directRules, 'text'),
+                sourceTrie: createRuleTrie(sourceRules, 'source'),
+                hasDirectRules: directRules.length > 0,
+                hasSourceRules: sourceRules.length > 0
+            };
+        };
+
+        const applyCompiledExtensionRulesOnce = (input, compiled) => {
+            const text = String(input || '').toLowerCase();
+            if (!compiled?.hasSourceRules || !text) return text;
+
+            let out = '';
+            let i = 0;
+            while (i < text.length) {
+                const hit = matchRuleTrie(compiled.sourceTrie, text, i);
+                if (hit) {
+                    out += hit.rule.keys;
+                    i = hit.end;
+                } else {
+                    out += text[i];
+                    i++;
+                }
+            }
+            return out;
+        };
+
+        const applyExtensionRulesOnce = (input, extensions) =>
+            applyCompiledExtensionRulesOnce(input, compileInputExtensions(extensions));
+
+        const resolveCorpusInterpretation = (input, mode = 'auto') => {
+            const normalizedMode = ['auto', 'romaji', 'kana', 'direct'].includes(mode) ? mode : 'auto';
+            if (normalizedMode !== 'auto') return normalizedMode;
+            // Auto only selects Kana mode when kana script is actually present. Kanji readings are
+            // intentionally not guessed; unsupported characters remain unsupported as before.
+            return /[\u3040-\u30ff]/.test(String(input || '')) ? 'kana' : 'romaji';
+        };
+
+        const prepareInputText = (input, bundle, filterSokuon = 'none', filterHatsuon = 'none', corpusInterpretation = 'auto') => {
+            const raw = String(input ?? '');
+            const corpusMode = resolveCorpusInterpretation(raw, corpusInterpretation);
+
+            // Direct means the corpus already represents logical tokens. Do not interpret Romaji,
+            // run Shorthands/Aliases, or perform Kana conversion.
+            if (corpusMode === 'direct') return raw.toLowerCase();
+
+            const extensionsEnabled = bundle?.enableInputExtensions !== undefined
+                ? bundle.enableInputExtensions !== false
+                : bundle?.enableCustomRules !== false;
+
+            const compiled = extensionsEnabled
+                ? compileInputExtensions(bundle?.inputExtensions, bundle?.customRules || '')
+                : null;
+
+            const processRomanPlain = (value) => {
+                let processed = String(value || '').toLowerCase();
+                if (filterHatsuon !== 'none') {
+                    processed = processed.replace(/(?:nn|xn|n(?=[^aiueoy]|$))/g, filterHatsuon);
+                }
+                if (filterSokuon !== 'none') {
+                    processed = processed.replace(/([bcdfghjklmpqrstvwxyz])\1/g, `${filterSokuon}$1`);
+                }
+                return extensionsEnabled
+                    ? applyCompiledExtensionRulesOnce(processed, compiled)
+                    : processed;
+            };
+
+            // Romaji mode is intentionally non-destructive. We create a Kana interpretation only
+            // for locating Shorthands, while unmatched source text keeps its original spelling
+            // (shi stays shi, sha stays sha, etc.).
+            if (corpusMode === 'romaji') {
+                if (!compiled?.hasDirectRules) return processRomanPlain(raw);
+
+                const trace = romajiToKanaTrace(raw);
+                const validBoundaries = new Set(trace.boundaryToSource.keys());
+                const pieces = [];
+                let kanaPos = 0;
+                let sourcePos = 0;
+
+                while (kanaPos < trace.kana.length) {
+                    if (!validBoundaries.has(kanaPos)) {
+                        kanaPos++;
+                        continue;
+                    }
+                    const hit = matchRuleTrieOnBoundaries(
+                        compiled.directTrie,
+                        trace.kana,
+                        kanaPos,
+                        validBoundaries
+                    );
+                    if (!hit) {
+                        kanaPos++;
+                        continue;
+                    }
+
+                    const hitSourceStart = trace.boundaryToSource.get(kanaPos);
+                    const hitSourceEnd = trace.boundaryToSource.get(hit.end);
+                    if (hitSourceStart > sourcePos) {
+                        pieces.push({ protected: false, value: raw.slice(sourcePos, hitSourceStart) });
+                    }
+                    pieces.push({ protected: true, value: hit.rule.keys.toLowerCase() });
+                    sourcePos = hitSourceEnd;
+                    kanaPos = hit.end;
+                }
+
+                if (sourcePos < raw.length) {
+                    pieces.push({ protected: false, value: raw.slice(sourcePos) });
+                }
+
+                return pieces.map(piece => piece.protected ? piece.value : processRomanPlain(piece.value)).join('');
+            }
+
+            // Kana mode has no original Roman spelling to preserve, so unmatched Kana are emitted
+            // as canonical KEYFLOW Romaji after Japanese-text Shorthands are resolved.
+            const normalizedJapanese = raw;
+            const chunks = [];
+
+            if (compiled?.hasDirectRules) {
+                let plainStart = 0;
+                let i = 0;
+                const pushPlain = (end) => {
+                    if (end > plainStart) chunks.push({ protected: false, value: normalizedJapanese.slice(plainStart, end) });
+                };
+
+                while (i < normalizedJapanese.length) {
+                    const hit = matchRuleTrie(compiled.directTrie, normalizedJapanese, i);
+                    if (hit) {
+                        pushPlain(i);
+                        chunks.push({ protected: true, value: hit.rule.keys.toLowerCase() });
+                        i = hit.end;
+                        plainStart = i;
+                    } else {
+                        i++;
+                    }
+                }
+                pushPlain(normalizedJapanese.length);
+            } else if (normalizedJapanese) {
+                chunks.push({ protected: false, value: normalizedJapanese });
+            }
+
+            return chunks.map(chunk => {
+                if (chunk.protected) return chunk.value;
+                return processRomanPlain(kanaToRomaji(chunk.value));
+            }).join('');
+        };
+
+        const SEOTO_EXTENDED_SHORTHANDS = [{"keys":"sr","text":"する","flag":"DisplayAmbiguousResult"},{"keys":"rs","text":"それ","flag":"DisplayAmbiguousResult"},{"keys":"rsdh","text":"それでは","flag":"DisplayAmbiguousResult"},{"keys":"rsg","text":"それが"},{"keys":"rsh","text":"それは","flag":"DisplayAmbiguousResult"},{"keys":"rshi","text":"それひ","flag":"DisplayAmbiguousResult"},{"keys":"rshu","text":"それふ","flag":"DisplayAmbiguousResult"},{"keys":"rshe","text":"それへ","flag":"DisplayAmbiguousResult"},{"keys":"rsho","text":"それほ","flag":"DisplayAmbiguousResult"},{"keys":"rszr","text":"それぞれ","flag":"DisplayAmbiguousResult"},{"keys":"slt","text":"されて","flag":"DisplayAmbiguousResult"},{"keys":"srl","text":"すると","flag":"DisplayAmbiguousResult"},{"keys":"slr","text":"される","flag":"DisplayAmbiguousResult"},{"keys":"ss","text":"させ","flag":"DisplayAmbiguousResult"},{"keys":"ssr","text":"させる","flag":"DisplayAmbiguousResult"},{"keys":"ssrr","text":"させられ","flag":"DisplayAmbiguousResult"},{"keys":"ssrrr","text":"させられる","flag":"DisplayAmbiguousResult"},{"keys":"srb","text":"すれば","flag":"DisplayAmbiguousResult"},{"keys":"srbc","text":"するべき","flag":"DisplayAmbiguousResult"},{"keys":"st","text":"して","flag":"DisplayAmbiguousResult"},{"keys":"stmst","text":"してました","flag":"DisplayAmbiguousResult"},{"keys":"sl","text":"した","flag":"DisplayAmbiguousResult"},{"keys":"str","text":"そちら","flag":"DisplayAmbiguousResult"},{"keys":"stru","text":"してる","flag":"DisplayAmbiguousResult"},{"keys":"stsm","text":"してしま","flag":"DisplayAmbiguousResult"},{"keys":"stsmi","text":"してしまい","flag":"DisplayAmbiguousResult"},{"keys":"stsmgt","text":"してしまいがち","flag":"DisplayAmbiguousResult"},{"keys":"smgt","text":"しまいがち","flag":"DisplayAmbiguousResult"},{"keys":"sst","text":"そして","flag":"DisplayAmbiguousResult"},{"keys":"sstr","text":"そしたら","flag":"DisplayAmbiguousResult"},{"keys":"sn","text":"しな","flag":"DisplayAmbiguousResult"},{"keys":"sngr","text":"しながら","flag":"DisplayAmbiguousResult"},{"keys":"sc","text":"しか","flag":"DisplayAmbiguousResult"},{"keys":"scs","text":"しかし"},{"keys":"scm","text":"しかも"},{"keys":"sbc","text":"すべき","flag":"DisplayAmbiguousResult"},{"keys":"sbt","text":"すべて","flag":"DisplayAmbiguousResult"},{"keys":"sbrc","text":"しばらく","flag":"DisplayAmbiguousResult"},{"keys":"sg","text":"すぎ","flag":"DisplayAmbiguousResult"},{"keys":"ssg","text":"しすぎ","flag":"DisplayAmbiguousResult"},{"keys":"sm","text":"しま","flag":"DisplayAmbiguousResult"},{"keys":"sms","text":"します","flag":"DisplayAmbiguousResult"},{"keys":"smsm","text":"そもそも","flag":"DisplayAmbiguousResult"},{"keys":"smsc","text":"しますか","flag":"DisplayAmbiguousResult"},{"keys":"smscd","text":"しますけど","flag":"DisplayAmbiguousResult"},{"keys":"smsg","text":"しますが","flag":"DisplayAmbiguousResult"},{"keys":"smsn","text":"しません","flag":"DisplayAmbiguousResult"},{"keys":"smsna","text":"しますな","flag":"DisplayAmbiguousResult"},{"keys":"smsne","text":"しますね","flag":"DisplayAmbiguousResult"},{"keys":"smsnne","text":"しませんね","flag":"DisplayAmbiguousResult"},{"keys":"smsnd","text":"しますので","flag":"DisplayAmbiguousResult"},{"keys":"smsnnd","text":"しませんので","flag":"DisplayAmbiguousResult"},{"keys":"smsng","text":"しませんが","flag":"DisplayAmbiguousResult"},{"keys":"smst","text":"しました","flag":"DisplayAmbiguousResult"},{"keys":"smsto","text":"しますと","flag":"DisplayAmbiguousResult"},{"keys":"smstr","text":"しましたら","flag":"DisplayAmbiguousResult"},{"keys":"smstrb","text":"しましたらば","flag":"DisplayAmbiguousResult"},{"keys":"smstg","text":"しましたが","flag":"DisplayAmbiguousResult"},{"keys":"ms","text":"ます","flag":"DisplayAmbiguousResult"},{"keys":"msn","text":"ません","flag":"DisplayAmbiguousResult"},{"keys":"msne","text":"ますね","flag":"DisplayAmbiguousResult"},{"keys":"msna","text":"ますな","flag":"DisplayAmbiguousResult"},{"keys":"msnne","text":"ませんね","flag":"DisplayAmbiguousResult"},{"keys":"msnd","text":"ますので","flag":"DisplayAmbiguousResult"},{"keys":"msnnd","text":"ませんので","flag":"DisplayAmbiguousResult"},{"keys":"msng","text":"ませんが","flag":"DisplayAmbiguousResult"},{"keys":"msg","text":"ますが","flag":"DisplayAmbiguousResult"},{"keys":"msc","text":"ますか","flag":"DisplayAmbiguousResult"},{"keys":"mscd","text":"ますけど","flag":"DisplayAmbiguousResult"},{"keys":"msm","text":"もしも"},{"keys":"mst","text":"ました","flag":"DisplayAmbiguousResult"},{"keys":"msto","text":"ますと","flag":"DisplayAmbiguousResult"},{"keys":"mstr","text":"ましたら","flag":"DisplayAmbiguousResult"},{"keys":"mstrb","text":"ましたらば","flag":"DisplayAmbiguousResult"},{"keys":"mstg","text":"ましたが","flag":"DisplayAmbiguousResult"},{"keys":"mmst","text":"みました","flag":"DisplayAmbiguousResult"},{"keys":"mmsto","text":"みますと","flag":"DisplayAmbiguousResult"},{"keys":"mmstr","text":"みましたら","flag":"DisplayAmbiguousResult"},{"keys":"mmstrb","text":"みましたらば","flag":"DisplayAmbiguousResult"},{"keys":"mmstg","text":"みましたが","flag":"DisplayAmbiguousResult"},{"keys":"mscst","text":"もしかして","flag":"DisplayAmbiguousResult"},{"keys":"mscstr","text":"もしかしたら","flag":"DisplayAmbiguousResult"},{"keys":"mtrn","text":"もちろん"},{"keys":"cs","text":"こそ","flag":"DisplayAmbiguousResult"},{"keys":"ct","text":"こと","flag":"DisplayAmbiguousResult"},{"keys":"ctr","text":"こちら","flag":"DisplayAmbiguousResult"},{"keys":"ctnr","text":"ことなら","flag":"DisplayAmbiguousResult"},{"keys":"ctnrb","text":"ことならば","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrb","text":"ことにならば","flag":"DisplayAmbiguousResult"},{"keys":"ctnnr","text":"ことになる","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrnr","text":"ことになるなら","flag":"DisplayAmbiguousResult"},{"keys":"ctnnc","text":"ことなのか","flag":"DisplayAmbiguousResult"},{"keys":"ctnncm","text":"ことなのかも","flag":"DisplayAmbiguousResult"},{"keys":"ctnncmsr","text":"ことなのかもしれ","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrms","text":"ことになります","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmsn","text":"ことになりません","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmsnd","text":"ことになりませんので","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmsg","text":"ことになりますが","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmsc","text":"ことになりますか","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmscd","text":"ことになりますけど","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmst","text":"ことになりました","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmsto","text":"ことになりますと","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmstr","text":"ことになりましたら","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmstrb","text":"ことになりましたらば","flag":"DisplayAmbiguousResult"},{"keys":"ctnnrmstg","text":"ことになりましたが","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrms","text":"ことにはなります","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmsn","text":"ことにはなりません","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmsnd","text":"ことにはなりませんので","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmsg","text":"ことにはなりますが","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmsc","text":"ことにはなりますか","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmscd","text":"ことにはなりますけど","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmst","text":"ことにはなりました","flag":"DisplayAmbiguousResult"},{"keys":"ctnhnrmstg","text":"ことにはなりましたが","flag":"DisplayAmbiguousResult"},{"keys":"cc","text":"ここ","flag":"DisplayAmbiguousResult"},{"keys":"cr","text":"から","flag":"DisplayAmbiguousResult"},{"keys":"rc","text":"これ","flag":"DisplayAmbiguousResult"},{"keys":"rcr","text":"これら","flag":"DisplayAmbiguousResult"},{"keys":"rcg","text":"これが","flag":"DisplayAmbiguousResult"},{"keys":"rch","text":"これは","flag":"DisplayAmbiguousResult"},{"keys":"cm","text":"かも","flag":"DisplayAmbiguousResult"},{"keys":"cmsrn","text":"かもしれない"},{"keys":"cn","text":"かな","flag":"DisplayAmbiguousResult"},{"keys":"cnr","text":"かなり","flag":"DisplayAmbiguousResult"},{"keys":"cnrz","text":"かならず","flag":"DisplayAmbiguousResult"},{"keys":"cd","text":"けど","flag":"DisplayAmbiguousResult"},{"keys":"cdm","text":"けども"},{"keys":"nm","text":"にも"},{"keys":"nstm","text":"にしても"},{"keys":"nh","text":"のは","flag":"DisplayAmbiguousResult"},{"keys":"ns","text":"には","flag":"DisplayAmbiguousResult"},{"keys":"nt","text":"にて","flag":"DisplayAmbiguousResult"},{"keys":"nd","text":"ので","flag":"DisplayAmbiguousResult"},{"keys":"ndh","text":"のでは","flag":"DisplayAmbiguousResult"},{"keys":"nds","text":"のです","flag":"DisplayAmbiguousResult"},{"keys":"ndsq","text":"のですよ","flag":"DisplayAmbiguousResult"},{"keys":"ndsqu","text":"のでしょう","flag":"DisplayAmbiguousResult"},{"keys":"nsd","text":"のです","flag":"DisplayAmbiguousResult"},{"keys":"ndsa","text":"のでさ","flag":"DisplayAmbiguousResult"},{"keys":"ndsi","text":"のでし","flag":"DisplayAmbiguousResult"},{"keys":"ndsu","text":"のです","flag":"DisplayAmbiguousResult"},{"keys":"ndse","text":"のでせ","flag":"DisplayAmbiguousResult"},{"keys":"ndso","text":"のでそ","flag":"DisplayAmbiguousResult"},{"keys":"ndsn","text":"のですね","flag":"DisplayAmbiguousResult"},{"keys":"nsdn","text":"のですね","flag":"DisplayAmbiguousResult"},{"keys":"ndsg","text":"のですが"},{"keys":"nsdg","text":"のですが"},{"keys":"ng","text":"のが","flag":"DisplayAmbiguousResult"},{"keys":"ndg","text":"のだが","flag":"DisplayAmbiguousResult"},{"keys":"nndg","text":"なのだが"},{"keys":"nn","text":"のに","flag":"DisplayAmbiguousResult"},{"keys":"nni","text":"なのに","flag":"DisplayAmbiguousResult"},{"keys":"nnh","text":"なのは"},{"keys":"nnd","text":"なので","flag":"DisplayAmbiguousResult"},{"keys":"nna","text":"なのだ","flag":"DisplayAmbiguousResult"},{"keys":"nnag","text":"なのだが","flag":"DisplayAmbiguousResult"},{"keys":"nng","text":"なのが"},{"keys":"nnc","text":"なのか","flag":"DisplayAmbiguousResult"},{"keys":"nncm","text":"なのかも","flag":"DisplayAmbiguousResult"},{"keys":"nncmsr","text":"なのかもしれ"},{"keys":"rn","text":"なる","flag":"DisplayAmbiguousResult"},{"keys":"nr","text":"なら","flag":"DisplayAmbiguousResult"},{"keys":"nrt","text":"ならば","flag":"DisplayAmbiguousResult"},{"keys":"nrms","text":"なります","flag":"DisplayAmbiguousResult"},{"keys":"nrmsc","text":"なりますか","flag":"DisplayAmbiguousResult"},{"keys":"nrmscd","text":"なりますけど","flag":"DisplayAmbiguousResult"},{"keys":"nrmsn","text":"なりません","flag":"DisplayAmbiguousResult"},{"keys":"nrmsna","text":"なりますな","flag":"DisplayAmbiguousResult"},{"keys":"nrmsnd","text":"なりますので","flag":"DisplayAmbiguousResult"},{"keys":"nrmst","text":"なりました","flag":"DisplayAmbiguousResult"},{"keys":"nrmsto","text":"なりますと","flag":"DisplayAmbiguousResult"},{"keys":"nrmstr","text":"なりましたら","flag":"DisplayAmbiguousResult"},{"keys":"nrmstrb","text":"なりましたらば","flag":"DisplayAmbiguousResult"},{"keys":"nnrms","text":"になります","flag":"DisplayAmbiguousResult"},{"keys":"nnrmsc","text":"になりますか","flag":"DisplayAmbiguousResult"},{"keys":"nnrmscd","text":"になりますけど","flag":"DisplayAmbiguousResult"},{"keys":"nnrmst","text":"になりました","flag":"DisplayAmbiguousResult"},{"keys":"nnrmsto","text":"になりますと","flag":"DisplayAmbiguousResult"},{"keys":"nrhd","text":"なるほど"},{"keys":"nrb","text":"ならば"},{"keys":"nb","text":"ねば"},{"keys":"nc","text":"なか","flag":"DisplayAmbiguousResult"},{"keys":"nct","text":"のこと","flag":"DisplayAmbiguousResult"},{"keys":"nz","text":"なぜ","flag":"DisplayAmbiguousResult"},{"keys":"nznr","text":"なぜなら","flag":"DisplayAmbiguousResult"},{"keys":"nznrb","text":"なぜならば","flag":"DisplayAmbiguousResult"},{"keys":"nzc","text":"なぜか","flag":"DisplayAmbiguousResult"},{"keys":"ngr","text":"ながら"},{"keys":"ntcmst","text":"につきまして"},{"keys":"rr","text":"られ","flag":"DisplayAmbiguousResult"},{"keys":"rrr","text":"られる","flag":"DisplayAmbiguousResult"},{"keys":"rb","text":"れば"},{"keys":"rt","text":"れて"},{"keys":"md","text":"まで"},{"keys":"mz","text":"まず","flag":"DisplayAmbiguousResult"},{"keys":"mzh","text":"まずは","flag":"DisplayAmbiguousResult"},{"keys":"mt","text":"また","flag":"DisplayAmbiguousResult"},{"keys":"mth","text":"または","flag":"DisplayAmbiguousResult"},{"keys":"mn","text":"もの"},{"keys":"mrd","text":"まるで"},{"keys":"ds","text":"です","flag":"DisplayAmbiguousResult"},{"keys":"sd","text":"です","flag":"DisplayAmbiguousResult"},{"keys":"dst","text":"でした","flag":"DisplayAmbiguousResult"},{"keys":"sdt","text":"でした","flag":"DisplayAmbiguousResult"},{"keys":"dsto","text":"ですと","flag":"DisplayAmbiguousResult"},{"keys":"sdto","text":"ですと","flag":"DisplayAmbiguousResult"},{"keys":"dstg","text":"でしたが"},{"keys":"sdtg","text":"でしたが"},{"keys":"dsn","text":"ですね","flag":"DisplayAmbiguousResult"},{"keys":"sdn","text":"ですね","flag":"DisplayAmbiguousResult"},{"keys":"dsna","text":"ですな","flag":"DisplayAmbiguousResult"},{"keys":"sdna","text":"ですな","flag":"DisplayAmbiguousResult"},{"keys":"dsno","text":"ですの","flag":"DisplayAmbiguousResult"},{"keys":"sdno","text":"ですの","flag":"DisplayAmbiguousResult"},{"keys":"dsnd","text":"ですので","flag":"DisplayAmbiguousResult"},{"keys":"sdnd","text":"ですので","flag":"DisplayAmbiguousResult"},{"keys":"dsc","text":"ですか","flag":"DisplayAmbiguousResult"},{"keys":"sdc","text":"ですか","flag":"DisplayAmbiguousResult"},{"keys":"dscd","text":"ですけど","flag":"DisplayAmbiguousResult"},{"keys":"sdcd","text":"ですけど","flag":"DisplayAmbiguousResult"},{"keys":"dscdm","text":"ですけども","flag":"DisplayAmbiguousResult"},{"keys":"sdcdm","text":"ですけども","flag":"DisplayAmbiguousResult"},{"keys":"dscn","text":"ですかね","flag":"DisplayAmbiguousResult"},{"keys":"sdcn","text":"ですかね","flag":"DisplayAmbiguousResult"},{"keys":"dsg","text":"ですが"},{"keys":"sdg","text":"ですが"},{"keys":"dm","text":"でも"},{"keys":"dc","text":"だけ","flag":"DisplayAmbiguousResult"},{"keys":"dcv","text":"だけど","flag":"DisplayAmbiguousResult"},{"keys":"dcr","text":"だから"},{"keys":"dn","text":"では","flag":"DisplayAmbiguousResult"},{"keys":"dh","text":"では","flag":"DisplayAmbiguousResult"},{"keys":"dnnc","text":"ではなく"},{"keys":"dt","text":"だと"},{"keys":"dg","text":"だが"},{"keys":"gt","text":"がち"},{"keys":"tr","text":"たら"},{"keys":"tsc","text":"たしか","flag":"DisplayAmbiguousResult"},{"keys":"tscn","text":"たしかに"},{"keys":"tsf","text":"とした","flag":"DisplayAmbiguousResult"},{"keys":"tst","text":"として","flag":"DisplayAmbiguousResult"},{"keys":"tsth","text":"としては","flag":"DisplayAmbiguousResult"},{"keys":"tstm","text":"としても","flag":"DisplayAmbiguousResult"},{"keys":"tsr","text":"とする","flag":"DisplayAmbiguousResult"},{"keys":"tsrt","text":"とすると"},{"keys":"tsrnr","text":"とするなら","flag":"DisplayAmbiguousResult"},{"keys":"tsrnrb","text":"とするならば"},{"keys":"tsrb","text":"とすれば"},{"keys":"tnrb","text":"となれば"},{"keys":"tn","text":"との","flag":"DisplayAmbiguousResult"},{"keys":"tnct","text":"とのこと","flag":"DisplayAmbiguousResult"},{"keys":"tnmn","text":"ちなみに","flag":"DisplayAmbiguousResult"},{"keys":"tm","text":"ため","flag":"DisplayAmbiguousResult"},{"keys":"tmr","text":"つまり","flag":"DisplayAmbiguousResult"},{"keys":"tmrtcr","text":"つまるところ"},{"keys":"th","text":"とは","flag":"DisplayAmbiguousResult"},{"keys":"ts","text":"ては","flag":"DisplayAmbiguousResult"},{"keys":"tc","text":"てき","flag":"DisplayAmbiguousResult"},{"keys":"tcrg","text":"ところが","flag":"DisplayAmbiguousResult"},{"keys":"tcr","text":"ところ","flag":"DisplayAmbiguousResult"},{"keys":"ttm","text":"とても","flag":"DisplayAmbiguousResult"},{"keys":"tcmst","text":"つきまして","flag":"DisplayAmbiguousResult"},{"keys":"td","text":"ただ","flag":"DisplayAmbiguousResult"},{"keys":"tds","text":"ただし","flag":"DisplayAmbiguousResult"},{"keys":"tb","text":"たび"},{"keys":"ht","text":"ひと"},{"keys":"bt","text":"びと"},{"keys":"bb","text":"べば","flag":"DisplayAmbiguousResult"},{"keys":"bc","text":"べき","flag":"DisplayAmbiguousResult"},{"keys":"zr","text":"ざる"},{"keys":"wts","text":"わたし","flag":"DisplayAmbiguousResult"},{"keys":"wc","text":"わけ","flag":"DisplayAmbiguousResult"},{"keys":"wcdh","text":"わけでは","flag":"DisplayAmbiguousResult"},{"keys":"wz","text":"わざ","flag":"DisplayAmbiguousResult"},{"keys":"wzt","text":"わざと","flag":"DisplayAmbiguousResult"},{"keys":"wztrs","text":"わざとらし","flag":"DisplayAmbiguousResult"},{"keys":"wztrsi","text":"わざとらしい","flag":"DisplayAmbiguousResult"},{"keys":"wztrsc","text":"わざとらしく","flag":"DisplayAmbiguousResult"},{"keys":"wzwz","text":"わざわざ","flag":"DisplayAmbiguousResult"}];
+
         const PRESETS = {
             qwerty: {
                 name: "QWERTY",
@@ -2363,6 +3074,15 @@
                 name: "せおと配列",
                 desc: "※ローマ字拡張あり（C=K, X=YA, J=YU, Q=YO）/ じゃ行はZを使用",
                 customRules: "k=c, ya=x, yu=j, yo=q",
+                inputExtensions: {
+                    aliases: [
+                        { source: "k", keys: "c" },
+                        { source: "ya", keys: "x" },
+                        { source: "yu", keys: "j" },
+                        { source: "yo", keys: "q" }
+                    ],
+                    shorthands: SEOTO_EXTENDED_SHORTHANDS
+                },
                 L: [
                     null, "1", "2", "3", "4", "5",
                     null, "p", "z", "h", "f", "←",
@@ -2683,8 +3403,10 @@
                 presetKey: name,
                 name: p.name || name.toUpperCase(),
                 desc: p.desc || "",
-                customRules: p.customRules || "",
-                enableCustomRules: true,
+                customRules: p.customRules || inputExtensionsToLegacyRules(p.inputExtensions),
+                enableCustomRules: p.enableCustomRules !== false,
+                inputExtensions: cloneInputExtensions(p.inputExtensions, p.customRules || ""),
+                enableInputExtensions: p.enableInputExtensions !== undefined ? p.enableInputExtensions !== false : p.enableCustomRules !== false,
                 layout: {
                     L: [...p.L],
                     R: [...p.R]
@@ -2779,6 +3501,7 @@
                 "4": 1.5
             },
             "layerCost": 0.5,
+            "baseStrokeCost": 1.0,
             "weights": {
                 "trans": 65
             }
@@ -2807,14 +3530,21 @@
 
                 hand_left: "LEFT HAND", hand_right: "RIGHT HAND",
                 panel_corpus: "Corpus Text", btn_analyze: "RUN ANALYSIS",
+                lbl_corpus_interpretation: "Corpus Interpretation",
+                desc_corpus_interpretation: "Controls how the evaluation corpus is interpreted. Auto detects Kana script. Romaji preserves the source spelling (for example shi/sha) and uses Kana interpretation only to find Shorthands. Kana emits canonical KEYFLOW Romaji for unmatched Kana. Direct evaluates literal logical tokens and skips interpretation/Input Extensions.",
+                opt_corpus_auto: "Auto (detect Kana / Romaji)",
+                opt_corpus_romaji: "Romaji (preserve spelling)",
+                opt_corpus_kana: "Kana → Standard Romaji",
+                opt_corpus_direct: "Direct Logical Tokens",
 
-                panel_results: "Analysis Results", res_total: "Cost per Input Character", res_work: "Total Raw Cost",
-                res_weighted_work: "Weighted Total Cost", res_weighted_per_stroke: "Cost per Stroke", res_raw_per_stroke: "Raw Cost / Stroke (no weights)",
+                panel_results: "Analysis Results", res_total: "Cost / Input Char", res_work: "Raw Cost Total",
+                res_effective_work: "Total Cost", res_base_stroke_work: "Base Stroke Cost Total", res_effective_per_stroke: "Cost / Stroke",
+                res_weighted_work: "Weighted Ergonomic Cost", res_weighted_per_stroke: "Ergonomic Cost / Stroke", res_raw_per_stroke: "Raw Cost / Stroke (no weights)",
                 res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
                 lbl_cost_per_input: "Cost / Char", lbl_weighted_per_stroke: "Cost / Stroke",
-                lbl_weighted_cost_stroke: "Cost per Stroke", lbl_weighted_work_short: "Weighted Total",
+                lbl_weighted_cost_stroke: "Cost / Stroke", lbl_weighted_work_short: "Ergonomic Cost",
                 lbl_cost_input_hint: "Lower is better",
-                lbl_position_short: "Position", lbl_transition_short: "Transition",
+                lbl_base_short: "Base", lbl_position_short: "Position", lbl_transition_short: "Transition",
                 lbl_position_total_short: "Position Total", lbl_transition_total_short: "Transition Total",
                 lbl_input_chars: "Input Characters", lbl_input_chars_short: "chars", lbl_strokes_unit: "strokes",
                 lbl_per_char: "/ char", lbl_strokes_per_char: "Strokes / Input Char",
@@ -2865,7 +3595,10 @@
                 desc_95: "95% of keystrokes fall below this cost. Lower means fewer sudden, difficult reaches.",
 
                 set_weight_title: "Position / Transition Weighting",
-                set_weight_desc: "Choose how strongly Position Cost and Transition Cost contribute to the evaluation. The same weights are used for Cost per Input Character and Cost per Stroke. They do not change Raw Cost / Stroke, SD, median, 95% tile, or the raw stroke-cost distribution.",
+                set_weight_desc: "Choose how strongly Position Cost and Transition Cost contribute to the ergonomic penalty. Base Stroke Cost is added separately for every resolved stroke.",
+                set_base_stroke_title: "Base Stroke Cost",
+                set_base_stroke_desc: "Adds a fixed effort for every resolved stroke, independent of position or transition difficulty. Set to 0.0 to reproduce the previous ergonomic-penalty-only score model.",
+                lbl_cost_per_stroke_base: "Cost / stroke",
                 lbl_static_w: "Position (Static)",
                 lbl_trans_w: "Flow (Dynamic)",
                 desc_static_w: "Prioritize Reach/Strength",
@@ -2890,8 +3623,8 @@
                 modal_desc_imp: "Paste the JSON text below.",
                 modal_desc_exp: "Copy and save the JSON text below.",
 
-                lbl_score_desc: "【Cost per Input Character】\nThe average evaluated cost required to produce one character of the input text. Lower is better.\n\nFormula:\n(Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Input Characters\n\nThe Position / Transition weights are the ratios configured in Analysis Logic. Because the denominator is input characters rather than strokes, layouts that produce the same text with fewer strokes are naturally rewarded.\n\nLayered output counts as one analyzed stroke. For that stroke, Layer Cost is added to its Position Cost (Position Cost = Base Position Cost + Layer Cost). It is therefore included in Position Cost Total and then weighted by Position Weight in the formula above. Unsupported input produces no stroke cost, so compare layouts using the same corpus and make sure it is sufficiently representable.",
-                lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluated cost of one analyzed stroke. Lower means each individual stroke is lighter.\n\nFormula:\n(Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Required Strokes\n\nThe Position / Transition weights are the ratios configured in Analysis Logic. This metric evaluates the burden of each stroke itself; it does not reward a layout simply for needing fewer strokes. Compare it together with Cost per Input Character and Required Strokes.",
+                lbl_score_desc: "【Cost per Input Character】\nThe average evaluation cost required to produce one input character. Lower is better.\n\nFormula:\n(Base Stroke Cost × Required Strokes + Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Input Characters\n\nPosition Weight and Transition Weight are the evaluation ratios configured under Analysis Logic. Base Stroke Cost is added separately for every required stroke, so layouts that produce the same text with fewer strokes receive that benefit here. Layer Cost is included in Position Cost for layered outputs and therefore passes through Position Weight. Unrecognized characters incur no stroke cost, so comparisons should use layouts that can represent the same corpus sufficiently.",
+                lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluation cost of one resolved stroke. Lower means each stroke is lighter on average.\n\nFormula:\nBase Stroke Cost + (Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Required Strokes\n\nThis metric describes the average weight of a stroke and does not by itself reward using fewer strokes. Read it together with Cost per Input Character and Required Strokes. The detailed results also show Ergonomic Cost / Stroke without Base Stroke Cost.",
                 lbl_strokes_desc: "【Required Strokes】\nThe number of key outputs the analyzer needs to produce the input text with this layout. Lower means fewer key outputs are needed for the same corpus.\n\nIf one key outputs multiple characters, that output counts as one stroke. A layered character also counts as one stroke; the layer action itself is not counted as an additional stroke. Instead, Layer Cost is added to that stroke\'s Position Cost and is evaluated through Position Weight.\n\nStrokes / Input Char = Required Strokes ÷ Input Characters.",
                 lbl_sd_desc: "Standard deviation of raw stroke cost (Position + Transition). Lower means steadier typing rhythm.",
                 lbl_med_desc: "Median raw stroke cost (Position + Transition). It represents a typical stroke while reducing the influence of outliers.",
@@ -2958,19 +3691,26 @@
 
                 hand_left: "左手 (Left)", hand_right: "右手 (Right)",
                 panel_corpus: "評価用コーパス (配列定義に合わせて入力)", btn_analyze: "解析実行 (RUN)",
+                lbl_corpus_interpretation: "コーパスの解釈",
+                desc_corpus_interpretation: "評価用コーパスをどう解釈するかを指定します。Autoはかな文字を検出するとKana、それ以外はRomajiとして扱います。Romajiはshi/sha等の元表記を保持し、Shorthands検索のためだけにかなとして解釈します。Kanaは未短縮部分をKEYFLOWのcanonical Romajiへ展開します。Directは文字列を論理トークン列としてそのまま評価し、解釈とInput Extensionsをスキップします。",
+                opt_corpus_auto: "Auto（かな / Romajiを自動判定）",
+                opt_corpus_romaji: "Romaji（入力表記を保持）",
+                opt_corpus_kana: "Kana → 標準Romaji",
+                opt_corpus_direct: "Direct（論理トークンを直接評価）",
 
                 // 結果パネル:
-                panel_results: "解析結果", res_total: "入力1文字あたりのコスト", res_work: "総実コスト",
-                res_weighted_work: "Weight適用後の総コスト", res_weighted_per_stroke: "1打鍵あたりのコスト", res_raw_per_stroke: "Rawコスト / 打鍵（Weightなし）",
+                panel_results: "解析結果", res_total: "入力1文字あたりのコスト", res_work: "Rawコスト合計",
+                res_effective_work: "総コスト", res_base_stroke_work: "基本打鍵コスト合計", res_effective_per_stroke: "1打鍵あたりのコスト",
+                res_weighted_work: "運指コスト合計（Weight適用後）", res_weighted_per_stroke: "運指コスト / 打鍵", res_raw_per_stroke: "Rawコスト / 打鍵（Weightなし）",
                 res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
                 lbl_cost_per_input: "コスト / 文字", lbl_weighted_per_stroke: "コスト / 打鍵",
-                lbl_weighted_cost_stroke: "1打鍵あたりのコスト", lbl_weighted_work_short: "Weight適用後",
+                lbl_weighted_cost_stroke: "1打鍵あたりのコスト", lbl_weighted_work_short: "運指コスト",
                 lbl_cost_input_hint: "低いほど効率的",
-                lbl_position_short: "位置", lbl_transition_short: "遷移",
+                lbl_base_short: "基本", lbl_position_short: "位置", lbl_transition_short: "遷移",
                 lbl_position_total_short: "位置コスト合計", lbl_transition_total_short: "遷移コスト合計",
                 lbl_input_chars: "入力文字数", lbl_input_chars_short: "文字", lbl_strokes_unit: "打鍵",
                 lbl_per_char: "/ 文字", lbl_strokes_per_char: "打鍵数 / 入力1文字",
-                lbl_strokes_per_char_card: "1文字あたり", lbl_layered_of_total: "うち裏レイヤー", lbl_of_all_strokes: "全打鍵の",
+                lbl_strokes_per_char_card: "1文字あたり", lbl_layered_of_total: "裏レイヤー", lbl_of_all_strokes: "全打鍵の",
                 lbl_layered_short: "裏レイヤー", lbl_layered_strokes: "裏レイヤー打鍵",
 
                 stat_keystrokes: "必要打鍵数", stat_sfb: "SFB率", stat_long_sf: "同指ロングジャンプ", stat_repeat: "同キー連打", stat_max_key: "最多打鍵",
@@ -3014,7 +3754,10 @@
                 desc_95: "「95%の打鍵はこのコスト以下に収まる」ライン。低いほど、突発的な高負荷(無理な運指)が少ないことを意味します。",
 
                 set_weight_title: "位置コスト / 遷移コストのWeight",
-                set_weight_desc: "位置コストと遷移コストを、評価時にどの比重で扱うかを設定します。同じWeightを「入力1文字あたりのコスト」と「1打鍵あたりのコスト」に使用します。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
+                set_weight_desc: "位置コストと遷移コストを、評価時にどの比重で扱うかを設定します。同じWeightを「入力1文字あたりのコスト」と「1打鍵あたりのコスト」に使用します。基本打鍵コストはこのWeightとは別に、必要打鍵ごとに加算されます。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
+                set_base_stroke_title: "基本打鍵コスト",
+                set_base_stroke_desc: "キー位置や遷移の難しさとは別に、1打鍵するだけで必ず発生する基本負荷です。「基本打鍵コスト × 必要打鍵数」として総コストへ加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点を評価できます。0.0にすると、従来どおり位置コストと遷移コストだけで評価します。",
+                lbl_cost_per_stroke_base: "Cost / 打鍵",
                 lbl_static_w: "位置コスト (スタミナ)",
                 lbl_trans_w: "遷移コスト (フロー)",
                 desc_static_w: "距離や指の強さを重視",
@@ -3039,8 +3782,8 @@
                 modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
-                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 入力文字数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。分母を打鍵数ではなく入力文字数にするため、同じ文章をより少ない打鍵で入力できる配列は、その利点もこの値に反映されます。\n\n裏レイヤーの出力は1打鍵として数えます。その打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」としてLayer Costを位置コスト側へ加算します。したがってLayer Costは上式の「位置コスト合計」に含まれ、位置Weightを通して最終コストへ反映されます。解析できない文字には打鍵コストが発生しないため、比較時は同じコーパスを十分に表現できていることを確認してください。",
-                lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 必要打鍵数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。この値は1打鍵そのものの重さを見る指標なので、文章を少ない打鍵で入力できること自体は評価しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると、配列の特徴が分かります。",
+                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（基本打鍵コスト × 必要打鍵数 + 位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 入力文字数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。基本打鍵コストはWeightとは別に、必要打鍵ごとに加算されます。分母を入力文字数にし、さらに基本打鍵コストが必要打鍵数に比例するため、同じ文章をより少ない打鍵で入力できる配列の利点もこの値に反映されます。\n\n裏レイヤーの出力は1打鍵として数えます。その打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」としてLayer Costを位置コスト側へ加算します。したがってLayer Costは上式の「位置コスト合計」に含まれ、位置Weightを通して最終コストへ反映されます。解析できない文字には打鍵コストが発生しないため、比較時は同じコーパスを十分に表現できていることを確認してください。",
+                lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n基本打鍵コスト +（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 必要打鍵数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。この値は1打鍵そのものの重さを見る指標なので、文章を少ない打鍵で入力できること自体は評価しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると、配列の特徴が分かります。\n\n詳細欄には、基本打鍵コストを含まない「運指コスト / 打鍵」も別に表示します。これにより、基本打鍵負荷と位置・遷移による負荷を分けて確認できます。",
                 lbl_strokes_desc: "【必要打鍵数】\nこの配列で入力テキストを生成するために、アナライザーが必要と判断したキー出力の回数です。同じコーパスなら、少ないほど少ないキー出力で入力できます。\n\n複数文字を1つのキーで出力する場合でも、その出力は1打鍵として数えます。裏レイヤーの文字も1打鍵として数え、レイヤーキー操作そのものは追加の1打鍵として数えません。その代わり、Layer Costをその打鍵の位置コストへ加算し、位置Weightを通して評価します。\n\n「打鍵数 / 入力1文字」= 必要打鍵数 ÷ 入力文字数 です。",
                 lbl_sd_desc: "【標準偏差 (SD)】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）のばらつきです。値が小さいほど、打鍵ごとの負荷が安定しています。",
                 lbl_med_desc: "【中央値】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）の中央値です。極端な高負荷打鍵の影響を受けにくく、典型的な1打鍵の重さを示します。",
@@ -3075,7 +3818,10 @@
                 opt_xn: "「xn」に強制置換",
                 desc_romaji_macro: "【ローマ字コーパス専用】\n入力されたアルファベットの連続子音(tt等)や単独の'n'を、指定した単独キー(ltu, nn等)に事前展開します。\n※コーパスに直接「かな」を入力して評価する場合、この置換処理は完全にスキップされます。",
                 lbl_custom_replace: "カスタムルール",
-                desc_custom_replace: "【論理配列固有のマクロ/IME展開】\nカンマ区切りで「コーパス内文字列=配列上のキー」を指定します(例: ltu=l, nn=q)。この設定は論理配列データとして保存されます。",
+                desc_custom_replace: "【論理配列固有のマクロ/IME展開】\nカンマ区切りで「コーパス内文字列=配列上のキー」を指定します（例: ltu=l, nn=q）。この設定は論理配列データとして保存されます。現在は旧形式との互換用として残しており、新しい入力拡張はAliases / Shorthands側で管理します。",
+                lbl_input_extensions: "入力拡張",
+                desc_input_extensions: "配列固有の入力方式を定義します。Aliases は標準ローマ字列→論理キー、Shorthands は「ました→mst」のような語句短縮です。再帰置換せず、元入力に対する最長一致で解決します。",
+                btn_edit_extensions: "拡張を編集",
                 lbl_show_flow: "フロー表示",
                 lbl_layer_keys: "レイヤーキー",
                 lbl_layer1: "レイヤー1",
@@ -3100,12 +3846,16 @@
                 this.gapConfig = defaults.gapConfig;
                 this.repeatCosts = defaults.repeatCosts || { "0": 2.5, "1": 2.0, "2": 1.5, "3": 1.0, "4": 1.2 };
                 this.layerCost = defaults.layerCost !== undefined ? defaults.layerCost : 2.0;
+                this.baseStrokeCost = defaults.baseStrokeCost !== undefined ? defaults.baseStrokeCost : 1.0;
                 this.weights = defaults.weights || { trans: 65 };
 
                 this.layoutName = "Custom";
                 this.layoutDesc = ""; // 配列の説明
-                this.customRules = ""; // 論理配列ごとのカスタムルール
-                this.enableCustomRules = true; // カスタムルールのON/OFFトグル
+                this.customRules = ""; // 旧形式互換: alias文字列
+                this.enableCustomRules = true; // 旧形式互換
+                this.inputExtensions = emptyInputExtensions();
+                this.enableInputExtensions = true;
+                this.corpusInterpretation = 'auto'; // Analyzer-side corpus interpretation; not part of logical layout data.
                 this.lang = "ja";
 
                 // ドメイン管理
@@ -3118,7 +3868,8 @@
                 this.emu = {
                     source: {
                         ...cloneBundleFromPreset('qwerty'),
-                        enableCustomRules: false
+                        enableCustomRules: false,
+                        enableInputExtensions: false
                     },
                     target: cloneBundleFromPreset('qwerty'),
                     sourceMode: 'layout',
@@ -3164,8 +3915,10 @@
                 // データ側にname定義があればそれを使い、なければキーを大文字化
                 this.layoutName = p.name || name.toUpperCase();
                 this.layoutDesc = p.desc || ""; // プリセットにdescがあれば読み込む
-                this.customRules = p.customRules || ""; // プリセット変更時にリセット
-                this.enableCustomRules = true;
+                this.inputExtensions = cloneInputExtensions(p.inputExtensions, p.customRules || "");
+                this.customRules = inputExtensionsToLegacyRules(this.inputExtensions);
+                this.enableInputExtensions = p.enableInputExtensions !== undefined ? p.enableInputExtensions !== false : p.enableCustomRules !== false;
+                this.enableCustomRules = this.enableInputExtensions;
             }
 
             toggleKey(hand, idx) {
@@ -3175,7 +3928,13 @@
 
             // 論理データ（配列）のみエクスポート
             exportLogical() {
-                return JSON.stringify({ type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName, layoutDesc: this.layoutDesc, customRules: this.customRules, enableCustomRules: this.enableCustomRules });
+                this.customRules = inputExtensionsToLegacyRules(this.inputExtensions);
+                this.enableCustomRules = this.enableInputExtensions;
+                return JSON.stringify({
+                    type: 'logical', layout: this.layout, fingers: this.fingers, name: this.layoutName, layoutDesc: this.layoutDesc,
+                    inputExtensions: cloneInputExtensions(this.inputExtensions), enableInputExtensions: this.enableInputExtensions,
+                    customRules: this.customRules, enableCustomRules: this.enableCustomRules
+                });
             }
 
             // 物理データ（設定）のみエクスポート
@@ -3188,6 +3947,7 @@
                     gapConfig: this.gapConfig,
                     repeatCosts: this.repeatCosts,
                     layerCost: this.layerCost,
+                    baseStrokeCost: this.baseStrokeCost,
                     weights: this.weights
                 });
             }
@@ -3209,7 +3969,9 @@
                     name: this.state.layoutName,
                     desc: this.state.layoutDesc,
                     customRules: this.state.customRules,
-                    enableCustomRules: this.state.enableCustomRules
+                    enableCustomRules: this.state.enableCustomRules,
+                    inputExtensions: this.state.inputExtensions,
+                    enableInputExtensions: this.state.enableInputExtensions
                 };
             }
 
@@ -3442,14 +4204,18 @@
                 const wTrans = transRatio / 100.0;
                 const wStatic = 1.0 - wTrans;
 
-                // Core score model:
-                //   Weighted Work = weighted totals over the whole sequence
-                //   Weighted Cost / Stroke = Weighted Work / strokes
-                //   Overall Cost = Weighted Work / source units
-                stats.weightedWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
-                stats.weightedCostPerStroke = stats.keystrokes > 0 ? (stats.weightedWork / stats.keystrokes) : 0;
+                // Total cost = fixed base cost per stroke + weighted position/transition cost.
+                const baseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? Math.max(0, this.state.baseStrokeCost) : 1.0;
+                stats.ergonomicWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.ergonomicCostPerStroke = stats.keystrokes > 0 ? (stats.ergonomicWork / stats.keystrokes) : 0;
+                stats.baseStrokeWork = baseStrokeCost * stats.keystrokes;
+                stats.effectiveWork = stats.baseStrokeWork + stats.ergonomicWork;
+                stats.effectiveCostPerStroke = stats.keystrokes > 0 ? (stats.effectiveWork / stats.keystrokes) : 0;
+                // Compatibility aliases keep existing detail/render code meaningful.
+                stats.weightedWork = stats.ergonomicWork;
+                stats.weightedCostPerStroke = stats.ergonomicCostPerStroke;
                 const sourceDenom = stats.sourceUnits > 0 ? stats.sourceUnits : (stats.keystrokes || 1);
-                stats.overallCost = stats.weightedWork / sourceDenom;
+                stats.overallCost = stats.effectiveWork / sourceDenom;
                 stats.rawCostPerStroke = stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0;
                 stats.strokesPerSourceUnit = stats.sourceUnits > 0 ? (stats.keystrokes / stats.sourceUnits) : 0;
                 stats.layeredStrokeRate = stats.keystrokes > 0 ? (stats.layeredStrokes / stats.keystrokes * 100) : 0;
@@ -3544,40 +4310,16 @@
                     return sCost + tCost;
                 };
 
-                // ▼▼▼ L2: Pre-processor (ローマ字展開・正規化) ▼▼▼
+                // ▼▼▼ L2: Input Method / Extensions Pre-processor ▼▼▼
                 const filterSokuon = document.getElementById('filter-sokuon')?.value || 'none';
                 const filterHatsuon = document.getElementById('filter-hatsuon')?.value || 'none';
-                const customRules = this.state.customRules || ''; // 状態から取得
-
-                let processedText = text.toLowerCase();
-
-                // 1. 撥音(ん)の展開
-                // 'nn', 'xn', または 'n' (母音とy以外が続く場合、または行末) をキャッチして統一
-                if (filterHatsuon !== 'none') {
-                    processedText = processedText.replace(/(?:nn|xn|n(?=[^aiueoy]|$))/g, filterHatsuon);
-                }
-
-                // 2. 促音(っ)の展開
-                if (filterSokuon !== 'none') {
-                    processedText = processedText.replace(/([bcdfghjklmpqrstvwxyz])\1/g, `${filterSokuon}$1`);
-                }
-
-                // 3. 論理配列固有のカスタムルールの適用
-                if (this.state.enableCustomRules && customRules.trim() !== '') {
-                    const rules = customRules.split(',').map(r => r.split('='));
-                    for (const [before, after] of rules) {
-                        if (before && after !== undefined) {
-                            processedText = processedText.split(before.trim().toLowerCase()).join(after.trim().toLowerCase());
-                        }
-                    }
-                }
+                const processedText = prepareInputText(text, this.getActiveBundle(), filterSokuon, filterHatsuon, this.state.corpusInterpretation || 'auto');
                 // ▲▲▲ L2: Pre-processor 終了 ▲▲▲
 
                 // ▼▼▼ 辞書の準備と事前正規化 ▼▼▼
                 const validTokens = Object.keys(keyMap)
-                    // space, ent に加え、制御キーの予約語を除外
                     .filter(k => k !== 'space' && k !== 'ent' && !CONTROL_KEYS.has(k))
-                    .sort((a, b) => b.length - a.length); // 降順ソート（最長一致用）
+                    .sort((a, b) => b.length - a.length);
 
                 const normalizedText = processedText
                     .replace(/[’‘]/g, "'")
@@ -3792,15 +4534,18 @@
                 const wTrans = transRatio / 100.0;
                 const wStatic = 1.0 - wTrans;
 
-                // Core score model:
-                //   Weighted Work = Position Total × Position Weight + Transition Total × Transition Weight
-                //   Weighted Cost / Stroke = Weighted Work / resolved strokes
-                //   Overall Cost = Weighted Work / original input characters
-                // This makes stroke count matter naturally when comparing the same corpus.
-                stats.weightedWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
-                stats.weightedCostPerStroke = stats.keystrokes > 0 ? (stats.weightedWork / stats.keystrokes) : 0;
+                // Total cost = fixed base cost per stroke + weighted position/transition cost.
+                // This makes stroke-count savings explicit.
+                const baseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? Math.max(0, this.state.baseStrokeCost) : 1.0;
+                stats.ergonomicWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.ergonomicCostPerStroke = stats.keystrokes > 0 ? (stats.ergonomicWork / stats.keystrokes) : 0;
+                stats.baseStrokeWork = baseStrokeCost * stats.keystrokes;
+                stats.effectiveWork = stats.baseStrokeWork + stats.ergonomicWork;
+                stats.effectiveCostPerStroke = stats.keystrokes > 0 ? (stats.effectiveWork / stats.keystrokes) : 0;
+                stats.weightedWork = stats.ergonomicWork;
+                stats.weightedCostPerStroke = stats.ergonomicCostPerStroke;
                 const sourceDenom = stats.sourceUnits > 0 ? stats.sourceUnits : 1;
-                stats.overallCost = stats.weightedWork / sourceDenom;
+                stats.overallCost = stats.effectiveWork / sourceDenom;
                 stats.rawCostPerStroke = stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0;
                 stats.strokesPerSourceUnit = stats.sourceUnits > 0 ? (stats.keystrokes / stats.sourceUnits) : 0;
                 stats.layeredStrokeRate = stats.keystrokes > 0 ? (stats.layeredStrokes / stats.keystrokes * 100) : 0;
@@ -3896,6 +4641,18 @@
 
                 // 解析ボタン
                 document.getElementById('btn-analyze').onclick = () => this.runAnalysis();
+
+                // Corpus Interpretation is an Analyzer-side setting, independent of the logical layout/Input Extensions.
+                this.corpusInterpretationSelect = document.getElementById('corpus-interpretation');
+                this.romajiPreprocessorBox = document.getElementById('romaji-preprocessor-box');
+                if (this.corpusInterpretationSelect) {
+                    this.corpusInterpretationSelect.value = this.state.corpusInterpretation || 'auto';
+                    this.corpusInterpretationSelect.onchange = (e) => {
+                        this.state.corpusInterpretation = e.target.value || 'auto';
+                        this.updateCorpusInterpretationUI();
+                    };
+                }
+                this.updateCorpusInterpretationUI();
 
                 // SFB KPI: クリックごとに Direct → Skip → Total → Off を循環表示
                 const sfbCard = document.getElementById('kpi-sfb-card');
@@ -4047,6 +4804,17 @@
                     elLayer.onchange = (e) => this.state.layerCost = parseFloat(e.target.value);
                 }
 
+                // 1打鍵そのものに必ず加算する基本負荷
+                const elBaseStroke = document.getElementById('base-stroke-cost-in');
+                if (elBaseStroke) {
+                    elBaseStroke.value = Number.isFinite(this.state.baseStrokeCost) ? this.state.baseStrokeCost : 1.0;
+                    elBaseStroke.onchange = (e) => {
+                        const v = parseFloat(e.target.value);
+                        this.state.baseStrokeCost = Number.isFinite(v) ? Math.max(0, v) : 1.0;
+                        e.target.value = this.state.baseStrokeCost.toFixed(1);
+                    };
+                }
+
                 // ウェイト設定スライダーのイベント
                 const wSlider = document.getElementById('weight-slider');
                 const dStatic = document.getElementById('disp-static');
@@ -4075,6 +4843,83 @@
                 this.modalDesc = document.getElementById('modal-desc');
                 this.btnModalCopy = document.getElementById('btn-modal-copy');
                 this.btnModalImport = document.getElementById('btn-modal-import');
+
+                // Input Extensions editor
+                this.extensionModal = document.getElementById('input-extension-modal');
+                this.extensionModalTitle = document.getElementById('extension-modal-title');
+                this.extensionModalDesc = document.getElementById('extension-modal-desc');
+                this.extensionAliasTitle = document.getElementById('extension-alias-title');
+                this.extensionAliasNote = document.getElementById('extension-alias-note');
+                this.extensionAliasEnabled = document.getElementById('extension-alias-enabled');
+                this.extensionAliasEnabledLabel = document.getElementById('extension-alias-enabled-label');
+                this.extensionShorthandTitle = document.getElementById('extension-shorthand-title');
+                this.extensionShorthandNote = document.getElementById('extension-shorthand-note');
+                this.extensionShorthandEnabled = document.getElementById('extension-shorthand-enabled');
+                this.extensionShorthandEnabledLabel = document.getElementById('extension-shorthand-enabled-label');
+                this.extensionAliasList = document.getElementById('extension-alias-list');
+                this.extensionShorthandList = document.getElementById('extension-shorthand-list');
+                this.extensionSearch = document.getElementById('extension-search');
+                this.extensionVisibleCount = document.getElementById('extension-visible-count');
+                this.extensionTotalCount = document.getElementById('extension-total-count');
+                this.extensionBulkSummary = document.getElementById('extension-bulk-summary');
+                this.extensionBulkText = document.getElementById('extension-bulk-text');
+                this.extensionBulkImport = document.getElementById('extension-bulk-import');
+                this.extensionBulkExport = document.getElementById('extension-bulk-export');
+                this.extensionApply = document.getElementById('extension-apply');
+                this.extensionCancel = document.getElementById('extension-cancel');
+
+                document.getElementById('extension-modal-close').onclick = () => this.closeInputExtensionEditor();
+                this.extensionCancel.onclick = () => this.closeInputExtensionEditor();
+                this.extensionApply.onclick = () => this.applyInputExtensionEditor();
+                this.extensionModal.onclick = (e) => { if (e.target === this.extensionModal) this.closeInputExtensionEditor(); };
+                this.extensionAliasEnabled.onchange = (e) => {
+                    if (!this.extensionEditorWorking) return;
+                    this.extensionEditorWorking.aliasesEnabled = e.target.checked;
+                    this.renderExtensionEditor();
+                };
+                this.extensionShorthandEnabled.onchange = (e) => {
+                    if (!this.extensionEditorWorking) return;
+                    this.extensionEditorWorking.shorthandsEnabled = e.target.checked;
+                    this.renderExtensionEditor();
+                };
+                document.getElementById('extension-add-alias').onclick = () => {
+                    if (!this.extensionEditorWorking) return;
+                    this.extensionEditorWorking.aliases.push({ source: '', keys: '', enabled: true });
+                    this.renderExtensionEditor();
+                };
+                document.getElementById('extension-add-shorthand').onclick = () => {
+                    if (!this.extensionEditorWorking) return;
+                    this.extensionEditorWorking.shorthands.unshift({ text: '', keys: '', enabled: true, flag: '' });
+                    this.renderExtensionEditor();
+                };
+                this.extensionSearch.oninput = () => this.filterExtensionEditor();
+                this.extensionBulkImport.onclick = () => {
+                    if (!this.extensionEditorWorking) return;
+                    const rows = String(this.extensionBulkText.value || '').replace(/\r\n?/g, '\n').split('\n');
+                    let added = 0;
+                    rows.forEach(line => {
+                        if (!line.trim()) return;
+                        const cols = line.split('\t');
+                        if (cols.length < 2) return;
+                        const keys = String(cols[0] || '').trim().toLowerCase();
+                        const textValue = String(cols[1] || '').trim();
+                        // New format: keys<TAB>text<TAB>flag. Legacy 4-column rows
+                        // (keys, text, Roman source, flag) remain importable; Roman source is ignored.
+                        const flag = String(cols.length >= 4 ? (cols[3] || '') : (cols[2] || '')).trim();
+                        if (!keys || !textValue) return;
+                        this.extensionEditorWorking.shorthands.push({ keys, text: textValue, enabled: true, flag });
+                        added++;
+                    });
+                    if (added) this.renderExtensionEditor();
+                };
+                this.extensionBulkExport.onclick = () => {
+                    if (!this.extensionEditorWorking) return;
+                    this.extensionBulkText.value = this.extensionEditorWorking.shorthands.map(rule =>
+                        [rule.keys || '', rule.text || '', rule.flag || ''].join('\t').replace(/\t+$/, '')
+                    ).join('\n');
+                    this.extensionBulkText.focus();
+                    this.extensionBulkText.select();
+                };
 
                 // Close Modal
                 const closeModal = () => this.modal.classList.remove('open');
@@ -4157,9 +5002,13 @@
                         if (d.type === 'logical') {
                             this.state.layout = d.layout;
                             this.state.fingers = d.fingers;
-                            this.state.customRules = d.customRules || "";
+                            this.state.inputExtensions = cloneInputExtensions(d.inputExtensions, d.customRules || "");
+                            this.state.customRules = inputExtensionsToLegacyRules(this.state.inputExtensions);
                             this.state.layoutDesc = d.layoutDesc || "";
-                            this.state.enableCustomRules = d.enableCustomRules !== undefined ? d.enableCustomRules : true;
+                            this.state.enableInputExtensions = d.enableInputExtensions !== undefined
+                                ? d.enableInputExtensions !== false
+                                : d.enableCustomRules !== false;
+                            this.state.enableCustomRules = this.state.enableInputExtensions;
 
                             this.triggerCustomMode();
 
@@ -4181,6 +5030,10 @@
                             if(d.gapConfig) this.state.gapConfig = d.gapConfig;
                             if(d.repeatCosts) this.state.repeatCosts = d.repeatCosts;
                             if(d.layerCost !== undefined) this.state.layerCost = d.layerCost;
+                            // Old physical JSON had no baseStrokeCost. Treat it as 0.0 so imported legacy scores remain reproducible.
+                            this.state.baseStrokeCost = d.baseStrokeCost !== undefined
+                                ? Math.max(0, Number(d.baseStrokeCost) || 0)
+                                : 0.0;
                             if(d.weights) this.state.weights = d.weights;
 
                             // Update Sliders UI
@@ -4198,6 +5051,8 @@
                             // Layer Cost Inputの更新
                             const elLayerIn = document.getElementById('layer-cost-in');
                             if(elLayerIn) elLayerIn.value = this.state.layerCost;
+                            const elBaseStrokeIn = document.getElementById('base-stroke-cost-in');
+                            if(elBaseStrokeIn) elBaseStrokeIn.value = this.state.baseStrokeCost;
 
                             alert(dict.alert_load_phys);
                             this.setDomain('physical');
@@ -4252,6 +5107,21 @@
                 document.getElementById('corpus-input').value = "This is Keyflow Analyzer. Customize your layout, mask unused keys, and analyze efficiency.\n\nInput text matching your layout's logical key definitions (e.g., Alphanumeric, Romaji, or direct Kana strings).\n\nkore ha irohanihoheto chirinuruwo wakayotare so tsunenaramu\nuwi no okuyama kefu koete asaki yumemishi wehimosesu";
             }
 
+            updateCorpusInterpretationUI() {
+                const mode = this.state.corpusInterpretation || 'auto';
+                if (this.corpusInterpretationSelect && this.corpusInterpretationSelect.value !== mode) {
+                    this.corpusInterpretationSelect.value = mode;
+                }
+                const direct = mode === 'direct';
+                ['filter-sokuon', 'filter-hatsuon'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = direct;
+                });
+                if (this.romajiPreprocessorBox) {
+                    this.romajiPreprocessorBox.style.opacity = direct ? '0.5' : '1';
+                }
+            }
+
             updateText() {
                 const dict = I18N[this.state.lang];
 
@@ -4297,7 +5167,6 @@
             triggerCustomMode() {
                 const presetSelect = document.getElementById('kb-preset-in');
                 const nameInput = document.getElementById('layout-name-in');
-                const rulesInput = document.getElementById('custom-rules-in');
 
                 if (presetSelect && presetSelect.value !== 'custom') {
                     presetSelect.value = 'custom';
@@ -4310,9 +5179,6 @@
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = "CUSTOM";
                 }
 
-                if (rulesInput && rulesInput.hasAttribute('readonly')) {
-                    rulesInput.removeAttribute('readonly');
-                }
                 const descInput = document.getElementById('layout-desc-in');
                 if (descInput && descInput.hasAttribute('readonly')) {
                     descInput.removeAttribute('readonly');
@@ -4433,11 +5299,11 @@
                                 <input type="text" id="layout-desc-in" value="${this.state.layoutDesc}" ${readOnlyAttr} class="meta-input" style="flex:1; max-width:400px;" placeholder="Optional">
                             </div>
                             <div class="meta-row">
-                                <label class="tooltip tooltip-down" data-tooltip="${dict.desc_custom_replace}" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
-                                    <input type="checkbox" id="toggle-custom-rules" ${this.state.enableCustomRules ? 'checked' : ''} style="cursor:pointer;">
-                                    ${dict.lbl_custom_replace}
+                                <label class="tooltip tooltip-down" data-tooltip="${dict.desc_input_extensions || dict.desc_custom_replace}" style="font-size:0.8rem; color:var(--accent); cursor:help; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                                    <input type="checkbox" id="toggle-input-extensions" ${this.state.enableInputExtensions ? 'checked' : ''} style="cursor:pointer;">
+                                    ${dict.lbl_input_extensions || 'Input Extensions'}
                                 </label>
-                                <input type="text" id="custom-rules-in" value="${this.state.customRules}" ${readOnlyAttr} class="meta-input" style="flex:1; max-width:400px; font-family:'JetBrains Mono', monospace;" placeholder="ex: ltu=l, nn=q">
+                                <button type="button" id="btn-input-extensions" class="secondary extension-summary-btn">${this.formatInputExtensionSummary(this.state.inputExtensions)}</button>
                             </div>
                         `;
 
@@ -4446,8 +5312,8 @@
                         const presetIn = document.getElementById('kb-preset-in');
                         const nameIn = document.getElementById('layout-name-in');
                         const descIn = document.getElementById('layout-desc-in');
-                        const rulesIn = document.getElementById('custom-rules-in');
-                        const ruleToggle = document.getElementById('toggle-custom-rules');
+                        const extensionToggle = document.getElementById('toggle-input-extensions');
+                        const extensionBtn = document.getElementById('btn-input-extensions');
 
                         if (presetIn) {
                             presetIn.value = presetValue;
@@ -4456,7 +5322,6 @@
                                 if (val === 'custom') {
                                     nameIn.removeAttribute('readonly');
                                     descIn.removeAttribute('readonly');
-                                    rulesIn.removeAttribute('readonly');
                                     nameIn.value = "CUSTOM";
                                     descIn.value = "";
                                     this.state.layoutName = "CUSTOM";
@@ -4473,14 +5338,13 @@
                                     nameIn.setAttribute('readonly', true);
                                     descIn.value = this.state.layoutDesc;
                                     descIn.setAttribute('readonly', true);
-                                    rulesIn.value = this.state.customRules;
-                                    rulesIn.setAttribute('readonly', true);
+                                    if (extensionBtn) extensionBtn.textContent = this.formatInputExtensionSummary(this.state.inputExtensions);
                                     this.dom.kbTitle.textContent = this.state.layoutName;
                                     if (descDisplay) {
                                         descDisplay.textContent = this.state.layoutDesc;
                                         descDisplay.style.display = this.state.layoutDesc ? 'block' : 'none';
                                     }
-                                    if (ruleToggle) ruleToggle.checked = this.state.enableCustomRules;
+                                    if (extensionToggle) extensionToggle.checked = this.state.enableInputExtensions;
                                 }
                             };
                         }
@@ -4503,17 +5367,16 @@
                             };
                         }
 
-                        if (ruleToggle) {
-                            ruleToggle.onchange = (e) => {
+                        if (extensionToggle) {
+                            extensionToggle.onchange = (e) => {
+                                this.state.enableInputExtensions = e.target.checked;
                                 this.state.enableCustomRules = e.target.checked;
+                                this.triggerCustomMode();
                             };
                         }
 
-                        if (rulesIn) {
-                            rulesIn.oninput = (e) => {
-                                this.state.customRules = e.target.value;
-                                this.triggerCustomMode();
-                            };
+                        if (extensionBtn) {
+                            extensionBtn.onclick = () => this.openInputExtensionEditor({ kind: 'main' });
                         }
                     } else {
                         this.dom.logicalMeta.style.display = 'none';
@@ -4570,6 +5433,161 @@
                 }
             }
 
+            formatInputExtensionSummary(extensions) {
+                const ext = normalizeInputExtensions(extensions);
+                const aliases = ext.aliases.filter(rule => rule.enabled !== false).length;
+                const shorthands = ext.shorthands.filter(rule => rule.enabled !== false).length;
+                const ja = this.state.lang === 'ja';
+                const prefix = '';
+                const aliasState = ext.aliasesEnabled ? `${aliases}` : (ja ? 'OFF' : 'OFF');
+                const shorthandState = ext.shorthandsEnabled ? `${shorthands}` : (ja ? 'OFF' : 'OFF');
+                return `${prefix}${aliasState} aliases / ${shorthandState} shorthands`;
+            }
+
+            getExtensionEditorTarget(context = this.extensionEditorContext) {
+                if (context?.kind === 'emu' && context.side) return this.state.emu[context.side];
+                return this.state;
+            }
+
+            openInputExtensionEditor(context = { kind: 'main' }) {
+                const target = this.getExtensionEditorTarget(context);
+                if (!target) return;
+                this.extensionEditorContext = context;
+                this.extensionEditorWorking = cloneInputExtensions(target.inputExtensions, target.customRules || '');
+                this.extensionModal.classList.add('open');
+                this.renderExtensionEditor();
+            }
+
+            closeInputExtensionEditor() {
+                if (this.extensionModal) this.extensionModal.classList.remove('open');
+            }
+
+            filterExtensionEditor() {
+                const query = String(this.extensionSearch?.value || '').trim().toLowerCase();
+                let visible = 0;
+                this.extensionShorthandList?.querySelectorAll('.extension-row.shorthand').forEach(row => {
+                    const index = Number(row.dataset.index);
+                    const rule = this.extensionEditorWorking?.shorthands?.[index];
+                    const haystack = `${rule?.text || ''} ${rule?.keys || ''}`.toLowerCase();
+                    const show = !query || haystack.includes(query);
+                    row.style.display = show ? 'grid' : 'none';
+                    if (show) visible++;
+                });
+                if (this.extensionVisibleCount) {
+                    const total = this.extensionEditorWorking?.shorthands?.length || 0;
+                    this.extensionVisibleCount.textContent = `${visible} / ${total}`;
+                }
+            }
+
+            renderExtensionEditor() {
+                if (!this.extensionEditorWorking) return;
+                const ext = this.extensionEditorWorking;
+                const ja = this.state.lang === 'ja';
+
+                this.extensionModalTitle.textContent = ja ? '入力拡張エディタ' : 'Input Extensions Editor';
+                this.extensionModalDesc.textContent = ja
+                    ? 'Aliases はRomaji→論理キー、Shorthands は日本語句→短縮キー列です。RomajiコーパスはShorthand検索用にだけかなとして解釈し、一致しない部分の元表記（shi/sha等）は保持します。同じ出力が複数ある場合は上にあるルールを優先します。'
+                    : 'Aliases map Romaji to logical keys. Shorthands map Japanese phrases to compact key sequences. Romaji corpora are interpreted as Kana only for Shorthand matching; unmatched source spellings such as shi/sha are preserved. Earlier duplicate rules have priority.';
+                this.extensionAliasTitle.textContent = ja ? 'Aliases（入力エイリアス）' : 'Aliases';
+                this.extensionAliasNote.textContent = ja ? '例: k → c, yo → q' : 'Example: k → c, yo → q';
+                this.extensionAliasEnabledLabel.textContent = ja ? '有効' : 'Enabled';
+                this.extensionShorthandTitle.textContent = ja ? 'Shorthands（語句短縮）' : 'Shorthands';
+                this.extensionShorthandNote.textContent = ja ? '例: ました → mst。上から優先順位。' : 'Example: ました → mst. Earlier rows have priority.';
+                this.extensionShorthandEnabledLabel.textContent = ja ? '有効' : 'Enabled';
+                this.extensionBulkSummary.textContent = ja ? 'TSV 一括インポート / エクスポート' : 'TSV Import / Export';
+                this.extensionApply.textContent = ja ? '適用' : 'Apply';
+                this.extensionCancel.textContent = ja ? 'キャンセル' : 'Cancel';
+                this.extensionBulkImport.textContent = ja ? 'TSVを追加' : 'Import TSV';
+                this.extensionBulkExport.textContent = ja ? 'TSVを書き出す' : 'Export TSV';
+                this.extensionSearch.placeholder = ja ? '語句・キーを検索' : 'Search text / keys';
+                this.extensionAliasEnabled.checked = ext.aliasesEnabled !== false;
+                this.extensionShorthandEnabled.checked = ext.shorthandsEnabled !== false;
+                this.extensionAliasList.closest('.extension-section')?.classList.toggle('group-disabled', ext.aliasesEnabled === false);
+                this.extensionShorthandList.closest('.extension-section')?.classList.toggle('group-disabled', ext.shorthandsEnabled === false);
+
+                this.extensionAliasList.innerHTML = ext.aliases.map((rule, index) => `
+                    <div class="extension-row" data-index="${index}">
+                        <input class="meta-input ext-alias-source" value="${escapeHtml(rule.source)}" spellcheck="false">
+                        <span class="extension-row-arrow">→</span>
+                        <input class="meta-input ext-alias-keys" value="${escapeHtml(rule.keys)}" spellcheck="false">
+                        <div class="extension-row-actions"><button class="extension-mini-btn danger ext-delete-alias" type="button">×</button></div>
+                    </div>`).join('') || `<div class="extension-section-note">${ja ? 'Aliases はありません。' : 'No aliases.'}</div>`;
+
+                this.extensionShorthandList.innerHTML = ext.shorthands.map((rule, index) => `
+                    <div class="extension-row shorthand" data-index="${index}">
+                        <input class="ext-short-enabled" type="checkbox" ${rule.enabled !== false ? 'checked' : ''} title="enabled">
+                        <input class="meta-input ext-short-text" value="${escapeHtml(rule.text)}" spellcheck="false" placeholder="ました">
+                        <input class="meta-input ext-short-keys" value="${escapeHtml(rule.keys)}" spellcheck="false" placeholder="mst">
+                        <div class="extension-row-actions">
+                            <button class="extension-mini-btn ext-move-up" type="button" title="priority up">↑</button>
+                            <button class="extension-mini-btn ext-move-down" type="button" title="priority down">↓</button>
+                            <button class="extension-mini-btn danger ext-delete-short" type="button">×</button>
+                        </div>
+                    </div>`).join('') || `<div class="extension-section-note">${ja ? 'Shorthands はありません。' : 'No shorthands.'}</div>`;
+
+                this.extensionAliasList.querySelectorAll('.extension-row').forEach(row => {
+                    const index = Number(row.dataset.index);
+                    const source = row.querySelector('.ext-alias-source');
+                    const keys = row.querySelector('.ext-alias-keys');
+                    source.oninput = () => ext.aliases[index].source = source.value.trim().toLowerCase();
+                    keys.oninput = () => ext.aliases[index].keys = keys.value.trim().toLowerCase();
+                    row.querySelector('.ext-delete-alias').onclick = () => {
+                        ext.aliases.splice(index, 1);
+                        this.renderExtensionEditor();
+                    };
+                });
+
+                this.extensionShorthandList.querySelectorAll('.extension-row.shorthand').forEach(row => {
+                    const index = Number(row.dataset.index);
+                    const rule = ext.shorthands[index];
+                    const enabled = row.querySelector('.ext-short-enabled');
+                    const textEl = row.querySelector('.ext-short-text');
+                    const keysEl = row.querySelector('.ext-short-keys');
+                    enabled.onchange = () => { rule.enabled = enabled.checked; };
+                    textEl.oninput = () => { rule.text = textEl.value; };
+                    keysEl.oninput = () => { rule.keys = keysEl.value.trim().toLowerCase(); };
+                    row.querySelector('.ext-delete-short').onclick = () => {
+                        ext.shorthands.splice(index, 1);
+                        this.renderExtensionEditor();
+                    };
+                    row.querySelector('.ext-move-up').onclick = () => {
+                        if (index <= 0) return;
+                        [ext.shorthands[index - 1], ext.shorthands[index]] = [ext.shorthands[index], ext.shorthands[index - 1]];
+                        this.renderExtensionEditor();
+                    };
+                    row.querySelector('.ext-move-down').onclick = () => {
+                        if (index >= ext.shorthands.length - 1) return;
+                        [ext.shorthands[index + 1], ext.shorthands[index]] = [ext.shorthands[index], ext.shorthands[index + 1]];
+                        this.renderExtensionEditor();
+                    };
+                });
+
+                const aliasCountLabel = ext.aliasesEnabled ? `${ext.aliases.length}` : `${ext.aliases.length} (OFF)`;
+                const shorthandCountLabel = ext.shorthandsEnabled ? `${ext.shorthands.length}` : `${ext.shorthands.length} (OFF)`;
+                this.extensionTotalCount.textContent = `${aliasCountLabel} aliases / ${shorthandCountLabel} shorthands`;
+                this.filterExtensionEditor();
+            }
+
+            applyInputExtensionEditor() {
+                const target = this.getExtensionEditorTarget();
+                if (!target || !this.extensionEditorWorking) return;
+                const cleaned = normalizeInputExtensions(this.extensionEditorWorking);
+                target.inputExtensions = cleaned;
+                target.customRules = inputExtensionsToLegacyRules(cleaned);
+                if (target.enableInputExtensions === undefined) target.enableInputExtensions = target.enableCustomRules !== false;
+                target.enableCustomRules = target.enableInputExtensions !== false;
+
+                if (this.extensionEditorContext?.kind === 'emu') {
+                    this.markEmuBundleCustom(this.extensionEditorContext.side);
+                    this.refreshEmuAnalysis();
+                    this.renderEmuWorkspace();
+                } else {
+                    this.triggerCustomMode();
+                    this.updateUI();
+                }
+                this.closeInputExtensionEditor();
+            }
+
             openModal(type, content = "", options = {}) {
                 const dict = I18N[this.state.lang];
                 const isLogic = this.state.domain === 'logic';
@@ -4622,8 +5640,10 @@
                     type: 'emu-logical',
                     name: b.name,
                     desc: b.desc,
-                    customRules: b.customRules,
-                    enableCustomRules: b.enableCustomRules,
+                    inputExtensions: cloneInputExtensions(b.inputExtensions, b.customRules || ''),
+                    enableInputExtensions: b.enableInputExtensions !== false,
+                    customRules: inputExtensionsToLegacyRules(b.inputExtensions),
+                    enableCustomRules: b.enableInputExtensions !== false,
                     layout: b.layout,
                     fingers: b.fingers
                 }, null, 2);
@@ -4634,6 +5654,8 @@
                     ? {
                         name: data.name,
                         desc: data.layoutDesc || '',
+                        inputExtensions: cloneInputExtensions(data.inputExtensions, data.customRules || ''),
+                        enableInputExtensions: data.enableInputExtensions !== undefined ? data.enableInputExtensions !== false : data.enableCustomRules !== false,
                         customRules: data.customRules || '',
                         enableCustomRules: data.enableCustomRules !== false,
                         layout: data.layout,
@@ -4649,8 +5671,10 @@
                     presetKey: 'custom',
                     name: payload.name || 'CUSTOM',
                     desc: payload.desc || '',
-                    customRules: payload.customRules || '',
-                    enableCustomRules: payload.enableCustomRules !== false,
+                    inputExtensions: cloneInputExtensions(payload.inputExtensions, payload.customRules || ''),
+                    enableInputExtensions: payload.enableInputExtensions !== undefined ? payload.enableInputExtensions !== false : payload.enableCustomRules !== false,
+                    customRules: inputExtensionsToLegacyRules(cloneInputExtensions(payload.inputExtensions, payload.customRules || '')),
+                    enableCustomRules: payload.enableInputExtensions !== undefined ? payload.enableInputExtensions !== false : payload.enableCustomRules !== false,
                     layout: {
                         L: [...payload.layout.L],
                         R: [...payload.layout.R]
@@ -4676,7 +5700,9 @@
                     name: this.state.layoutName,
                     desc: this.state.layoutDesc,
                     customRules: this.state.customRules,
-                    enableCustomRules: this.state.enableCustomRules
+                    enableCustomRules: this.state.enableCustomRules,
+                    inputExtensions: this.state.inputExtensions,
+                    enableInputExtensions: this.state.enableInputExtensions
                 };
             }
 
@@ -4790,7 +5816,7 @@
                 const presetEl = document.getElementById(`emu-${side}-preset`);
                 const nameEl = document.getElementById(`emu-${side}-${side === 'target' ? 'name-in' : 'name'}`);
                 const descEl = document.getElementById(`emu-${side}-desc`);
-                const rulesEl = document.getElementById(`emu-${side}-rules`);
+                const extensionBtn = document.getElementById(`emu-${side}-extension-btn`);
                 const toggleEl = document.getElementById(`emu-${side}-toggle-rules`);
                 const resetEl = document.getElementById(`emu-${side}-reset`);
                 const importEl = document.getElementById(`emu-${side}-import`);
@@ -4826,12 +5852,8 @@
                     };
                 }
 
-                if (rulesEl) {
-                    rulesEl.oninput = (e) => {
-                        if (side === 'source') return;
-                        this.state.emu[side].customRules = e.target.value || '';
-                        this.markEmuBundleCustom(side);
-                    };
+                if (extensionBtn && side !== 'source') {
+                    extensionBtn.onclick = () => this.openInputExtensionEditor({ kind: 'emu', side });
                 }
 
                 if (toggleEl) {
@@ -4840,8 +5862,10 @@
                             e.target.checked = false;
                             return;
                         }
+                        this.state.emu[side].enableInputExtensions = e.target.checked;
                         this.state.emu[side].enableCustomRules = e.target.checked;
                         this.markEmuBundleCustom(side);
+                        this.refreshEmuAnalysis();
                     };
                 }
 
@@ -5217,12 +6241,13 @@
 
                 if (isSource) {
                     bundle.enableCustomRules = false;
+                    bundle.enableInputExtensions = false;
                 }
 
                 const presetEl = document.getElementById(`emu-${side}-preset`);
                 const nameEl = document.getElementById(`emu-${side}-${side === 'target' ? 'name-in' : 'name'}`);
                 const descEl = document.getElementById(`emu-${side}-desc`);
-                const rulesEl = document.getElementById(`emu-${side}-rules`);
+                const extensionBtn = document.getElementById(`emu-${side}-extension-btn`);
                 const toggleEl = document.getElementById(`emu-${side}-toggle-rules`);
                 const nameViewEl = document.getElementById(`emu-${side}-name-view`);
                 const descViewEl = document.getElementById(`emu-${side}-desc-view`);
@@ -5269,16 +6294,17 @@
                     });
                 }
 
-                if (rulesEl) {
-                    rulesEl.value = bundle.customRules || '';
-                    rulesEl.disabled = isSource;
-                    rulesEl.readOnly = isSource;
-                    rulesEl.style.opacity = isSource ? '0.55' : '1';
-                    rulesEl.style.cursor = isSource ? 'not-allowed' : 'text';
+                if (extensionBtn) {
+                    extensionBtn.textContent = isSource
+                        ? (this.state.lang === 'ja' ? 'Source側では無効' : 'Disabled on source')
+                        : this.formatInputExtensionSummary(bundle.inputExtensions);
+                    extensionBtn.disabled = isSource;
+                    extensionBtn.style.opacity = isSource ? '0.55' : '1';
+                    extensionBtn.style.cursor = isSource ? 'not-allowed' : 'pointer';
                 }
 
                 if (toggleEl) {
-                    toggleEl.checked = isSource ? false : (bundle.enableCustomRules !== false);
+                    toggleEl.checked = isSource ? false : (bundle.enableInputExtensions !== false);
                     toggleEl.disabled = isSource;
                     toggleEl.style.cursor = isSource ? 'not-allowed' : 'pointer';
                 }
@@ -5924,24 +6950,40 @@
 
             expandEmuDisplayToken(token, bundle) {
                 const normalized = String(token || '').toLowerCase();
+                if (!bundle || bundle.enableInputExtensions === false) return null;
+                const ext = normalizeInputExtensions(bundle.inputExtensions, bundle.customRules || '');
+                const inverseRules = ext.aliases
+                    .filter(rule => rule.enabled !== false && rule.keys && rule.source)
+                    .sort((a, b) => b.keys.length - a.keys.length);
+                const hit = inverseRules.find(rule => rule.keys === normalized);
+                return hit ? hit.source : null;
+            }
 
-                if (!bundle || bundle.enableCustomRules === false) return null;
+            matchEmuDisplayExtension(targetSequence, startIndex, bundle) {
+                if (!bundle || bundle.enableInputExtensions === false) return null;
+                const ext = normalizeInputExtensions(bundle.inputExtensions, bundle.customRules || '');
+                const rules = [];
+                ext.shorthands.forEach((rule, index) => {
+                    if (rule.enabled === false || !rule.keys || !rule.text) return;
+                    rules.push({ keys: rule.keys.toLowerCase(), output: rule.text, kind: 'shorthand', priority: index });
+                });
+                ext.aliases.forEach((rule, index) => {
+                    if (rule.enabled === false || !rule.keys || !rule.source) return;
+                    rules.push({ keys: rule.keys.toLowerCase(), output: rule.source, kind: 'alias', priority: index });
+                });
+                rules.sort((a, b) => (b.keys.length - a.keys.length) || (a.kind === b.kind ? a.priority - b.priority : (a.kind === 'shorthand' ? -1 : 1)));
 
-                const inverseRules = new Map();
-
-                String(bundle.customRules || '')
-                    .split(',')
-                    .map(rule => rule.split('='))
-                    .forEach(([from, to]) => {
-                        const lhs = String(from || '').trim().toLowerCase();
-                        const rhs = String(to || '').trim().toLowerCase();
-                        if (!lhs || !rhs) return;
-
-                        // analyzer では "yo=q" だが、表示では逆に q -> yo
-                        inverseRules.set(rhs, lhs);
-                    });
-
-                return inverseRules.get(normalized) || null;
+                for (const rule of rules) {
+                    let combined = '';
+                    for (let j = startIndex; j < targetSequence.length && combined.length <= rule.keys.length; j++) {
+                        const token = String(targetSequence[j]?.token || '').toLowerCase();
+                        if (!token || token === 'space' || token === 'ent' || token === 'tab' || CONTROL_KEYS.has(token)) break;
+                        combined += token;
+                        if (combined === rule.keys) return { output: rule.output, consumed: j - startIndex + 1 };
+                        if (!rule.keys.startsWith(combined)) break;
+                    }
+                }
+                return null;
             }
 
             updateEmuCaptureDisplay(text = '') {
@@ -6036,39 +7078,30 @@
                 let out = '';
                 const bundle = this.state.emu.target;
 
-                for (const ev of targetSequence) {
+                for (let i = 0; i < targetSequence.length; i++) {
+                    const ev = targetSequence[i];
                     if (!ev) continue;
+
+                    const extensionHit = this.matchEmuDisplayExtension(targetSequence, i, bundle);
+                    if (extensionHit) {
+                        out += extensionHit.output;
+                        i += extensionHit.consumed - 1;
+                        continue;
+                    }
 
                     const token = String(ev.token || '').toLowerCase();
                     const disp = String(ev.disp || ev.token || '');
 
-                    if (token === 'space') {
-                        out += ' ';
-                        continue;
-                    }
-
-                    if (token === 'ent') {
-                        out += '\n';
-                        continue;
-                    }
-
-                    if (token === 'tab') {
-                        out += '\t';
-                        continue;
-                    }
-
+                    if (token === 'space') { out += ' '; continue; }
+                    if (token === 'ent') { out += '\n'; continue; }
+                    if (token === 'tab') { out += '\t'; continue; }
                     if (token === 'bs' || token === 'backspace' || token === 'del' || token === 'delete') {
                         out = out.slice(0, -1);
                         continue;
                     }
-
-                    if (CONTROL_KEYS.has(token)) {
-                        continue;
-                    }
+                    if (CONTROL_KEYS.has(token)) continue;
 
                     const expanded = this.expandEmuDisplayToken(token, bundle);
-
-                    // 解析は token のまま、表示だけ逆引きで展開
                     out += expanded || disp;
                 }
 
@@ -6541,13 +7574,13 @@
 
                 // [1] Core comparison metrics
                 const overallCost = Number.isFinite(stats.overallCost) ? stats.overallCost : (stats.avgTotal || 0);
-                const weightedCostPerStroke = Number.isFinite(stats.weightedCostPerStroke) ? stats.weightedCostPerStroke : 0;
+                const effectiveCostPerStroke = Number.isFinite(stats.effectiveCostPerStroke) ? stats.effectiveCostPerStroke : 0;
                 const strokesPerSourceUnit = Number.isFinite(stats.strokesPerSourceUnit) ? stats.strokesPerSourceUnit : 0;
                 const layeredStrokes = Number.isFinite(stats.layeredStrokes) ? stats.layeredStrokes : 0;
                 const layeredRate = Number.isFinite(stats.layeredStrokeRate) ? stats.layeredStrokeRate : 0;
 
                 document.getElementById('kpi-score').textContent = overallCost.toFixed(2);
-                document.getElementById('kpi-cost-stroke').textContent = weightedCostPerStroke.toFixed(2);
+                document.getElementById('kpi-cost-stroke').textContent = effectiveCostPerStroke.toFixed(2);
                 document.getElementById('kpi-strokes').textContent = f(stats.keystrokes);
                 document.getElementById('kpi-source-units').textContent = f(stats.sourceUnits || 0);
                 document.getElementById('kpi-strokes-per-char').textContent = strokesPerSourceUnit.toFixed(2);
@@ -6560,6 +7593,9 @@
                 const scoreStaticWeight = 100 - scoreTransWeight;
                 document.getElementById('kpi-score-static-weight').textContent = `${scoreStaticWeight}%`;
                 document.getElementById('kpi-score-trans-weight').textContent = `${scoreTransWeight}%`;
+                const scoreBaseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? this.state.baseStrokeCost : 1.0;
+                const baseCostEl = document.getElementById('kpi-score-base-cost');
+                if (baseCostEl) baseCostEl.textContent = scoreBaseStrokeCost.toFixed(1);
 
                 // [2] SD & Median & 95% (Calc)
                 const samples = stats.costSamples.sort((a, b) => a - b);
@@ -6756,13 +7792,19 @@
                 const rawCostPerStroke = Number.isFinite(stats.rawCostPerStroke)
                     ? stats.rawCostPerStroke
                     : (stats.keystrokes > 0 ? (stats.totalCost / stats.keystrokes) : 0);
+                const effectiveWork = Number.isFinite(stats.effectiveWork) ? stats.effectiveWork : 0;
+                const baseStrokeWork = Number.isFinite(stats.baseStrokeWork) ? stats.baseStrokeWork : 0;
                 const weightedWork = Number.isFinite(stats.weightedWork) ? stats.weightedWork : 0;
+                const effectivePerStroke = Number.isFinite(stats.effectiveCostPerStroke) ? stats.effectiveCostPerStroke : 0;
                 const weightedPerStroke = Number.isFinite(stats.weightedCostPerStroke) ? stats.weightedCostPerStroke : 0;
                 const strokeRatio = Number.isFinite(stats.strokesPerSourceUnit) ? stats.strokesPerSourceUnit : 0;
                 const layeredCount = Number.isFinite(stats.layeredStrokes) ? stats.layeredStrokes : 0;
                 const layeredPct = Number.isFinite(stats.layeredStrokeRate) ? stats.layeredStrokeRate : 0;
 
+                document.getElementById('res-effective-work').textContent = effectiveWork.toFixed(2);
+                document.getElementById('res-base-stroke-work').textContent = baseStrokeWork.toFixed(2);
                 document.getElementById('res-weighted-work').textContent = weightedWork.toFixed(2);
+                document.getElementById('res-effective-per-stroke').textContent = effectivePerStroke.toFixed(2);
                 document.getElementById('res-weighted-per-stroke').textContent = weightedPerStroke.toFixed(2);
                 document.getElementById('res-raw-per-key').textContent = rawCostPerStroke.toFixed(2);
                 document.getElementById('res-total-load').textContent = f(stats.totalCost);
