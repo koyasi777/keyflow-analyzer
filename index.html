@@ -443,6 +443,53 @@
         }
         .mode-btn.active { background: var(--accent-dim); color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
+        .transition-layer-switch {
+            display: flex; gap: 4px; background: var(--bg-main); padding: 4px;
+            border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px;
+        }
+        .transition-layer-btn {
+            border: none; background: transparent; color: var(--text-dim); padding: 8px 14px;
+            border-radius: 6px; font-size: 0.78rem; font-weight: 800; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 190px;
+        }
+        .transition-layer-btn:hover { color: var(--text-main); }
+        .transition-layer-btn.active { background: var(--accent-dim); color: white; }
+        .transition-layer-btn .transition-layer-sub {
+            font-size: 0.65rem; font-weight: 600; line-height: 1.35; opacity: 0.78;
+        }
+        .transition-context-note {
+            max-width: 650px; margin: 0 auto 10px; padding: 10px 12px;
+            border: 1px solid var(--border); border-radius: 7px; background: var(--bg-main);
+            color: var(--text-dim); font-size: 0.76rem; line-height: 1.55; text-align: left;
+        }
+        .transition-recovery-panel {
+            width: 100%; max-width: 650px; margin: 18px auto 0; padding-top: 16px;
+            border-top: 1px solid var(--border); text-align: left;
+        }
+        .transition-recovery-header { margin-bottom: 12px; }
+        .transition-recovery-title {
+            color: var(--accent); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;
+        }
+        .transition-recovery-desc {
+            color: var(--text-dim); font-size: 0.76rem; line-height: 1.55;
+        }
+        .transition-recovery-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+        }
+        .transition-recovery-card {
+            min-width: 0; background: var(--bg-main); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+        }
+        .transition-recovery-card .gap-sub { height: auto; min-height: 3.2em; margin-bottom: 12px; }
+        .transition-recovery-card .input-group { margin-top: auto; flex-wrap: wrap; justify-content: center; }
+        .transition-recovery-example { margin-top: 12px; max-width: none; }
+        @media (max-width: 620px) {
+            .transition-layer-switch { width: 100%; }
+            .transition-layer-btn { flex: 1; min-width: 0; padding: 8px 6px; }
+            .transition-recovery-grid { grid-template-columns: 1fr; }
+        }
+
         /* HEADER & TITLE */
         .kb-header {
             display: flex; align-items: center; justify-content: center; gap: 0;
@@ -823,7 +870,7 @@
         .logic-title { font-size: 1.25rem; font-weight: bold; color: var(--accent); margin-bottom: 0.5rem; }
         .logic-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; }
 
-        .gap-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+        .gap-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
         .gap-card {
             background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px;
             padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -838,7 +885,11 @@
         .viz-dot.rest { background: var(--text-dim); opacity: 0.3; width: 8px; height: 8px; }
 
         .gap-name { font-weight: bold; font-size: 1rem; margin-bottom: 0.2rem; }
-        .gap-sub { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem; height: 2.4em; }
+        .gap-sub {
+            font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem;
+            min-height: 4.8em; height: auto; line-height: 1.6;
+        }
+        .gap-card .input-group { margin-top: auto; }
         .input-group {
             display: flex; align-items: center; gap: 12px;
         }
@@ -2008,63 +2059,6 @@
                                     <button class="step-btn" onclick="stepVal('base-stroke-cost-in', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
                                     <input type="number" id="base-stroke-cost-in" value="1.0" min="0" step="0.1" class="gap-input">
                                     <button class="step-btn" onclick="stepVal('base-stroke-cost-in', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="logic-card">
-                        <div class="logic-header">
-                            <div class="logic-title" data-i18n="set_gap_title">Finger Fatigue & Recovery Simulation</div>
-                            <p class="logic-desc" data-i18n="set_gap_desc">This setting simulates how finger fatigue "recovers" when you use the OTHER hand.</p>
-                        </div>
-
-                        <div class="gap-container">
-                            <div class="gap-card">
-                                <div class="gap-viz">
-                                    <div class="viz-dot hit"></div><div class="viz-dot hit"></div>
-                                </div>
-                                <div class="gap-name" style="color:var(--c-dang)" data-i18n="gap0_name">Consecutive (SFB)</div>
-                                <div class="gap-sub" data-i18n="gap0_sub">Same finger used twice. No rest. Maximum fatigue.</div>
-                                <div class="input-group">
-                                    <span>Cost x</span>
-                                    <div class="stepper-box">
-                                        <button class="step-btn" onclick="stepVal('gap-0', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                        <input type="number" id="gap-0" value="1.0" step="0.1" class="gap-input">
-                                        <button class="step-btn" onclick="stepVal('gap-0', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="gap-card">
-                                <div class="gap-viz">
-                                    <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
-                                </div>
-                                <div class="gap-name" style="color:var(--c-warn)" data-i18n="gap1_name">Short Rest</div>
-                                <div class="gap-sub" data-i18n="gap1_sub">1 keystroke by other hand between uses. Slight recovery.</div>
-                                <div class="input-group">
-                                    <span>Cost x</span>
-                                    <div class="stepper-box">
-                                        <button class="step-btn" onclick="stepVal('gap-1', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                        <input type="number" id="gap-1" value="0.8" step="0.1" class="gap-input">
-                                        <button class="step-btn" onclick="stepVal('gap-1', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="gap-card">
-                                <div class="gap-viz">
-                                    <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
-                                </div>
-                                <div class="gap-name" style="color:var(--c-best)" data-i18n="gap2_name">Long Rest</div>
-                                <div class="gap-sub" data-i18n="gap2_sub">2+ keystrokes by other hand. Fully recovered.</div>
-                                <div class="input-group">
-                                    <span>Cost x</span>
-                                    <div class="stepper-box">
-                                        <button class="step-btn" onclick="stepVal('gap-2', -0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                        <input type="number" id="gap-2" value="0.5" step="0.1" class="gap-input">
-                                        <button class="step-btn" onclick="stepVal('gap-2', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3581,6 +3575,10 @@
                 "1": 0.8,
                 "2": 0.5
             },
+            "transitionRecovery": {
+                "2": 0.15,
+                "3": 0.40
+            },
             "repeatCosts": {
                 "0": 2.5,
                 "1": 2,
@@ -3594,6 +3592,27 @@
                 "trans": 65
             }
         };
+
+        function scaleTransitionCostMatrix(costs, multiplier) {
+            const m = Number.isFinite(Number(multiplier)) ? Number(multiplier) : 0.8;
+            return {
+                L: (costs?.L || []).map(row => row.map(v => Number(v) * m)),
+                R: (costs?.R || []).map(row => row.map(v => Number(v) * m))
+            };
+        }
+
+        function normalizeTransitionRecovery(value) {
+            const defaults = { "2": 0.15, "3": 0.40 };
+            const out = { ...defaults };
+            [2, 3].forEach(gap => {
+                const n = Number(value?.[gap]);
+                // Allow experimentation up to 200% of the DIRECT→SKIP-1 improvement.
+                if (Number.isFinite(n)) out[gap] = Math.max(0, Math.min(2, n));
+            });
+            // More opposite-hand strokes must never reduce recovery.
+            out[3] = Math.max(out[2], out[3]);
+            return out;
+        }
 
         const I18N = {
             en: {
@@ -3651,18 +3670,23 @@
                 instr_finger: "Select tool, click keys to assign finger.",
 
                 // Definitions updated to imply "Ergonomics" inside "Physical" context
-                instr_cost: "Set the finger \"transition cost\". Click the starting key, then scroll the wheel over the destination key to set a value from 0 (Low) to 10 (High). Define it considering fingering compatibility such as distance, rolls, and scissors.",
+                instr_cost: "Choose the typing situation you want to edit, click the starting key, then scroll over the destination key to set its cost from 0 (Low) to 10 (High).",
                 instr_base: "Define the key \"position cost\". Scroll the wheel over a key to set a value from 0 (Low) to 10 (High). Set it considering distance from the home position and each finger's strength.",
 
+                transition_direct: "Same hand, consecutive",
+                transition_direct_sub: "No opposite-hand keystroke in between",
+                transition_skip1: "One opposite-hand keystroke in between",
+                transition_skip1_sub: "Example: Left A → Right X → Left B",
+                transition_context_note: "The same A→B movement can have a different cost depending on the typing context. Consecutive same-hand typing may benefit from a smooth roll or arpeggio. If the opposite hand is inserted, that continuous motion is broken, but the original hand gains time to move and prepare for B, which can make large or awkward transitions easier. Some transitions therefore become cheaper with an intervening opposite-hand keystroke, while others are easier when kept consecutive. The two values let the analyzer represent this difference for each transition.",
                 instr_result: "Heatmap View. Darker green = More usage.",
-                set_gap_title: "Hand Fatigue & Recovery Simulation",
-                set_gap_desc: "Simulates how hand fatigue recovers while using the *other* hand (creating a margin for the next transition). The coefficient set here is multiplied by the Transition Cost.",
-                gap0_name: "Same Hand (Consecutive)",
-                gap0_sub: "Continuous use of the same hand. No rest.",
-                gap1_name: "Short Rest (Alternation)",
-                gap1_sub: "1 keystroke by other hand.",
-                gap2_name: "Long Rest",
-                gap2_sub: "2+ keystrokes by other hand.",
+                set_gap_title: "Recovery after multiple opposite-hand keystrokes",
+                set_gap_desc: "The Transition Cost screen directly sets the cost for consecutive same-hand typing and for one opposite-hand keystroke in between. Here you control how much additional easing is applied when 2 or 3+ opposite-hand keystrokes give the original hand more preparation time. The additional easing is calculated from the difference between those two directly-set costs. If the one-opposite-hand case is already more costly, the cost stays at that value and does not worsen further.",
+                gap2_name: "2 opposite-hand keystrokes in between",
+                gap2_sub: "Use a small value if the 1- and 2-keystroke cases should feel similar. This percentage applies additional easing based on the difference between the two directly-set transition costs.",
+                gap3_name: "3+ opposite-hand keystrokes in between",
+                gap3_sub: "Use a larger value if 3 or more intervening keystrokes should provide noticeably more preparation time. Recovery saturates here.",
+                lbl_recovery_amount: "Additional easing %",
+                recovery_example: "Example: if consecutive cost = 10 and one-opposite-hand cost = 8, then 15% gives 7.7 for two intervening keystrokes, and 40% gives 7.2 for three or more.",
                 lbl_preset: "Load Preset:", lbl_name: "Layout Name:", lbl_desc: "Description:",
 
                 imp_layout: "Import", exp_layout: "Export",
@@ -3816,18 +3840,23 @@
                 instr_layout: "左クリック:文字変更 / 右クリック:有効無効切替(マスク) / ドラッグ:入替",
                 instr_finger: "指ツールを選んでキーをクリックしてください。",
 
-                instr_cost: "指の「遷移コスト」を設定します。始点となるキーをクリックし、終点キー上でホイールして、0(Low)~10(High)の値を設定してください。距離・ロール・シザーズ等の運指相性を加味して定義します。",
+                instr_cost: "編集したい打鍵状況を選び、始点キーをクリックしてから終点キー上でホイールし、0（Low）〜10（High）のコストを設定します。",
                 instr_base: "キーの「位置コスト」を定義します。キー上でホイールして、0(Low)~10(High)の値を設定してください。ホームポジションからの距離や、指ごとの強さを加味して設定します。",
 
+                transition_direct: "同じ手で続けて打つ",
+                transition_direct_sub: "反対の手をはさまない",
+                transition_skip1: "反対の手を1打鍵はさむ",
+                transition_skip1_sub: "例：左A → 右X → 左B",
+                transition_context_note: "同じ A→B の移動でも、打鍵の文脈によって負担は変わります。同じ手で続けて打つ場合は、ロールやアルペジオの滑らかな流れを活かせることがあります。一方、反対の手をはさむと連続動作はいったん切れますが、元の手には B へ移動・準備する時間が生まれるため、同指の大きな移動などでは遷移コストが軽くなることがあります。逆に、連続して打つ方が楽な遷移もあります。こうした違いを遷移ごとに反映するため、2つの打鍵状況を別々に設定します。",
                 instr_result: "ヒートマップ。緑が濃いほど高頻度。",
-                set_gap_title: "手の疲労と回復シミュレーション",
-                set_gap_desc: "「反対の手」を使っている間に、もう片方の手の疲労がどれくらい回復するか（次の遷移にどれくらい余裕が生まれるか）を設定します。ここで設定した係数が「遷移コスト」に掛け算されます。",
-                gap0_name: "同手連打 (Consecutive)",
-                gap0_sub: "反対の手を挟まず、同じ手で連続打鍵。疲労蓄積大。",
-                gap1_name: "1打鍵の休憩 (交互打鍵)",
-                gap1_sub: "反対の手を1回挟む。少し回復します。",
-                gap2_name: "2打鍵以上の休憩",
-                gap2_sub: "反対の手を2回以上挟む。さらに回復。",
+                set_gap_title: "反対の手を複数打鍵はさんだときの回復",
+                set_gap_desc: "上記では、『同じ手で続けて打つ』場合と『反対の手を1打鍵はさむ』場合のコストを直接設定しましたが、ここでは、反対の手が2打鍵・3打鍵以上続いて元の手にさらに準備時間ができたとき、そこからどれだけ追加でコストを軽くするかを設定します。追加軽減は、この2つの直接設定値の差を基準に計算します。なお、『反対の手を1打鍵はさむ』方が高コストな遷移は、その値で固定し、それ以上は悪化させません。",
+                gap2_name: "反対の手を2打鍵はさむ",
+                gap2_sub: "1打鍵はさんだ場合と2打鍵はさんだ場合を近い負担感にしたいときは、小さめの値にします。2つの直接設定値の差に対して、この割合ぶんだけ追加でコストを軽くします。",
+                gap3_name: "反対の手を3打鍵以上はさむ",
+                gap3_sub: "3打鍵以上あけば準備時間がより増える、と考える場合はこちらを大きめにします。3打鍵以上はこの値で回復を打ち止めにします。",
+                lbl_recovery_amount: "追加で軽減する割合 %",
+                recovery_example: "例：『同じ手で続けて打つ』= 10、『反対の手を1打鍵はさむ』= 8 の遷移なら、2打鍵の追加軽減を15%にすると 7.7、3打鍵以上を40%にすると 7.2 になります。",
                 lbl_preset: "プリセット読込:", lbl_name: "配列名:", lbl_desc: "配列の説明:",
                 imp_layout: "インポート", exp_layout: "エクスポート",
                 imp_phys: "インポート", exp_phys: "エクスポート",
@@ -3939,9 +3968,17 @@
                 // デフォルト設定定数(DEFAULT_PHYSICAL_DATA)の値をディープコピーして初期化します
                 const defaults = JSON.parse(JSON.stringify(DEFAULT_PHYSICAL_DATA));
 
+                // Transition cost has two editable context layers:
+                //   costs     = DIRECT (gap=0)
+                //   skipCosts = SKIP-1 (gap=1)
+                // Legacy physical data only has `costs` + gapConfig, so derive SKIP-1 from gapConfig[1].
                 this.costs = defaults.costs;
+                const defaultSkipMultiplier = Number(defaults.gapConfig?.[1] ?? 0.8);
+                this.skipCosts = defaults.skipCosts || scaleTransitionCostMatrix(this.costs, defaultSkipMultiplier);
+                this.transitionRecovery = normalizeTransitionRecovery(defaults.transitionRecovery);
+                this.gapConfig = defaults.gapConfig; // legacy import compatibility only
+                this.costLayer = 'direct';
                 this.baseCosts = defaults.baseCosts;
-                this.gapConfig = defaults.gapConfig;
                 this.repeatCosts = defaults.repeatCosts || { "0": 2.5, "1": 2.0, "2": 1.5, "3": 1.0, "4": 1.2 };
                 this.layerCost = defaults.layerCost !== undefined ? defaults.layerCost : 2.0;
                 this.baseStrokeCost = defaults.baseStrokeCost !== undefined ? defaults.baseStrokeCost : 1.0;
@@ -4037,12 +4074,13 @@
 
             // 物理データ（設定）のみエクスポート
             exportPhysical() {
-                // repeatCosts をエクスポート対象に含める
                 return JSON.stringify({
                     type: 'physical',
-                    costs: this.costs,
+                    transitionModel: 2,
+                    costs: this.costs,            // DIRECT (gap=0); kept as `costs` for compatibility
+                    skipCosts: this.skipCosts,    // SKIP-1 (gap=1)
+                    transitionRecovery: this.transitionRecovery,
                     baseCosts: this.baseCosts,
-                    gapConfig: this.gapConfig,
                     repeatCosts: this.repeatCosts,
                     layerCost: this.layerCost,
                     baseStrokeCost: this.baseStrokeCost,
@@ -4058,6 +4096,41 @@
                 const cols = hand === 'L' ? COLS_L : COLS_R;
                 const isThumb = hand === 'R' && idx === TOTAL_KEYS_R - 1;
                 return isThumb ? 4 : Math.min(4, Math.floor(idx / cols));
+            }
+
+            getTransitionCost(hand, fromIdx, toIdx, gap) {
+                const directRaw = this.state.costs?.[hand]?.[fromIdx]?.[toIdx];
+                const skipRaw = this.state.skipCosts?.[hand]?.[fromIdx]?.[toIdx];
+                const direct = Number.isFinite(Number(directRaw)) ? Number(directRaw) : 0;
+                const skip1 = Number.isFinite(Number(skipRaw)) ? Number(skipRaw) : direct;
+
+                if (gap <= 0) return direct;
+                if (gap === 1) return skip1;
+
+                // If interrupting the motion is worse (e.g. a good roll/arpeggio),
+                // do not extrapolate that penalty upward. It saturates at SKIP-1.
+                if (skip1 >= direct) return skip1;
+
+                const recovery = normalizeTransitionRecovery(this.state.transitionRecovery);
+                const extraRecovery = gap >= 3 ? recovery[3] : recovery[2];
+                const directToSkipDelta = direct - skip1;
+                return Math.max(0, skip1 - (directToSkipDelta * extraRecovery));
+            }
+
+            getStepTransitionCost(cand, history, bundle) {
+                const activeH = cand.hand;
+                const last = history[activeH].idx;
+                const gap = history[activeH].gap;
+                if (last === null) return 0;
+
+                const f = bundle.fingers[activeH][cand.idx];
+                if (last === cand.idx && gap === 0) {
+                    return (f !== null && this.state.repeatCosts[f] !== undefined)
+                        ? this.state.repeatCosts[f]
+                        : 1.5;
+                }
+
+                return this.getTransitionCost(activeH, last, cand.idx, gap);
             }
 
             getActiveBundle() {
@@ -4103,33 +4176,9 @@
 
             calcStepCostForBundle(cand, history, bundle) {
                 const activeH = cand.hand;
-                const last = history[activeH].idx;
-                const gap = history[activeH].gap;
-
                 let sCost = this.state.baseCosts[activeH][cand.idx];
                 if (cand.isLayer) sCost += this.state.layerCost;
-
-                let tCost = 0;
-
-                if (last !== null) {
-                    const f = bundle.fingers[activeH][cand.idx];
-
-                    if (last === cand.idx) {
-                        tCost = (f !== null && this.state.repeatCosts[f] !== undefined)
-                            ? this.state.repeatCosts[f]
-                            : 1.5;
-                    } else {
-                        const rawCost = this.state.costs[activeH][last][cand.idx];
-                        let fatigue = this.state.gapConfig[0];
-
-                        if (gap === 1) fatigue = this.state.gapConfig[1];
-                        else if (gap >= 2) fatigue = this.state.gapConfig[2];
-
-                        tCost = rawCost * fatigue;
-                    }
-                }
-
-                return sCost + tCost;
+                return sCost + this.getStepTransitionCost(cand, history, bundle);
             }
 
             runResolvedSequence(sequence, bundle) {
@@ -4201,11 +4250,8 @@
                         if (last === k.idx && history[activeH].gap === 0) {
                             stats.repeatCount++;
                             stats.repeatKeyCounts[activeH][k.idx]++;
-                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
-                                ? this.state.repeatCosts[f]
-                                : 1.5;
-                            tCost = rCost;
-                            stats.repeatCostSum += rCost;
+                            tCost = this.getStepTransitionCost(k, history, bundle);
+                            stats.repeatCostSum += tCost;
                             if (f !== null && f !== undefined) {
                                 stats.fingerRepeats[f]++;
                             }
@@ -4246,12 +4292,7 @@
                                 }
                             }
 
-                            const rawCost = this.state.costs[activeH][last][k.idx];
-                            let fatigue = this.state.gapConfig[0];
-                            if (history[activeH].gap === 1) fatigue = this.state.gapConfig[1];
-                            else if (history[activeH].gap >= 2) fatigue = this.state.gapConfig[2];
-
-                            tCost = rawCost * fatigue;
+                            tCost = this.getStepTransitionCost(k, history, bundle);
 
                             const fromId = `${activeH}:${last}`;
                             const toId = `${activeH}:${k.idx}`;
@@ -4334,7 +4375,8 @@
             }
 
             run(text) {
-                const keyMap = this.getLayoutMap();
+                const activeBundle = this.getActiveBundle();
+                const keyMap = this.buildLayoutMapFrom(activeBundle);
                 const stats = {
                     totalCost: 0, transCost: 0, staticCost: 0,
                     keystrokes: 0, sourceUnits: 0, layeredStrokes: 0,
@@ -4374,44 +4416,13 @@
 
                 let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
 
-                // コスト計算ヘルパー関数 (このメソッド内、またはクラスメソッドとして定義)
-                // 直前の状態(history)から、候補キー(cand)を打った場合の推定コストを返す
-                const calcStepCost = (cand, history) => {
-                    const activeH = cand.hand;
-                    const last = history[activeH].idx;
-                    const gap = history[activeH].gap; // gapは「他方の手を何回使ったか」
-
-                    let sCost = this.state.baseCosts[activeH][cand.idx]; // 位置コスト
-                    if (cand.isLayer) sCost += this.state.layerCost; // 裏レイヤーペナルティ加算
-                    let tCost = 0; // 遷移コスト
-
-                    if (last !== null) {
-                        const f = this.state.fingers[activeH][cand.idx];
-
-                        if (last === cand.idx) {
-                            // 連打
-                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
-                                        ? this.state.repeatCosts[f] : 1.5;
-                            tCost = rCost;
-                        } else {
-                            // 通常遷移
-                            let rawCost = this.state.costs[activeH][last][cand.idx];
-                            let fatigue = 1.0;
-                            if (gap >= 2) fatigue = this.state.gapConfig[2];
-                            else if (gap === 1) fatigue = this.state.gapConfig[1];
-                            else fatigue = this.state.gapConfig[0];
-
-                            tCost = rawCost * fatigue;
-                        }
-                    }
-                    // 単純合計コストを返す (選択基準用)
-                    return sCost + tCost;
-                };
+                // Greedy candidate selection and final scoring share the exact same cost function.
+                const calcStepCost = (cand, history) => this.calcStepCostForBundle(cand, history, activeBundle);
 
                 // ▼▼▼ L2: Input Method / Extensions Pre-processor ▼▼▼
                 const filterSokuon = document.getElementById('filter-sokuon')?.value || 'none';
                 const filterHatsuon = document.getElementById('filter-hatsuon')?.value || 'none';
-                const processedText = prepareInputText(text, this.getActiveBundle(), filterSokuon, filterHatsuon, this.state.corpusInterpretation || 'auto');
+                const processedText = prepareInputText(text, activeBundle, filterSokuon, filterHatsuon, this.state.corpusInterpretation || 'auto');
                 // ▲▲▲ L2: Pre-processor 終了 ▲▲▲
 
                 // ▼▼▼ 辞書の準備と事前正規化 ▼▼▼
@@ -4513,13 +4524,10 @@
                             // 同一キー連打 (Repeat)
                             stats.repeatCount++;
                             stats.repeatKeyCounts[activeH][k.idx]++;
-                            const rCost = (f !== null && this.state.repeatCosts[f] !== undefined)
-                                          ? this.state.repeatCosts[f]
-                                          : 1.5;
-                            tCost = rCost;
+                            tCost = this.getStepTransitionCost(k, history, activeBundle);
 
                             // 詳細集計
-                            stats.repeatCostSum += rCost;
+                            stats.repeatCostSum += tCost;
                             if (f !== null && f !== undefined) {
                                 stats.fingerRepeats[f]++;
                             }
@@ -4563,15 +4571,8 @@
                                 }
                             }
 
-                            // 遷移コスト計算 (従来通り)
-                            let rawCost = this.state.costs[activeH][last][k.idx];
-                            const gap = history[activeH].gap;
-                            let fatigue = 1.0;
-                            if (gap >= 2) fatigue = this.state.gapConfig[2];
-                            else if (gap === 1) fatigue = this.state.gapConfig[1];
-                            else fatigue = this.state.gapConfig[0];
-
-                            tCost = rawCost * fatigue;
+                            // Context-aware transition cost (DIRECT / SKIP-1 / recovery curve).
+                            tCost = this.getStepTransitionCost(k, history, activeBundle);
 
                             const getDisp = (raw) => raw ? parseKeyToken(raw.trim().split(/\s+/)[0]).disp : '';
                             const k1 = getDisp(this.state.layout[activeH][last]);
@@ -4884,12 +4885,6 @@
                     if(this.state.mode === 'result') this.renderStats(this.state.lastResult);
                 };
 
-                // Gap設定のイベント
-                [0,1,2].forEach(i => {
-                    document.getElementById(`gap-${i}`).onchange = (e) =>
-                        this.state.gapConfig[i] = parseFloat(e.target.value);
-                });
-
                 // 連打コスト設定のイベントと初期値反映
                 [0,1,2,3,4].forEach(i => {
                     const el = document.getElementById(`rep-${i}`);
@@ -5127,9 +5122,17 @@
                             alert(dict.alert_load_layout);
                             this.setDomain('logic');
                         } else if (d.type === 'physical') {
+                            if (!d.costs) throw new Error('Physical data is missing transition costs.');
                             this.state.costs = d.costs;
+
+                            // New format: explicit SKIP-1 matrix.
+                            // Legacy format: derive SKIP-1 using the old gap=1 multiplier.
+                            const legacyGap1 = Number(d.gapConfig?.[1] ?? 0.8);
+                            this.state.skipCosts = d.skipCosts || scaleTransitionCostMatrix(d.costs, legacyGap1);
+                            this.state.transitionRecovery = normalizeTransitionRecovery(d.transitionRecovery);
+                            if (d.gapConfig) this.state.gapConfig = d.gapConfig;
+
                             this.state.baseCosts = d.baseCosts;
-                            if(d.gapConfig) this.state.gapConfig = d.gapConfig;
                             if(d.repeatCosts) this.state.repeatCosts = d.repeatCosts;
                             if(d.layerCost !== undefined) this.state.layerCost = d.layerCost;
                             // Old physical JSON had no baseStrokeCost. Treat it as 0.0 so imported legacy scores remain reproducible.
@@ -5364,7 +5367,64 @@
                                 </select>
                             </div>`;
                     }
+                    if (mode === 'cost') {
+                        html += `
+                            <div class="transition-layer-switch" role="group" aria-label="Transition context">
+                                <button type="button" class="transition-layer-btn ${this.state.costLayer === 'direct' ? 'active' : ''}" data-cost-layer="direct">
+                                    <span>${dict.transition_direct || 'Same hand, consecutive'}</span>
+                                    <span class="transition-layer-sub">${dict.transition_direct_sub || 'No opposite-hand keystroke in between'}</span>
+                                </button>
+                                <button type="button" class="transition-layer-btn ${this.state.costLayer === 'skip1' ? 'active' : ''}" data-cost-layer="skip1">
+                                    <span>${dict.transition_skip1 || 'One opposite-hand keystroke in between'}</span>
+                                    <span class="transition-layer-sub">${dict.transition_skip1_sub || 'Example: Left A → Right X → Left B'}</span>
+                                </button>
+                            </div>
+                            <div class="transition-context-note">${dict.transition_context_note || ''}</div>`;
+                    }
                     html += `<div class="instruction">${dict['instr_' + mode]}</div>`;
+
+                    if (mode === 'cost') {
+                        html += `
+                            <div class="transition-recovery-panel">
+                                <div class="transition-recovery-header">
+                                    <div class="transition-recovery-title">${dict.set_gap_title || 'Recovery after multiple opposite-hand keystrokes'}</div>
+                                    <div class="transition-recovery-desc">${dict.set_gap_desc || ''}</div>
+                                </div>
+                                <div class="transition-recovery-grid">
+                                    <div class="transition-recovery-card">
+                                        <div class="gap-viz">
+                                            <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
+                                        </div>
+                                        <div class="gap-name" style="color:var(--c-warn)">${dict.gap2_name || '2 opposite-hand keystrokes in between'}</div>
+                                        <div class="gap-sub">${dict.gap2_sub || ''}</div>
+                                        <div class="input-group">
+                                            <span>${dict.lbl_recovery_amount || 'Additional easing %'}</span>
+                                            <div class="stepper-box">
+                                                <button class="step-btn" type="button" onclick="stepVal('recovery-2', -5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                                <input type="number" id="recovery-2" min="0" max="200" step="5" class="gap-input">
+                                                <button class="step-btn" type="button" onclick="stepVal('recovery-2', 5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="transition-recovery-card">
+                                        <div class="gap-viz">
+                                            <div class="viz-dot hit"></div><div class="viz-dot rest"></div><div class="viz-dot rest"></div><div class="viz-dot rest"></div><div class="viz-dot hit"></div>
+                                        </div>
+                                        <div class="gap-name" style="color:var(--c-best)">${dict.gap3_name || '3+ opposite-hand keystrokes in between'}</div>
+                                        <div class="gap-sub">${dict.gap3_sub || ''}</div>
+                                        <div class="input-group">
+                                            <span>${dict.lbl_recovery_amount || 'Additional easing %'}</span>
+                                            <div class="stepper-box">
+                                                <button class="step-btn" type="button" onclick="stepVal('recovery-3', -5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                                <input type="number" id="recovery-3" min="0" max="200" step="5" class="gap-input">
+                                                <button class="step-btn" type="button" onclick="stepVal('recovery-3', 5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="transition-context-note transition-recovery-example">${dict.recovery_example || ''}</div>
+                            </div>`;
+                    }
 
                     if (this.dom.kbTitle) this.dom.kbTitle.textContent = this.state.layoutName;
                     const descDisplay = document.getElementById('kb-desc');
@@ -5521,6 +5581,33 @@
                         }
 
                         ctrl.innerHTML = html;
+
+                        if (mode === 'cost') {
+                            ctrl.querySelectorAll('.transition-layer-btn').forEach(btn => {
+                                btn.onclick = () => {
+                                    this.state.costLayer = btn.dataset.costLayer === 'skip1' ? 'skip1' : 'direct';
+                                    ctrl.querySelectorAll('.transition-layer-btn').forEach(b =>
+                                        b.classList.toggle('active', b.dataset.costLayer === this.state.costLayer));
+                                    this.renderGrid('L');
+                                    this.renderGrid('R');
+                                };
+                            });
+
+                            [2,3].forEach(i => {
+                                const el = ctrl.querySelector(`#recovery-${i}`);
+                                if (!el) return;
+                                el.value = (this.state.transitionRecovery[i] * 100).toFixed(0);
+                                el.onchange = (e) => {
+                                    const pct = Math.max(0, Math.min(200, Number(e.target.value) || 0));
+                                    this.state.transitionRecovery[i] = pct / 100;
+                                    this.state.transitionRecovery = normalizeTransitionRecovery(this.state.transitionRecovery);
+                                    [2,3].forEach(gap => {
+                                        const input = ctrl.querySelector(`#recovery-${gap}`);
+                                        if (input) input.value = (this.state.transitionRecovery[gap] * 100).toFixed(0);
+                                    });
+                                };
+                            });
+                        }
 
                         if (mode === 'result') {
                             const flowToggle = document.getElementById('toggle-flow-ctrl');
@@ -7553,9 +7640,9 @@
                         if (this.state.selectedSource && this.state.selectedSource.hand === hand) {
                             if (this.state.selectedSource.idx === idx) keyDiv.classList.add('active-source');
                             else {
-                                // 整数表示に変更
-                                const cost = Math.round(this.state.costs[hand][this.state.selectedSource.idx][idx]);
-                                sSpan.textContent = cost;
+                                const matrix = this.state.costLayer === 'skip1' ? this.state.skipCosts : this.state.costs;
+                                const cost = Number(matrix[hand][this.state.selectedSource.idx][idx]) || 0;
+                                sSpan.textContent = Number.isInteger(cost) ? String(cost) : cost.toFixed(1);
                                 if (cost < 3) keyDiv.classList.add('cost-best');
                                 else if (cost < 5) keyDiv.classList.add('cost-good');
                                 else if (cost < 7) keyDiv.classList.add('cost-warn');
@@ -7731,16 +7818,17 @@
                             const src = this.state.selectedSource.idx;
                             if (src === idx) return;
 
-                            // 整数単位で増減 (-1 or +1)
-                            const delta = e.deltaY > 0 ? -1 : 1;
-                            // 現在値を四捨五入してから増減
-                            let v = Math.round(this.state.costs[hand][src][idx]) + delta;
+                            // 連続遷移は 0.5、反対の手を1打鍵はさむ遷移は 0.1 刻みで調整する。
+                            const step = this.state.costLayer === 'skip1' ? 0.1 : 0.5;
+                            const delta = e.deltaY > 0 ? -step : step;
+                            const matrix = this.state.costLayer === 'skip1' ? this.state.skipCosts : this.state.costs;
+                            let v = Math.round((Number(matrix[hand][src][idx]) + delta) * 10) / 10;
 
                             // 0~10 の範囲に制限
                             if (v < 0) v = 0;
                             if (v > 10) v = 10;
 
-                            this.state.costs[hand][src][idx] = v;
+                            matrix[hand][src][idx] = v;
                             this.renderGrid(hand);
                         };
                     }
@@ -8677,7 +8765,10 @@
             if (!input) return;
             let val = parseFloat(input.value);
             val = Math.round((val + step) * 10) / 10;
-            if (val < 0) val = 0;
+            const min = input.min !== '' ? Number(input.min) : 0;
+            const max = input.max !== '' ? Number(input.max) : Infinity;
+            if (Number.isFinite(min)) val = Math.max(min, val);
+            if (Number.isFinite(max)) val = Math.min(max, val);
             input.value = val.toFixed(1);
             // 変更イベントを発火させて既存ロジック(UIクラス)に通知
             input.dispatchEvent(new Event('change'));
