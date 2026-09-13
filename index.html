@@ -820,6 +820,17 @@
             .result-grid > div {
                 min-width: 0; /* Grid内でのコンテンツはみ出し防止 */
             }
+            .result-grid > .res-bottom-block {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .res-bottom-block {
+            width: 100%;
+            min-width: 0;
+        }
+        .result-detail-stats {
+            margin-bottom: 1rem;
         }
 
         .panel h3 {
@@ -2320,7 +2331,33 @@
                                 <div class="hist-body" id="cost-hist-new"></div>
                             </div>
 
-                            <div style="margin-bottom: 1rem;">
+                        </div>
+
+                        <div class="res-col-sub">
+
+                            <h3 style="margin-top:0;" data-i18n="graph_finger">Finger Load</h3>
+                            <div class="stats-split">
+                                <div class="stats-col"><h4>L</h4><div id="chart-finger-L"></div></div>
+                                <div class="stats-col"><h4>R</h4><div id="chart-finger-R"></div></div>
+                            </div>
+
+                            <div id="repeat-detail-wrapper" style="margin-top:-0.7rem; margin-bottom:1.5rem; display:none; background:rgba(255,255,255,0.03); padding:10px; border-radius:6px;">
+                                <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:6px;" data-i18n="lbl_rep_finger">Repeats by Finger</div>
+                                <div id="chart-repeat-finger-new"></div>
+                            </div>
+
+                            <h3 style="margin-top:1rem;" data-i18n="graph_row">Row Usage</h3>
+                            <div class="stats-split">
+                                <div class="stats-col"><h4>L</h4><div id="chart-row-L"></div></div>
+                                <div class="stats-col"><h4>R</h4><div id="chart-row-R"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="res-bottom-block">
+                            <h4 style="margin-top:0; font-size:0.75rem; color:var(--text-dim);" data-i18n="res_worst">Worst Transitions</h4>
+                            <div id="worst-grid" class="worst-grid" style="margin-bottom: 1.5rem;"></div>
+
+                            <div class="result-detail-stats">
                                 <div class="stat-item"><span data-i18n="res_effective_work">総コスト</span><span id="res-effective-work">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_base_stroke_work">Base Stroke Work</span><span id="res-base-stroke-work">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_weighted_work">Ergonomic Penalty Total</span><span id="res-weighted-work">0.00</span></div>
@@ -2338,29 +2375,6 @@
                                 <div class="stat-item"><span data-i18n="lbl_strokes_per_char">Strokes / Input Char</span><span id="stat-strokes-per-char">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="lbl_layered_strokes">Layered Strokes</span><span id="stat-layered-strokes">0 (0.0%)</span></div>
                                 <div class="stat-item"><span data-i18n="stat_max_key">Top Key</span><span id="stat-max-key">-</span></div>
-
-                                <div id="repeat-detail-wrapper" style="margin-top:10px; display:none; background:rgba(255,255,255,0.03); padding:10px; border-radius:6px;">
-                                    <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:6px;" data-i18n="lbl_rep_finger">Repeats by Finger</div>
-                                    <div id="chart-repeat-finger-new"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="res-col-sub">
-
-                            <h4 style="margin-top:0; font-size:0.75rem; color:var(--text-dim);" data-i18n="res_worst">Worst Transitions</h4>
-                            <div id="worst-grid" class="worst-grid" style="margin-bottom: 2rem;"></div>
-
-                            <h3 style="margin-top:0;" data-i18n="graph_finger">Finger Load</h3>
-                            <div class="stats-split">
-                                <div class="stats-col"><h4>L</h4><div id="chart-finger-L"></div></div>
-                                <div class="stats-col"><h4>R</h4><div id="chart-finger-R"></div></div>
-                            </div>
-
-                            <h3 style="margin-top:1rem;" data-i18n="graph_row">Row Usage</h3>
-                            <div class="stats-split">
-                                <div class="stats-col"><h4>L</h4><div id="chart-row-L"></div></div>
-                                <div class="stats-col"><h4>R</h4><div id="chart-row-R"></div></div>
                             </div>
                         </div>
 
