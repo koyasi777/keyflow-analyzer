@@ -724,6 +724,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .instruction { margin-bottom: 0; line-height: 1.5; color: var(--text-dim); }
+        .instruction + .transition-context-note { margin-top: 10px; }
 
         .finger-palette { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
         .p-btn {
@@ -5494,9 +5495,11 @@
                                     <span class="transition-layer-sub">${dict.transition_skip1_sub || 'Example: Left A → Right X → Left B'}</span>
                                 </button>
                             </div>
+                            <div class="instruction">${dict.instr_cost}</div>
                             <div class="transition-context-note">${dict.transition_context_note || ''}</div>`;
+                    } else {
+                        html += `<div class="instruction">${dict['instr_' + mode]}</div>`;
                     }
-                    html += `<div class="instruction">${dict['instr_' + mode]}</div>`;
 
                     if (mode === 'cost') {
                         html += `
