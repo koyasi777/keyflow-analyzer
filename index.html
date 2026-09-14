@@ -2043,10 +2043,10 @@
                         <div style="padding: 1rem 0;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:0.9rem;">
                                 <span style="color:var(--text-dim)">
-                                    <span data-i18n="lbl_static_w">Position</span>: <span id="disp-static" style="color:var(--text-main)">35</span>%
+                                    <span data-i18n="lbl_static_w">Position</span>: <span id="disp-static" style="color:var(--text-main)">35</span> <span id="disp-static-mult" style="color:var(--text-dim)">(×0.70)</span>
                                 </span>
                                 <span style="color:var(--accent)">
-                                    <span data-i18n="lbl_trans_w">Transition</span>: <span id="disp-trans" style="color:white">65</span>%
+                                    <span data-i18n="lbl_trans_w">Transition</span>: <span id="disp-trans" style="color:white">65</span> <span id="disp-trans-mult" style="color:var(--text-dim)">(×1.30)</span>
                                 </span>
                             </div>
 
@@ -2121,6 +2121,24 @@
                                     <input type="number" id="rep-4" value="1.5" step="0.1" class="gap-input">
                                     <button class="step-btn" onclick="stepVal('rep-4', 0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="logic-card">
+                        <div class="logic-header">
+                            <div class="logic-title" data-i18n="set_upper_streak_down_title">Upper-row Streak → Lower-row Penalty</div>
+                            <p class="logic-desc" data-i18n="set_upper_streak_down_desc">When the same hand types two different consecutive keys on the upper letter row and then immediately moves to the lower letter row, multiply only that final transition cost by this additional percentage.</p>
+                        </div>
+                        <div style="display:flex; justify-content:center; margin-top:1rem;">
+                            <div class="input-group">
+                                <span data-i18n="lbl_upper_streak_down_penalty">Additional transition cost</span>
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepVal('upper-streak-down-penalty-in', -5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                    <input type="number" id="upper-streak-down-penalty-in" value="30" min="0" max="100" step="5" class="gap-input">
+                                    <button class="step-btn" onclick="stepVal('upper-streak-down-penalty-in', 5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+                                </div>
+                                <span>%</span>
                             </div>
                         </div>
                     </div>
@@ -2214,7 +2232,7 @@
                                 <div id="kpi-overall-card" class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_score_desc" tabindex="0">
                                     <div class="kpi-label" data-i18n="res_total">Cost per Input Character</div>
                                     <div class="kpi-value-row">
-                                        <div class="kpi-value" id="kpi-score" style="color:var(--accent)">0.00</div>
+                                        <div class="kpi-value" id="kpi-score" style="color:var(--accent)">0.000</div>
                                         <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_cost_per_input">Cost / Char</div>
                                     </div>
                                     <div class="kpi-sub">
@@ -2226,7 +2244,7 @@
                                 <div id="kpi-cost-stroke-card" class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_cost_stroke_desc" tabindex="0">
                                     <div class="kpi-label" data-i18n="lbl_weighted_cost_stroke">Cost per Stroke</div>
                                     <div class="kpi-value-row">
-                                        <div class="kpi-value" id="kpi-cost-stroke">0.00</div>
+                                        <div class="kpi-value" id="kpi-cost-stroke">0.000</div>
                                         <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_weighted_per_stroke">Cost / Stroke</div>
                                     </div>
                                     <div class="kpi-sub score-weight-line">
@@ -2234,11 +2252,29 @@
                                         <span id="kpi-score-base-cost" class="score-weight-value">1.0</span>
                                         <span class="score-weight-sep">+</span>
                                         <span data-i18n="lbl_position_short">Position</span>
-                                        <span id="kpi-score-static-weight" class="score-weight-value">35%</span>
+                                        <span id="kpi-score-static-weight" class="score-weight-value">×0.70</span>
                                         <span class="score-weight-sep">·</span>
                                         <span data-i18n="lbl_transition_short">Transition</span>
-                                        <span id="kpi-score-trans-weight" class="score-weight-value">65%</span>
+                                        <span id="kpi-score-trans-weight" class="score-weight-value">×1.30</span>
                                     </div>
+                                </div>
+
+                                <div class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_position_score_desc">
+                                    <div class="kpi-label" data-i18n="lbl_position_score">Position Score</div>
+                                    <div class="kpi-value-row">
+                                        <div class="kpi-value" id="kpi-position-score">0.000</div>
+                                        <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_weighted_per_stroke">Cost / Stroke</div>
+                                    </div>
+                                    <div class="kpi-sub" data-i18n="lbl_raw_avg_per_stroke">Before balance multiplier</div>
+                                </div>
+
+                                <div class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_transition_score_desc">
+                                    <div class="kpi-label" data-i18n="lbl_transition_score">Transition Score</div>
+                                    <div class="kpi-value-row">
+                                        <div class="kpi-value" id="kpi-transition-score">0.000</div>
+                                        <div class="kpi-unit kpi-unit-inline" data-i18n="lbl_weighted_per_stroke">Cost / Stroke</div>
+                                    </div>
+                                    <div class="kpi-sub" data-i18n="lbl_raw_avg_per_stroke">Before balance multiplier</div>
                                 </div>
 
                                 <div class="kpi-card tooltip core-metric-card" data-i18n-tooltip="lbl_strokes_desc">
@@ -2364,8 +2400,12 @@
                                 <div class="stat-item"><span data-i18n="res_effective_per_stroke">1打鍵あたりのコスト</span><span id="res-effective-per-stroke">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_weighted_per_stroke">Ergonomic Penalty / Stroke</span><span id="res-weighted-per-stroke">0.00</span></div>
                                 <div class="stat-item"><span data-i18n="res_raw_per_stroke">Raw Cost / Stroke</span><span id="res-raw-per-key">0.00</span></div>
-                                <div class="stat-item"><span data-i18n="res_static">Avg. Position</span><span id="res-static-val">0.00</span></div>
-                                <div class="stat-item"><span data-i18n="res_trans">Avg. Transition</span><span id="res-trans-val">0.00</span></div>
+                                <div class="stat-item"><span data-i18n="res_static">Avg. Position</span><span id="res-static-val">0.000</span></div>
+                                <div class="stat-item"><span data-i18n="res_trans">Avg. Transition</span><span id="res-trans-val">0.000</span></div>
+                                <div class="stat-item"><span data-i18n="res_upper_streak_hits">Upper-streak → lower-row penalty hits</span><span id="res-upper-streak-hits">0</span></div>
+                                <div class="stat-item"><span data-i18n="res_upper_streak_extra_raw">Upper-streak → lower-row extra transition cost (Raw)</span><span id="res-upper-streak-extra-raw">+0.000</span></div>
+                                <div class="stat-item"><span data-i18n="res_upper_streak_extra_per_hit">Upper-streak → lower-row extra cost / hit</span><span id="res-upper-streak-extra-per-hit">+0.000</span></div>
+                                <div class="stat-item"><span data-i18n="res_upper_streak_overall_impact">Upper-streak → lower-row Overall Cost contribution</span><span id="res-upper-streak-overall-impact">+0.000</span></div>
                                 <div class="stat-item"><span data-i18n="res_work">Total Raw Cost</span><span id="res-total-load">0</span></div>
 
                                 <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:5px;"></div>
@@ -3716,6 +3756,7 @@
                 "3": 1,
                 "4": 1.5
             },
+            "upperStreakDownPenalty": 0.3,
             "layerCost": 0.5,
             "baseStrokeCost": 1.0,
             "weights": {
@@ -3729,6 +3770,12 @@
                 L: (costs?.L || []).map(row => row.map(v => Number(v) * m)),
                 R: (costs?.R || []).map(row => row.map(v => Number(v) * m))
             };
+        }
+
+        function normalizeUpperStreakDownPenalty(value) {
+            const n = Number(value);
+            // 0.30 means +30%. Cap at +100% so the contextual modifier remains bounded.
+            return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.30;
         }
 
         function normalizeTransitionRecovery(value) {
@@ -3776,10 +3823,16 @@
 
                 panel_results: "Analysis Results", res_total: "Cost / Input Char", res_work: "Raw Cost Total",
                 res_effective_work: "Total Cost", res_base_stroke_work: "Base Stroke Cost Total", res_effective_per_stroke: "Cost / Stroke",
-                res_weighted_work: "Weighted Ergonomic Cost", res_weighted_per_stroke: "Ergonomic Cost / Stroke", res_raw_per_stroke: "Raw Cost / Stroke (no weights)",
-                res_trans: "Avg. Transition Cost", res_static: "Avg. Position Cost",
-                lbl_cost_per_input: "Cost / Char", lbl_weighted_per_stroke: "Cost / Stroke",
+                res_weighted_work: "Balance-adjusted Ergonomic Cost", res_weighted_per_stroke: "Balance-adjusted Cost / Stroke", res_raw_per_stroke: "Raw Cost / Stroke (no balance multiplier)",
+                res_trans: "Avg. Transition Cost (Raw)", res_static: "Avg. Position Cost (Raw)",
+                res_upper_streak_hits: "Upper-streak → lower-row penalty hits",
+                res_upper_streak_extra_raw: "Upper-streak → lower-row extra transition cost (Raw)",
+                res_upper_streak_extra_per_hit: "Upper-streak → lower-row extra cost / hit",
+                res_upper_streak_overall_impact: "Upper-streak → lower-row Overall Cost contribution",
+                lbl_cost_per_input: "Cost / Char", lbl_weighted_per_stroke: "Cost / Stroke", lbl_points_short: "pt",
                 lbl_weighted_cost_stroke: "Cost / Stroke", lbl_weighted_work_short: "Ergonomic Cost",
+                lbl_position_score: "Avg. Position Cost", lbl_transition_score: "Avg. Transition Cost",
+                lbl_raw_avg_per_stroke: "Before balance multiplier",
                 lbl_cost_input_hint: "Lower is better",
                 lbl_base_short: "Base", lbl_position_short: "Position", lbl_transition_short: "Transition",
                 lbl_position_total_short: "Position Total", lbl_transition_total_short: "Transition Total",
@@ -3836,8 +3889,8 @@
                 desc_sd: "Standard Deviation. Represents inconsistency (Mura). Lower means a steadier typing rhythm.",
                 desc_95: "95% of keystrokes fall below this cost. Lower means fewer sudden, difficult reaches.",
 
-                set_weight_title: "Position / Transition Weighting",
-                set_weight_desc: "Choose how strongly Position Cost and Transition Cost contribute to the ergonomic penalty. Base Stroke Cost is added separately for every resolved stroke.",
+                set_weight_title: "Position / Transition Balance",
+                set_weight_desc: "Adjust the relative emphasis of Position Cost and Transition Cost. 50:50 is neutral (×1.00 / ×1.00); 35:65 means Position ×0.70 and Transition ×1.30. The raw costs are not both compressed. Base Stroke Cost is added separately for every resolved stroke.",
                 set_base_stroke_title: "Base Stroke Cost",
                 set_base_stroke_desc: "Adds a fixed effort for every resolved stroke, independent of position or transition difficulty. Set to 0.0 to reproduce the previous ergonomic-penalty-only score model.",
                 lbl_cost_per_stroke_base: "Cost / stroke",
@@ -3850,9 +3903,13 @@
                 set_repeat_desc: "Cost penalty for pressing the same key consecutively. Adjust based on finger agility.",
                 lbl_pinky: "Pinky", lbl_ring: "Ring", lbl_mid: "Mid", lbl_idx: "Index", lbl_thb: "Thumb",
 
+                set_upper_streak_down_title: "Upper-row Streak → Lower-row Penalty",
+                set_upper_streak_down_desc: "Typing two different consecutive keys on the upper letter row with the same hand tends to shift the whole hand upward. If that hand then moves directly to the lower letter row without an opposite-hand stroke, only the final upper-to-lower transition receives the extra penalty because pulling the hand back down is more demanding. Same-key repeats on the upper row do not qualify, an opposite-hand stroke resets the sequence, and the reverse lower-to-upper movement is not penalized.",
+                lbl_upper_streak_down_penalty: "Additional transition cost",
+
                 // Layer Penalty & Prompt
                 set_layer_title: "Layer Switch Penalty",
-                set_layer_desc: "Additional cost for accessing a secondary layer (e.g. Shift or Fn). For a layered stroke, this value is added to that stroke\'s Position Cost: Position Cost = Base Position Cost + Layer Cost. It is therefore included in Position Cost Total and affected by Position Weight in the final evaluation.",
+                set_layer_desc: "Additional cost for accessing a secondary layer (e.g. Shift or Fn). For a layered stroke, this value is added to that stroke\'s Position Cost: Position Cost = Base Position Cost + Layer Cost. It is therefore included in Position Cost Total and affected by the Position multiplier in the final evaluation.",
                 msg_key_prompt: "Key Char (Space to add layer. Use 'val:disp' for display name. e.g. 'wa:わ'):",
 
                 lbl_rep_cost: "Avg. Repeat Cost",
@@ -3865,9 +3922,11 @@
                 modal_desc_imp: "Paste the JSON text below.",
                 modal_desc_exp: "Copy and save the JSON text below.",
 
-                lbl_score_desc: "【Cost per Input Character】\nThe average evaluation cost required to produce one input character. Lower is better.\n\nFormula:\n(Base Stroke Cost × Required Strokes + Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Input Characters\n\nPosition Weight and Transition Weight are the evaluation ratios configured under Analysis Logic. Base Stroke Cost is added separately for every required stroke, so layouts that produce the same text with fewer strokes receive that benefit here. Layer Cost is included in Position Cost for layered outputs and therefore passes through Position Weight. Unrecognized characters incur no stroke cost, so comparisons should use layouts that can represent the same corpus sufficiently.",
-                lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluation cost of one resolved stroke. Lower means each stroke is lighter on average.\n\nFormula:\nBase Stroke Cost + (Position Cost Total × Position Weight + Transition Cost Total × Transition Weight) ÷ Required Strokes\n\nThis metric describes the average weight of a stroke and does not by itself reward using fewer strokes. Read it together with Cost per Input Character and Required Strokes. The detailed results also show Ergonomic Cost / Stroke without Base Stroke Cost.",
-                lbl_strokes_desc: "【Required Strokes】\nThe number of key outputs the analyzer needs to produce the input text with this layout. Lower means fewer key outputs are needed for the same corpus.\n\nIf one key outputs multiple characters, that output counts as one stroke. A layered character also counts as one stroke; the layer action itself is not counted as an additional stroke. Instead, Layer Cost is added to that stroke\'s Position Cost and is evaluated through Position Weight.\n\nStrokes / Input Char = Required Strokes ÷ Input Characters.",
+                lbl_score_desc: "【Cost per Input Character】\nThe average evaluation cost required to produce one input character. Lower is better.\n\nFormula:\n(Base Stroke Cost × Required Strokes + Position Cost Total × Position Multiplier + Transition Cost Total × Transition Multiplier) ÷ Input Characters\n\nThe Position and Transition settings control their relative evaluation strength. 50:50 is neutral (×1.00 / ×1.00); for example, 35:65 means Position ×0.70 and Transition ×1.30. Base Stroke Cost is added separately for every required stroke, so layouts that produce the same text with fewer strokes receive that benefit here.\n\nFor a layered output, Layer Cost is added to that stroke's Position Cost and therefore passes through the Position multiplier. Unrecognized characters incur no stroke cost, so use a corpus the layout can represent sufficiently when evaluating results.",
+                lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluation cost of one resolved stroke. Lower means each stroke is lighter on average.\n\nFormula:\nBase Stroke Cost + (Position Cost Total × Position Multiplier + Transition Cost Total × Transition Multiplier) ÷ Required Strokes\n\nThe Position and Transition settings are relative multipliers: 50:50 is neutral (×1.00 / ×1.00). This metric describes the average weight of a stroke and does not by itself reward using fewer strokes. Read it together with Cost per Input Character and Required Strokes. The detailed results also show the movement-related cost per stroke separately.",
+                lbl_position_score_desc: "【Avg. Position Cost】\nThe average positional burden of one resolved stroke. Lower means the layout tends to use easier key positions.\n\nFormula:\nPosition Cost Total ÷ Required Strokes\n\nThe Position balance multiplier is not applied here, so this card shows the position-cost model itself rather than its weighted contribution to the overall cost.",
+                lbl_transition_score_desc: "【Avg. Transition Cost】\nThe average movement burden between strokes. Lower means the layout tends to produce smoother, lighter transitions.\n\nFormula:\nTransition Cost Total ÷ Required Strokes\n\nDIRECT / SKIP costs, recovery adjustments, and contextual transition penalties are reflected before averaging. The Transition balance multiplier is not applied here, so this card shows the transition model itself.",
+                lbl_strokes_desc: "【Required Strokes】\nThe number of key outputs the analyzer needs to produce the input text with this layout. Lower means fewer key outputs are needed for the same corpus.\n\nIf one key outputs multiple characters, that output counts as one stroke. A layered character also counts as one stroke; the layer action itself is not counted as an additional stroke. Instead, Layer Cost is added to that stroke\'s Position Cost and is evaluated through the Position multiplier.\n\nStrokes / Input Char = Required Strokes ÷ Input Characters.",
                 lbl_sd_desc: "Standard deviation of raw stroke cost (Position + Transition). Lower means steadier typing rhythm.",
                 lbl_med_desc: "Median raw stroke cost (Position + Transition). It represents a typical stroke while reducing the influence of outliers.",
                 lbl_95_desc: "95% of raw stroke costs fall at or below this value. Lower values mean fewer extreme high-load strokes.",
@@ -3948,10 +4007,16 @@
                 // 結果パネル:
                 panel_results: "解析結果", res_total: "入力1文字あたりのコスト", res_work: "Rawコスト合計",
                 res_effective_work: "総コスト", res_base_stroke_work: "基本打鍵コスト合計", res_effective_per_stroke: "1打鍵あたりのコスト",
-                res_weighted_work: "運指コスト合計（Weight適用後）", res_weighted_per_stroke: "運指コスト / 打鍵", res_raw_per_stroke: "Rawコスト / 打鍵（Weightなし）",
-                res_trans: "遷移コスト (平均)", res_static: "位置コスト (平均)",
-                lbl_cost_per_input: "コスト / 文字", lbl_weighted_per_stroke: "コスト / 打鍵",
+                res_weighted_work: "運指コスト合計（バランス倍率適用後）", res_weighted_per_stroke: "運指コスト / 打鍵（倍率適用後）", res_raw_per_stroke: "Rawコスト / 打鍵（倍率なし）",
+                res_trans: "遷移コスト平均（Raw）", res_static: "位置コスト平均（Raw）",
+                res_upper_streak_hits: "同手・上段連続→下段 ペナルティ発生回数",
+                res_upper_streak_extra_raw: "同手・上段連続→下段 追加遷移コスト（Raw）",
+                res_upper_streak_extra_per_hit: "同手・上段連続→下段 1回あたり追加負荷",
+                res_upper_streak_overall_impact: "同手・上段連続→下段 Overall Costへの寄与",
+                lbl_cost_per_input: "コスト / 文字", lbl_weighted_per_stroke: "コスト / 打鍵", lbl_points_short: "pt",
                 lbl_weighted_cost_stroke: "1打鍵あたりのコスト", lbl_weighted_work_short: "運指コスト",
+                lbl_position_score: "平均位置コスト", lbl_transition_score: "平均遷移コスト",
+                lbl_raw_avg_per_stroke: "バランス倍率適用前",
                 lbl_cost_input_hint: "低いほど効率的",
                 lbl_base_short: "基本", lbl_position_short: "位置", lbl_transition_short: "遷移",
                 lbl_position_total_short: "位置コスト合計", lbl_transition_total_short: "遷移コスト合計",
@@ -4005,8 +4070,8 @@
                 desc_sd: "打鍵心地の「ムラ」。数値が小さいほど、常に一定のリズムで快適に打てます。",
                 desc_95: "「95%の打鍵はこのコスト以下に収まる」ライン。低いほど、突発的な高負荷(無理な運指)が少ないことを意味します。",
 
-                set_weight_title: "位置コスト / 遷移コストのWeight",
-                set_weight_desc: "位置コストと遷移コストを、評価時にどの比重で扱うかを設定します。同じWeightを「入力1文字あたりのコスト」と「1打鍵あたりのコスト」に使用します。基本打鍵コストはこのWeightとは別に、必要打鍵ごとに加算されます。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
+                set_weight_title: "位置コスト / 遷移コストの評価バランス",
+                set_weight_desc: "位置コストと遷移コストの相対的な重視度を設定します。50:50では両方を等倍（×1.00 / ×1.00）で評価します。たとえば35:65なら位置×0.70、遷移×1.30となり、両方のコストを割合で圧縮しません。基本打鍵コストはこのバランスとは別に、必要打鍵ごとに加算されます。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
                 set_base_stroke_title: "基本打鍵コスト",
                 set_base_stroke_desc: "キー位置や遷移の難しさとは別に、1打鍵するだけで必ず発生する基本負荷です。「基本打鍵コスト × 必要打鍵数」として総コストへ加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点を評価できます。0.0にすると、従来どおり位置コストと遷移コストだけで評価します。",
                 lbl_cost_per_stroke_base: "Cost / 打鍵",
@@ -4019,9 +4084,13 @@
                 set_repeat_desc: "同じキーを連続して打つ際の追加コストです。指の動きにくさに応じて調整してください。",
                 lbl_pinky: "小指", lbl_ring: "薬指", lbl_mid: "中指", lbl_idx: "人差", lbl_thb: "親指",
 
+                set_upper_streak_down_title: "同手・上段連続後の下段移動ペナルティ",
+                set_upper_streak_down_desc: "同じ手で文字上段の異なるキーを2打鍵連続すると、手全体の位置が上段側へ寄りやすくなります。その状態から異手を挟まず、同じ手で文字下段へ引き戻す動作は負担が大きいため、最後の「上段→下段」の遷移コストにだけ追加補正をかけます。上段での同一キー連打は手全体の移動とはみなさないため対象外です。途中に異手を挟むと連続状態は解除されます。また、下段から上段へ伸ばす逆方向の動作には適用しません。",
+                lbl_upper_streak_down_penalty: "遷移コスト加算率",
+
                 // Layer Penalty & Prompt
                 set_layer_title: "レイヤー切替ペナルティ",
-                set_layer_desc: "ShiftやFnなど、裏レイヤーにアクセスする打鍵へ追加するコストです。裏レイヤー打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」として位置コスト側へ加算します。そのため位置コスト合計に含まれ、最終評価では位置Weightの影響を受けます。",
+                set_layer_desc: "ShiftやFnなど、裏レイヤーにアクセスする打鍵へ追加するコストです。裏レイヤー打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」として位置コスト側へ加算します。そのため位置コスト合計に含まれ、最終評価では位置側のバランス倍率の影響を受けます。",
                 msg_key_prompt: "キー文字 (裏レイヤーは半角スペース区切り。「入力:表示」の形式で表示名を変えられます。 例: wa:わ):",
 
                 lbl_rep_cost: "平均連打コスト",
@@ -4034,9 +4103,11 @@
                 modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
-                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（基本打鍵コスト × 必要打鍵数 + 位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 入力文字数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。基本打鍵コストはWeightとは別に、必要打鍵ごとに加算されます。分母を入力文字数にし、さらに基本打鍵コストが必要打鍵数に比例するため、同じ文章をより少ない打鍵で入力できる配列の利点もこの値に反映されます。\n\n裏レイヤーの出力は1打鍵として数えます。その打鍵では「位置コスト = キー本来の位置コスト + Layer Cost」としてLayer Costを位置コスト側へ加算します。したがってLayer Costは上式の「位置コスト合計」に含まれ、位置Weightを通して最終コストへ反映されます。解析できない文字には打鍵コストが発生しないため、比較時は同じコーパスを十分に表現できていることを確認してください。",
-                lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n基本打鍵コスト +（位置コスト合計 × 位置Weight + 遷移コスト合計 × 遷移Weight）÷ 必要打鍵数\n\n位置Weight・遷移Weightは「解析ロジック」で設定した評価比率です。この値は1打鍵そのものの重さを見る指標なので、文章を少ない打鍵で入力できること自体は評価しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると、配列の特徴が分かります。\n\n詳細欄には、基本打鍵コストを含まない「運指コスト / 打鍵」も別に表示します。これにより、基本打鍵負荷と位置・遷移による負荷を分けて確認できます。",
-                lbl_strokes_desc: "【必要打鍵数】\nこの配列で入力テキストを生成するために、アナライザーが必要と判断したキー出力の回数です。同じコーパスなら、少ないほど少ないキー出力で入力できます。\n\n複数文字を1つのキーで出力する場合でも、その出力は1打鍵として数えます。裏レイヤーの文字も1打鍵として数え、レイヤーキー操作そのものは追加の1打鍵として数えません。その代わり、Layer Costをその打鍵の位置コストへ加算し、位置Weightを通して評価します。\n\n「打鍵数 / 入力1文字」= 必要打鍵数 ÷ 入力文字数 です。",
+                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（基本打鍵コスト × 必要打鍵数 + 位置コスト合計 × 位置倍率 + 遷移コスト合計 × 遷移倍率）÷ 入力文字数\n\n位置・遷移の設定は、それぞれをどの程度重視するかを相対倍率として調整します。50:50では位置・遷移とも×1.00、たとえば35:65なら位置×0.70・遷移×1.30です。基本打鍵コストはこの倍率とは別に必要打鍵ごとに加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点もこの値に反映されます。\n\n裏レイヤーの出力ではLayer Costをその打鍵の位置コストへ加算し、位置倍率を通して評価します。解析できない文字には打鍵コストが発生しないため、結果を見る際は対象コーパスを十分に入力できていることも確認してください。",
+                lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n基本打鍵コスト +（位置コスト合計 × 位置倍率 + 遷移コスト合計 × 遷移倍率）÷ 必要打鍵数\n\n位置・遷移の設定は相対倍率として反映され、50:50では両方×1.00です。この指標は1打鍵そのものの重さを見るため、文章を少ない打鍵で入力できる利点だけを単独では表しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると配列の特徴が分かります。\n\n詳細欄では、基本打鍵コストやバランス倍率の影響を分けて確認できる値も表示します。",
+                lbl_position_score_desc: "【平均位置コスト】\n1打鍵あたりの「キー位置そのものの負担」の平均です。低いほど、負担の小さい位置を使う傾向があることを示します。\n\n計算式：\n位置コスト合計 ÷ 必要打鍵数\n\nここでは位置側のバランス倍率を掛けません。そのため、総合コストへの寄与ではなく、設定した位置コストモデルそのものの傾向を確認できます。",
+                lbl_transition_score_desc: "【平均遷移コスト】\n打鍵から次の打鍵へ移るときの「運指の負担」の平均です。低いほど、滑らかで負担の小さい遷移が多いことを示します。\n\n計算式：\n遷移コスト合計 ÷ 必要打鍵数\n\nDIRECT / SKIP、回復補正、文脈依存の遷移ペナルティを反映した後の値を平均します。ここでは遷移側のバランス倍率を掛けないため、設定した遷移コストモデルそのものの傾向を確認できます。",
+                lbl_strokes_desc: "【必要打鍵数】\nこの配列で入力テキストを生成するために、アナライザーが必要と判断したキー出力の回数です。同じコーパスなら、少ないほど少ないキー出力で入力できます。\n\n複数文字を1つのキーで出力する場合でも、その出力は1打鍵として数えます。裏レイヤーの文字も1打鍵として数え、レイヤーキー操作そのものは追加の1打鍵として数えません。その代わり、Layer Costをその打鍵の位置コストへ加算し、位置側のバランス倍率を通して評価します。\n\n「打鍵数 / 入力1文字」= 必要打鍵数 ÷ 入力文字数 です。",
                 lbl_sd_desc: "【標準偏差 (SD)】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）のばらつきです。値が小さいほど、打鍵ごとの負荷が安定しています。",
                 lbl_med_desc: "【中央値】\n1打鍵ごとのRawコスト（位置コスト + 遷移コスト）の中央値です。極端な高負荷打鍵の影響を受けにくく、典型的な1打鍵の重さを示します。",
                 lbl_95_desc: "【95%タイル値】\n1打鍵ごとのRawコストの95%が、この値以下に収まるラインです。低いほど、突発的な高負荷打鍵が少ないことを示します。",
@@ -4110,6 +4181,7 @@
                 this.costLayer = 'direct';
                 this.baseCosts = defaults.baseCosts;
                 this.repeatCosts = defaults.repeatCosts || { "0": 2.5, "1": 2.0, "2": 1.5, "3": 1.0, "4": 1.2 };
+                this.upperStreakDownPenalty = normalizeUpperStreakDownPenalty(defaults.upperStreakDownPenalty);
                 this.layerCost = defaults.layerCost !== undefined ? defaults.layerCost : 2.0;
                 this.baseStrokeCost = defaults.baseStrokeCost !== undefined ? defaults.baseStrokeCost : 1.0;
                 this.weights = defaults.weights || { trans: 65 };
@@ -4212,6 +4284,7 @@
                     transitionRecovery: this.transitionRecovery,
                     baseCosts: this.baseCosts,
                     repeatCosts: this.repeatCosts,
+                    upperStreakDownPenalty: this.upperStreakDownPenalty,
                     layerCost: this.layerCost,
                     baseStrokeCost: this.baseStrokeCost,
                     weights: this.weights
@@ -4247,6 +4320,45 @@
                 return Math.max(0, skip1 - (directToSkipDelta * extraRecovery));
             }
 
+            shouldApplyUpperStreakDownPenalty(cand, history) {
+                const activeH = cand.hand;
+                const penalty = normalizeUpperStreakDownPenalty(this.state.upperStreakDownPenalty);
+                if (penalty <= 0) return false;
+
+                // Only a fully consecutive same-hand sequence qualifies. Any opposite-hand
+                // keystroke resets _lastHand/_sameHandRows and therefore cancels the modifier.
+                if (history?._lastHand !== activeH || history?.[activeH]?.gap !== 0) return false;
+
+                const rows = history?._sameHandRows;
+                const indices = history?._sameHandIndices;
+                if (!Array.isArray(rows) || rows.length < 2 || !Array.isArray(indices) || indices.length < 2) return false;
+
+                // Physical row indices: 0=number row, 1=upper letter row,
+                // 2=home row, 3=lower letter row, 4=thumb/space.
+                // The two qualifying upper-row strokes must be different physical keys;
+                // same-key repeats do not establish the posture-shift penalty.
+                const prev2 = rows[rows.length - 2];
+                const prev1 = rows[rows.length - 1];
+                const prev2Idx = indices[indices.length - 2];
+                const prev1Idx = indices[indices.length - 1];
+                const current = this.getPhysicalRow(activeH, cand.idx);
+                return prev2 === 1 && prev1 === 1 && prev2Idx !== prev1Idx && current === 3;
+            }
+
+            updateSameHandRowHistory(history, hand, idx) {
+                const row = this.getPhysicalRow(hand, idx);
+                if (history._lastHand === hand) {
+                    const rows = Array.isArray(history._sameHandRows) ? history._sameHandRows : [];
+                    const indices = Array.isArray(history._sameHandIndices) ? history._sameHandIndices : [];
+                    history._sameHandRows = [...rows, row].slice(-2);
+                    history._sameHandIndices = [...indices, idx].slice(-2);
+                } else {
+                    history._sameHandRows = [row];
+                    history._sameHandIndices = [idx];
+                }
+                history._lastHand = hand;
+            }
+
             getStepTransitionCost(cand, history, bundle) {
                 const activeH = cand.hand;
                 const last = history[activeH].idx;
@@ -4260,7 +4372,11 @@
                         : 1.5;
                 }
 
-                return this.getTransitionCost(activeH, last, cand.idx, gap);
+                let cost = this.getTransitionCost(activeH, last, cand.idx, gap);
+                if (this.shouldApplyUpperStreakDownPenalty(cand, history)) {
+                    cost *= 1 + normalizeUpperStreakDownPenalty(this.state.upperStreakDownPenalty);
+                }
+                return cost;
             }
 
             getActiveBundle() {
@@ -4324,6 +4440,8 @@
                     repeatCount: 0,
                     handSwitchCount: 0,
                     repeatCostSum: 0,
+                    upperStreakDownCount: 0,
+                    upperStreakDownExtraCost: 0,
                     fingerRepeats: [0,0,0,0,0],
                     repeatKeyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
                     keyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) },
@@ -4340,7 +4458,13 @@
                     costEvents: []
                 };
 
-                let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
+                let history = {
+                    L: {idx:null, gap:99},
+                    R: {idx:null, gap:99},
+                    _lastHand: null,
+                    _sameHandRows: [],
+                    _sameHandIndices: []
+                };
                 // Emulation/resolved sequences already consist of one resolved source event per item.
                 stats.sourceUnits = Array.isArray(sequence) ? sequence.filter(Boolean).length : 0;
 
@@ -4439,6 +4563,12 @@
                         }
                     }
 
+                    if (last !== null && this.shouldApplyUpperStreakDownPenalty(k, history)) {
+                        const rawTransitionCost = this.getTransitionCost(activeH, last, k.idx, history[activeH].gap);
+                        stats.upperStreakDownCount++;
+                        stats.upperStreakDownExtraCost += Math.max(0, tCost - rawTransitionCost);
+                    }
+
                     stats.staticCost += sCost;
                     stats.transCost += tCost;
                     const stepCost = sCost + tCost;
@@ -4455,6 +4585,7 @@
 
                     history[activeH].idx = k.idx;
                     history[activeH].gap = 0;
+                    this.updateSameHandRowHistory(history, activeH, k.idx);
                 }
 
                 stats.worstTransitions = Object.entries(stats.transitions)
@@ -4470,12 +4601,17 @@
                     ? this.state.weights.trans
                     : 65;
 
-                const wTrans = transRatio / 100.0;
-                const wStatic = 1.0 - wTrans;
+                const staticRatio = 100 - transRatio;
+                // 50:50 is neutral: both raw cost models are used at ×1.0.
+                // Moving the balance changes relative emphasis without compressing both costs.
+                const positionMultiplier = staticRatio / 50.0;
+                const transitionMultiplier = transRatio / 50.0;
 
-                // Total cost = fixed base cost per stroke + weighted position/transition cost.
+                // Total cost = fixed base cost per stroke + multiplier-adjusted position/transition cost.
                 const baseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? Math.max(0, this.state.baseStrokeCost) : 1.0;
-                stats.ergonomicWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.positionMultiplier = positionMultiplier;
+                stats.transitionMultiplier = transitionMultiplier;
+                stats.ergonomicWork = (stats.staticCost * positionMultiplier) + (stats.transCost * transitionMultiplier);
                 stats.ergonomicCostPerStroke = stats.keystrokes > 0 ? (stats.ergonomicWork / stats.keystrokes) : 0;
                 stats.baseStrokeWork = baseStrokeCost * stats.keystrokes;
                 stats.effectiveWork = stats.baseStrokeWork + stats.ergonomicWork;
@@ -4521,6 +4657,8 @@
 
                     // 連打詳細データ
                     repeatCostSum: 0,            // 連打によるコストの総和
+                    upperStreakDownCount: 0,      // 同手・上段連続→下段ペナルティの発生回数
+                    upperStreakDownExtraCost: 0,  // 上記ペナルティによる追加遷移コスト（Raw）
                     fingerRepeats: [0,0,0,0,0],  // 指ごとの連打回数 (左右合算: 小,薬,中,人,親)
                     repeatKeyCounts: { L:Array(TOTAL_KEYS_L).fill(0), R:Array(TOTAL_KEYS_R).fill(0) }, // 物理キーごとの同キー連打回数
 
@@ -4544,7 +4682,13 @@
                 const sourceTextForCount = String(text ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 stats.sourceUnits = Array.from(sourceTextForCount).length;
 
-                let history = { L: {idx:null, gap:99}, R: {idx:null, gap:99} };
+                let history = {
+                    L: {idx:null, gap:99},
+                    R: {idx:null, gap:99},
+                    _lastHand: null,
+                    _sameHandRows: [],
+                    _sameHandIndices: []
+                };
 
                 // Greedy candidate selection and final scoring share the exact same cost function.
                 const calcStepCost = (cand, history) => this.calcStepCostForBundle(cand, history, activeBundle);
@@ -4722,6 +4866,13 @@
                         }
                     }
 
+                    // 同手・上段連続後の下段移動ペナルティが実際に何回・どれだけ加算されたかを別集計する。
+                    if (last !== null && this.shouldApplyUpperStreakDownPenalty(k, history)) {
+                        const rawTransitionCost = this.getTransitionCost(activeH, last, k.idx, history[activeH].gap);
+                        stats.upperStreakDownCount++;
+                        stats.upperStreakDownExtraCost += Math.max(0, tCost - rawTransitionCost);
+                    }
+
                     // 記録
                     stats.staticCost += sCost;
                     stats.transCost += tCost;
@@ -4741,6 +4892,7 @@
 
                     history[activeH].idx = k.idx;
                     history[activeH].gap = 0;
+                    this.updateSameHandRowHistory(history, activeH, k.idx);
 
                     // ▼▼▼ 次の評価対象へポインタを進める ▼▼▼
                     i += stepLength;
@@ -4760,13 +4912,18 @@
                                    ? this.state.weights.trans
                                    : 65;
 
-                const wTrans = transRatio / 100.0;
-                const wStatic = 1.0 - wTrans;
+                const staticRatio = 100 - transRatio;
+                // 50:50 is neutral: both raw cost models are used at ×1.0.
+                // Moving the balance changes relative emphasis without compressing both costs.
+                const positionMultiplier = staticRatio / 50.0;
+                const transitionMultiplier = transRatio / 50.0;
 
-                // Total cost = fixed base cost per stroke + weighted position/transition cost.
-                // This makes stroke-count savings explicit.
+                // Total cost = fixed base cost per stroke + multiplier-adjusted position/transition cost.
+                // This makes stroke-count savings explicit while preserving the raw cost scale at 50:50.
                 const baseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? Math.max(0, this.state.baseStrokeCost) : 1.0;
-                stats.ergonomicWork = (stats.staticCost * wStatic) + (stats.transCost * wTrans);
+                stats.positionMultiplier = positionMultiplier;
+                stats.transitionMultiplier = transitionMultiplier;
+                stats.ergonomicWork = (stats.staticCost * positionMultiplier) + (stats.transCost * transitionMultiplier);
                 stats.ergonomicCostPerStroke = stats.keystrokes > 0 ? (stats.ergonomicWork / stats.keystrokes) : 0;
                 stats.baseStrokeWork = baseStrokeCost * stats.keystrokes;
                 stats.effectiveWork = stats.baseStrokeWork + stats.ergonomicWork;
@@ -5024,6 +5181,17 @@
                     }
                 });
 
+                // 同手・上段連続後の下段移動ペナルティ（0.30 = +30%）
+                const elUpperStreakDown = document.getElementById('upper-streak-down-penalty-in');
+                if (elUpperStreakDown) {
+                    elUpperStreakDown.value = (normalizeUpperStreakDownPenalty(this.state.upperStreakDownPenalty) * 100).toFixed(0);
+                    elUpperStreakDown.onchange = (e) => {
+                        const pct = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+                        this.state.upperStreakDownPenalty = normalizeUpperStreakDownPenalty(pct / 100);
+                        e.target.value = (this.state.upperStreakDownPenalty * 100).toFixed(0);
+                    };
+                }
+
                 // レイヤー切り替えコスト設定のイベントと初期値反映
                 const elLayer = document.getElementById('layer-cost-in');
                 if (elLayer) {
@@ -5046,11 +5214,17 @@
                 const wSlider = document.getElementById('weight-slider');
                 const dStatic = document.getElementById('disp-static');
                 const dTrans = document.getElementById('disp-trans');
+                const dStaticMult = document.getElementById('disp-static-mult');
+                const dTransMult = document.getElementById('disp-trans-mult');
 
-                // 初期表示更新関数（引数 val は「位置コスト(Static)」の値になる）
+                // 50:50 = ×1.00 / ×1.00. Values express relative balance, not percentage compression.
                 const updateDisp = (val) => {
-                    dStatic.textContent = val;           // 左側 (Position)
-                    dTrans.textContent = 100 - val;      // 右側 (Transition)
+                    const staticRatio = Number(val);
+                    const transRatio = 100 - staticRatio;
+                    dStatic.textContent = staticRatio;
+                    dTrans.textContent = transRatio;
+                    if (dStaticMult) dStaticMult.textContent = `(×${(staticRatio / 50).toFixed(2)})`;
+                    if (dTransMult) dTransMult.textContent = `(×${(transRatio / 50).toFixed(2)})`;
                 };
 
                 // 初期値セット: 全体(100)から遷移コスト(trans)を引いて、位置コスト(static)を算出
@@ -5264,6 +5438,10 @@
 
                             this.state.baseCosts = d.baseCosts;
                             if(d.repeatCosts) this.state.repeatCosts = d.repeatCosts;
+                            // Legacy physical JSON predates this history-dependent modifier; keep old scores reproducible.
+                            this.state.upperStreakDownPenalty = d.upperStreakDownPenalty !== undefined
+                                ? normalizeUpperStreakDownPenalty(d.upperStreakDownPenalty)
+                                : 0.0;
                             if(d.layerCost !== undefined) this.state.layerCost = d.layerCost;
                             // Old physical JSON had no baseStrokeCost. Treat it as 0.0 so imported legacy scores remain reproducible.
                             this.state.baseStrokeCost = d.baseStrokeCost !== undefined
@@ -5275,14 +5453,22 @@
                             const wSlider = document.getElementById('weight-slider');
                             if(wSlider && this.state.weights) {
                                 wSlider.value = 100 - this.state.weights.trans;
-                                document.getElementById('disp-static').textContent = 100 - this.state.weights.trans;
-                                document.getElementById('disp-trans').textContent = this.state.weights.trans;
+                                const staticRatio = 100 - this.state.weights.trans;
+                                const transRatio = this.state.weights.trans;
+                                document.getElementById('disp-static').textContent = staticRatio;
+                                document.getElementById('disp-trans').textContent = transRatio;
+                                const staticMultEl = document.getElementById('disp-static-mult');
+                                const transMultEl = document.getElementById('disp-trans-mult');
+                                if (staticMultEl) staticMultEl.textContent = `(×${(staticRatio / 50).toFixed(2)})`;
+                                if (transMultEl) transMultEl.textContent = `(×${(transRatio / 50).toFixed(2)})`;
                             }
                             // Update Repeat Inputs
                             [0,1,2,3,4].forEach(i => {
                                 const el = document.getElementById(`rep-${i}`);
                                 if(el) el.value = this.state.repeatCosts[i];
                             });
+                            const elUpperStreakDownIn = document.getElementById('upper-streak-down-penalty-in');
+                            if(elUpperStreakDownIn) elUpperStreakDownIn.value = (this.state.upperStreakDownPenalty * 100).toFixed(0);
                             // Layer Cost Inputの更新
                             const elLayerIn = document.getElementById('layer-cost-in');
                             if(elLayerIn) elLayerIn.value = this.state.layerCost;
@@ -8022,8 +8208,12 @@
                 const layeredStrokes = Number.isFinite(stats.layeredStrokes) ? stats.layeredStrokes : 0;
                 const layeredRate = Number.isFinite(stats.layeredStrokeRate) ? stats.layeredStrokeRate : 0;
 
-                document.getElementById('kpi-score').textContent = overallCost.toFixed(2);
-                document.getElementById('kpi-cost-stroke').textContent = effectiveCostPerStroke.toFixed(2);
+                // Show the raw cost scale directly. No display-only ×100 conversion.
+                // Three decimals preserve the small differences intentionally encoded in the cost matrices.
+                document.getElementById('kpi-score').textContent = overallCost.toFixed(3);
+                document.getElementById('kpi-cost-stroke').textContent = effectiveCostPerStroke.toFixed(3);
+                document.getElementById('kpi-position-score').textContent = (Number.isFinite(stats.avgStatic) ? stats.avgStatic : 0).toFixed(3);
+                document.getElementById('kpi-transition-score').textContent = (Number.isFinite(stats.avgTrans) ? stats.avgTrans : 0).toFixed(3);
                 document.getElementById('kpi-strokes').textContent = f(stats.keystrokes);
                 document.getElementById('kpi-source-units').textContent = f(stats.sourceUnits || 0);
                 document.getElementById('kpi-strokes-per-char').textContent = strokesPerSourceUnit.toFixed(2);
@@ -8034,8 +8224,10 @@
                     ? this.state.weights.trans
                     : 65;
                 const scoreStaticWeight = 100 - scoreTransWeight;
-                document.getElementById('kpi-score-static-weight').textContent = `${scoreStaticWeight}%`;
-                document.getElementById('kpi-score-trans-weight').textContent = `${scoreTransWeight}%`;
+                const scorePositionMultiplier = scoreStaticWeight / 50.0;
+                const scoreTransitionMultiplier = scoreTransWeight / 50.0;
+                document.getElementById('kpi-score-static-weight').textContent = `×${scorePositionMultiplier.toFixed(2)}`;
+                document.getElementById('kpi-score-trans-weight').textContent = `×${scoreTransitionMultiplier.toFixed(2)}`;
                 const scoreBaseStrokeCost = Number.isFinite(this.state.baseStrokeCost) ? this.state.baseStrokeCost : 1.0;
                 const baseCostEl = document.getElementById('kpi-score-base-cost');
                 if (baseCostEl) baseCostEl.textContent = scoreBaseStrokeCost.toFixed(1);
@@ -8251,8 +8443,22 @@
                 document.getElementById('res-weighted-per-stroke').textContent = weightedPerStroke.toFixed(2);
                 document.getElementById('res-raw-per-key').textContent = rawCostPerStroke.toFixed(2);
                 document.getElementById('res-total-load').textContent = f(stats.totalCost);
-                document.getElementById('res-trans-val').textContent = stats.avgTrans.toFixed(2);
-                document.getElementById('res-static-val').textContent = stats.avgStatic.toFixed(2);
+                document.getElementById('res-trans-val').textContent = stats.avgTrans.toFixed(3);
+                document.getElementById('res-static-val').textContent = stats.avgStatic.toFixed(3);
+
+                const upperStreakHits = Number.isFinite(stats.upperStreakDownCount) ? stats.upperStreakDownCount : 0;
+                const upperStreakExtraRaw = Number.isFinite(stats.upperStreakDownExtraCost) ? stats.upperStreakDownExtraCost : 0;
+                const upperStreakExtraPerHit = upperStreakHits > 0
+                    ? (upperStreakExtraRaw / upperStreakHits)
+                    : 0;
+                const upperStreakOverallImpact = (stats.sourceUnits > 0)
+                    ? (upperStreakExtraRaw * scoreTransitionMultiplier / stats.sourceUnits)
+                    : 0;
+                document.getElementById('res-upper-streak-hits').textContent = f(upperStreakHits);
+                document.getElementById('res-upper-streak-extra-raw').textContent = `+${upperStreakExtraRaw.toFixed(3)}`;
+                document.getElementById('res-upper-streak-extra-per-hit').textContent = `+${upperStreakExtraPerHit.toFixed(3)}`;
+                document.getElementById('res-upper-streak-overall-impact').textContent = `+${upperStreakOverallImpact.toFixed(3)}`;
+
                 document.getElementById('stat-source-units').textContent = f(stats.sourceUnits || 0);
                 document.getElementById('stat-keystrokes').textContent = f(stats.keystrokes);
                 document.getElementById('stat-strokes-per-char').textContent = strokeRatio.toFixed(2);
