@@ -2043,14 +2043,14 @@
                         <div style="padding: 1rem 0;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; font-size:0.9rem;">
                                 <span style="color:var(--text-dim)">
-                                    <span data-i18n="lbl_static_w">Position</span>: <span id="disp-static" style="color:var(--text-main)">35</span> <span id="disp-static-mult" style="color:var(--text-dim)">(×0.70)</span>
+                                    <span data-i18n="lbl_static_w">Position</span>: <span id="disp-static" style="color:var(--text-main)">30</span> <span id="disp-static-mult" style="color:var(--text-dim)">(×0.60)</span>
                                 </span>
                                 <span style="color:var(--accent)">
-                                    <span data-i18n="lbl_trans_w">Transition</span>: <span id="disp-trans" style="color:white">65</span> <span id="disp-trans-mult" style="color:var(--text-dim)">(×1.30)</span>
+                                    <span data-i18n="lbl_trans_w">Transition</span>: <span id="disp-trans" style="color:white">70</span> <span id="disp-trans-mult" style="color:var(--text-dim)">(×1.40)</span>
                                 </span>
                             </div>
 
-                            <input type="range" id="weight-slider" min="0" max="100" value="35" step="5" style="width:100%; cursor:pointer;">
+                            <input type="range" id="weight-slider" min="0" max="100" value="30" step="5" style="width:100%; cursor:pointer;">
 
                             <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-top:6px;">
                                 <span data-i18n="desc_static_w">Long-term Fatigue</span>
@@ -2135,7 +2135,7 @@
                                 <span data-i18n="lbl_upper_streak_down_penalty">Additional transition cost</span>
                                 <div class="stepper-box">
                                     <button class="step-btn" onclick="stepVal('upper-streak-down-penalty-in', -5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-                                    <input type="number" id="upper-streak-down-penalty-in" value="30" min="0" max="100" step="5" class="gap-input">
+                                    <input type="number" id="upper-streak-down-penalty-in" value="40" min="0" max="100" step="5" class="gap-input">
                                     <button class="step-btn" onclick="stepVal('upper-streak-down-penalty-in', 5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
                                 </div>
                                 <span>%</span>
@@ -3210,13 +3210,23 @@
             seoto: {
                 name: "せおと配列",
                 desc: "※ローマ字拡張あり（C=K, X=YA, J=YU, Q=YO）/ じゃ行はZを使用",
-                customRules: "k=c, ya=x, yu=j, yo=q",
+                customRules: "k=c, ya=x, yu=j, yo=q, ji=zi, ja=zx, ju=zj, je=zye, jo=zq, jya=zx, jyi=zyi, jyu=zj, jye=zye, jyo=zq",
                 inputExtensions: {
                     aliases: [
                         { source: "k", keys: "c" },
                         { source: "ya", keys: "x" },
                         { source: "yu", keys: "j" },
-                        { source: "yo", keys: "q" }
+                        { source: "yo", keys: "q" },
+                        { source: "ji", keys: "zi" },
+                        { source: "ja", keys: "zx" },
+                        { source: "ju", keys: "zj" },
+                        { source: "je", keys: "zye" },
+                        { source: "jo", keys: "zq" },
+                        { source: "jya", keys: "zx" },
+                        { source: "jyi", keys: "zyi" },
+                        { source: "jyu", keys: "zj" },
+                        { source: "jye", keys: "zye" },
+                        { source: "jyo", keys: "zq" }
                     ],
                     shorthands: SEOTO_EXTENDED_SHORTHANDS
                 },
@@ -3756,11 +3766,11 @@
                 "3": 1,
                 "4": 1.5
             },
-            "upperStreakDownPenalty": 0.3,
+            "upperStreakDownPenalty": 0.4,
             "layerCost": 0.5,
             "baseStrokeCost": 1.0,
             "weights": {
-                "trans": 65
+                "trans": 70
             }
         };
 
@@ -3774,8 +3784,8 @@
 
         function normalizeUpperStreakDownPenalty(value) {
             const n = Number(value);
-            // 0.30 means +30%. Cap at +100% so the contextual modifier remains bounded.
-            return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.30;
+            // 0.40 means +40%. Cap at +100% so the contextual modifier remains bounded.
+            return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.40;
         }
 
         function normalizeTransitionRecovery(value) {
@@ -3890,7 +3900,7 @@
                 desc_95: "95% of keystrokes fall below this cost. Lower means fewer sudden, difficult reaches.",
 
                 set_weight_title: "Position / Transition Balance",
-                set_weight_desc: "Adjust the relative emphasis of Position Cost and Transition Cost. 50:50 is neutral (×1.00 / ×1.00); 35:65 means Position ×0.70 and Transition ×1.30. The raw costs are not both compressed. Base Stroke Cost is added separately for every resolved stroke.",
+                set_weight_desc: "Adjust the relative emphasis of Position Cost and Transition Cost. 50:50 is neutral (×1.00 / ×1.00); 30:70 means Position ×0.60 and Transition ×1.40. The raw costs are not both compressed. Base Stroke Cost is added separately for every resolved stroke.",
                 set_base_stroke_title: "Base Stroke Cost",
                 set_base_stroke_desc: "Adds a fixed effort for every resolved stroke, independent of position or transition difficulty. Set to 0.0 to reproduce the previous ergonomic-penalty-only score model.",
                 lbl_cost_per_stroke_base: "Cost / stroke",
@@ -3922,7 +3932,7 @@
                 modal_desc_imp: "Paste the JSON text below.",
                 modal_desc_exp: "Copy and save the JSON text below.",
 
-                lbl_score_desc: "【Cost per Input Character】\nThe average evaluation cost required to produce one input character. Lower is better.\n\nFormula:\n(Base Stroke Cost × Required Strokes + Position Cost Total × Position Multiplier + Transition Cost Total × Transition Multiplier) ÷ Input Characters\n\nThe Position and Transition settings control their relative evaluation strength. 50:50 is neutral (×1.00 / ×1.00); for example, 35:65 means Position ×0.70 and Transition ×1.30. Base Stroke Cost is added separately for every required stroke, so layouts that produce the same text with fewer strokes receive that benefit here.\n\nFor a layered output, Layer Cost is added to that stroke's Position Cost and therefore passes through the Position multiplier. Unrecognized characters incur no stroke cost, so use a corpus the layout can represent sufficiently when evaluating results.",
+                lbl_score_desc: "【Cost per Input Character】\nThe average evaluation cost required to produce one input character. Lower is better.\n\nFormula:\n(Base Stroke Cost × Required Strokes + Position Cost Total × Position Multiplier + Transition Cost Total × Transition Multiplier) ÷ Input Characters\n\nThe Position and Transition settings control their relative evaluation strength. 50:50 is neutral (×1.00 / ×1.00); for example, 30:70 means Position ×0.60 and Transition ×1.40. Base Stroke Cost is added separately for every required stroke, so layouts that produce the same text with fewer strokes receive that benefit here.\n\nFor a layered output, Layer Cost is added to that stroke's Position Cost and therefore passes through the Position multiplier. Unrecognized characters incur no stroke cost, so use a corpus the layout can represent sufficiently when evaluating results.",
                 lbl_cost_stroke_desc: "【Cost per Stroke】\nThe average evaluation cost of one resolved stroke. Lower means each stroke is lighter on average.\n\nFormula:\nBase Stroke Cost + (Position Cost Total × Position Multiplier + Transition Cost Total × Transition Multiplier) ÷ Required Strokes\n\nThe Position and Transition settings are relative multipliers: 50:50 is neutral (×1.00 / ×1.00). This metric describes the average weight of a stroke and does not by itself reward using fewer strokes. Read it together with Cost per Input Character and Required Strokes. The detailed results also show the movement-related cost per stroke separately.",
                 lbl_position_score_desc: "【Avg. Position Cost】\nThe average positional burden of one resolved stroke. Lower means the layout tends to use easier key positions.\n\nFormula:\nPosition Cost Total ÷ Required Strokes\n\nThe Position balance multiplier is not applied here, so this card shows the position-cost model itself rather than its weighted contribution to the overall cost.",
                 lbl_transition_score_desc: "【Avg. Transition Cost】\nThe average movement burden between strokes. Lower means the layout tends to produce smoother, lighter transitions.\n\nFormula:\nTransition Cost Total ÷ Required Strokes\n\nDIRECT / SKIP costs, recovery adjustments, and contextual transition penalties are reflected before averaging. The Transition balance multiplier is not applied here, so this card shows the transition model itself.",
@@ -4071,7 +4081,7 @@
                 desc_95: "「95%の打鍵はこのコスト以下に収まる」ライン。低いほど、突発的な高負荷(無理な運指)が少ないことを意味します。",
 
                 set_weight_title: "位置コスト / 遷移コストの評価バランス",
-                set_weight_desc: "位置コストと遷移コストの相対的な重視度を設定します。50:50では両方を等倍（×1.00 / ×1.00）で評価します。たとえば35:65なら位置×0.70、遷移×1.30となり、両方のコストを割合で圧縮しません。基本打鍵コストはこのバランスとは別に、必要打鍵ごとに加算されます。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
+                set_weight_desc: "位置コストと遷移コストの相対的な重視度を設定します。50:50では両方を等倍（×1.00 / ×1.00）で評価します。たとえば30:70なら位置×0.60、遷移×1.40となり、両方のコストを割合で圧縮しません。基本打鍵コストはこのバランスとは別に、必要打鍵ごとに加算されます。Rawコスト / 打鍵、SD、中央値、95%タイル値、Rawの打鍵コスト分布そのものには影響しません。",
                 set_base_stroke_title: "基本打鍵コスト",
                 set_base_stroke_desc: "キー位置や遷移の難しさとは別に、1打鍵するだけで必ず発生する基本負荷です。「基本打鍵コスト × 必要打鍵数」として総コストへ加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点を評価できます。0.0にすると、従来どおり位置コストと遷移コストだけで評価します。",
                 lbl_cost_per_stroke_base: "Cost / 打鍵",
@@ -4103,7 +4113,7 @@
                 modal_desc_imp: "以下のテキストエリアにJSONを貼り付けてください。",
                 modal_desc_exp: "以下のJSONテキストをコピーして保存してください。",
 
-                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（基本打鍵コスト × 必要打鍵数 + 位置コスト合計 × 位置倍率 + 遷移コスト合計 × 遷移倍率）÷ 入力文字数\n\n位置・遷移の設定は、それぞれをどの程度重視するかを相対倍率として調整します。50:50では位置・遷移とも×1.00、たとえば35:65なら位置×0.70・遷移×1.30です。基本打鍵コストはこの倍率とは別に必要打鍵ごとに加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点もこの値に反映されます。\n\n裏レイヤーの出力ではLayer Costをその打鍵の位置コストへ加算し、位置倍率を通して評価します。解析できない文字には打鍵コストが発生しないため、結果を見る際は対象コーパスを十分に入力できていることも確認してください。",
+                lbl_score_desc: "【入力1文字あたりのコスト】\n入力テキスト1文字を生成するために、平均してどれくらいの評価コストが必要かを示します。低いほど効率的です。\n\n計算式：\n（基本打鍵コスト × 必要打鍵数 + 位置コスト合計 × 位置倍率 + 遷移コスト合計 × 遷移倍率）÷ 入力文字数\n\n位置・遷移の設定は、それぞれをどの程度重視するかを相対倍率として調整します。50:50では位置・遷移とも×1.00、たとえば30:70なら位置×0.60・遷移×1.40です。基本打鍵コストはこの倍率とは別に必要打鍵ごとに加算されるため、同じ文章をより少ない打鍵で入力できる配列の利点もこの値に反映されます。\n\n裏レイヤーの出力ではLayer Costをその打鍵の位置コストへ加算し、位置倍率を通して評価します。解析できない文字には打鍵コストが発生しないため、結果を見る際は対象コーパスを十分に入力できていることも確認してください。",
                 lbl_cost_stroke_desc: "【1打鍵あたりのコスト】\n解析された1打鍵が、平均してどれくらいの評価コストになるかを示します。低いほど、1打鍵そのものの負担が小さいことを意味します。\n\n計算式：\n基本打鍵コスト +（位置コスト合計 × 位置倍率 + 遷移コスト合計 × 遷移倍率）÷ 必要打鍵数\n\n位置・遷移の設定は相対倍率として反映され、50:50では両方×1.00です。この指標は1打鍵そのものの重さを見るため、文章を少ない打鍵で入力できる利点だけを単独では表しません。「入力1文字あたりのコスト」「必要打鍵数」と合わせて見ると配列の特徴が分かります。\n\n詳細欄では、基本打鍵コストやバランス倍率の影響を分けて確認できる値も表示します。",
                 lbl_position_score_desc: "【平均位置コスト】\n1打鍵あたりの「キー位置そのものの負担」の平均です。低いほど、負担の小さい位置を使う傾向があることを示します。\n\n計算式：\n位置コスト合計 ÷ 必要打鍵数\n\nここでは位置側のバランス倍率を掛けません。そのため、総合コストへの寄与ではなく、設定した位置コストモデルそのものの傾向を確認できます。",
                 lbl_transition_score_desc: "【平均遷移コスト】\n打鍵から次の打鍵へ移るときの「運指の負担」の平均です。低いほど、滑らかで負担の小さい遷移が多いことを示します。\n\n計算式：\n遷移コスト合計 ÷ 必要打鍵数\n\nDIRECT / SKIP、回復補正、文脈依存の遷移ペナルティを反映した後の値を平均します。ここでは遷移側のバランス倍率を掛けないため、設定した遷移コストモデルそのものの傾向を確認できます。",
@@ -4184,7 +4194,7 @@
                 this.upperStreakDownPenalty = normalizeUpperStreakDownPenalty(defaults.upperStreakDownPenalty);
                 this.layerCost = defaults.layerCost !== undefined ? defaults.layerCost : 2.0;
                 this.baseStrokeCost = defaults.baseStrokeCost !== undefined ? defaults.baseStrokeCost : 1.0;
-                this.weights = defaults.weights || { trans: 65 };
+                this.weights = defaults.weights || { trans: 70 };
 
                 this.layoutName = "Custom";
                 this.layoutDesc = ""; // 配列の説明
@@ -5181,7 +5191,7 @@
                     }
                 });
 
-                // 同手・上段連続後の下段移動ペナルティ（0.30 = +30%）
+                // 同手・上段連続後の下段移動ペナルティ（0.40 = +40%）
                 const elUpperStreakDown = document.getElementById('upper-streak-down-penalty-in');
                 if (elUpperStreakDown) {
                     elUpperStreakDown.value = (normalizeUpperStreakDownPenalty(this.state.upperStreakDownPenalty) * 100).toFixed(0);
